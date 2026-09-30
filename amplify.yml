@@ -4,7 +4,13 @@ frontend:
     build:
       commands:
         - mkdir -p dist
-        - rsync -a --exclude 'worker' --exclude 'dist' --exclude '.git' --exclude 'amplify.yml' --exclude 'README.md' --exclude 'DEPLOY.md' ./ dist/
+        - cp -R . dist/
+        - rm -rf dist/worker
+        - rm -rf dist/dist
+        - rm -rf dist/.git
+        - rm -f dist/amplify.yml
+        - rm -f dist/README.md
+        - rm -f dist/DEPLOY.md
   artifacts:
     baseDirectory: dist
     files:
