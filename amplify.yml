@@ -4,13 +4,7 @@ frontend:
     build:
       commands:
         - mkdir -p dist
-        - cp -R . dist/
-        - rm -rf dist/worker
-        - rm -rf dist/dist
-        - rm -rf dist/.git
-        - rm -f dist/amplify.yml
-        - rm -f dist/README.md
-        - rm -f dist/DEPLOY.md
+        - find . -mindepth 1 -maxdepth 1 ! -name dist ! -name worker ! -name .git ! -name amplify.yml ! -name README.md ! -name DEPLOY.md -exec cp -R {} dist/ \;
   artifacts:
     baseDirectory: dist
     files:
