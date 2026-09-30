@@ -1,0 +1,13 @@
+version: 1
+frontend:
+  phases:
+    build:
+      commands:
+        - mkdir -p dist
+        - rsync -a --exclude 'worker' --exclude 'dist' --exclude '.git' --exclude 'amplify.yml' --exclude 'README.md' --exclude 'DEPLOY.md' ./ dist/
+  artifacts:
+    baseDirectory: dist
+    files:
+      - '**/*'
+  cache:
+    paths: []

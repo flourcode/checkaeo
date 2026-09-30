@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Is your site ready for ChatGPT search? – CheckAEO</title>
+<meta name="description" content="How ChatGPT search reads websites: the OAI-SearchBot, ChatGPT-User and GPTBot crawlers, why JavaScript-only pages look empty, and a six-point checklist for being quotable.">
+<link rel="canonical" href="https://checkaeo.com/chatgpt-search/">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#EEECE4">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="CheckAEO">
+<meta property="og:title" content="ChatGPT search readiness">
+<meta property="og:description" content="How ChatGPT search reads websites: the OAI-SearchBot, ChatGPT-User and GPTBot crawlers, why JavaScript-only pages look empty, and a six-point checklist for being quotable.">
+<meta property="og:url" content="https://checkaeo.com/chatgpt-search/">
+<meta property="og:image" content="https://checkaeo.com/assets/img/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preload" href="../assets/fonts/archivo.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/css/tokens.css">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>document.write(location.protocol === 'file:' ? '<script src="../assets/fonts/fonts.js"><\/script>' : '<link rel="stylesheet" href="../assets/css/fonts.css">');</script>
+<noscript><link rel="stylesheet" href="../assets/css/fonts.css"></noscript>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Article", "headline": "ChatGPT search readiness", "description": "How ChatGPT search reads websites: the OAI-SearchBot, ChatGPT-User and GPTBot crawlers, why JavaScript-only pages look empty, and a six-point checklist for being quotable.", "url": "https://checkaeo.com/chatgpt-search/", "datePublished": "2026-09-30", "dateModified": "2026-09-30", "author": {"@type": "Person", "name": "Mark Flournoy", "url": "https://www.linkedin.com/in/markflournoy/"}, "publisher": {"@id": "https://checkaeo.com/#org"}, "isPartOf": {"@id": "https://checkaeo.com/#site"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "CheckAEO", "item": "https://checkaeo.com/"}, {"@type": "ListItem", "position": 2, "name": "ChatGPT search readiness", "item": "https://checkaeo.com/chatgpt-search/"}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I check whether ChatGPT can see my site?", "acceptedAnswer": {"@type": "Answer", "text": "Run a CheckAEO scan. The Access category reports your HTTP status, noindex directives, and whether OAI-SearchBot is blocked in robots.txt, and shows how much text is in the raw HTML."}}, {"@type": "Question", "name": "Should I block GPTBot?", "acceptedAnswer": {"@type": "Answer", "text": "That is your decision and it concerns model training, not search. Blocking GPTBot does not stop ChatGPT search from fetching your page; blocking OAI-SearchBot does."}}, {"@type": "Question", "name": "Does ChatGPT use my structured data?", "acceptedAnswer": {"@type": "Answer", "text": "There is no official statement. Structured data is still worthwhile because it feeds Bing and Google, which ChatGPT search builds on, and because it states your name and identity unambiguously."}}]}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="../index.html" aria-label="CheckAEO home"><svg class="brand__mark glyph" viewBox="0 0 152 192" aria-hidden="true" focusable="false"><path d="M8 63 L48 63 C52 63 54.5 61 57.5 58 L62 53.5 L72 53.5 C64 53.5 55.5 61 55.5 70 L55.5 123 Q55.5 134 66.5 134 L143 134 Q151 134 151 142 L151 183 Q151 191 143 191 L70 191 A70 70 0 0 1 0 121 L0 71 Q0 63 8 63 Z" fill="#111111"/><g fill="#075E45"><rect x="63" y="0" width="88" height="54" rx="8"/></g></svg><span class="brand__text"><span class="brand__name">CheckAEO</span><span class="brand__tag">Public site diagnostic</span></span></a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="../what-is-aeo/index.html">What is AEO</a>
+      <a href="../methodology/index.html">Methodology</a>
+      <a href="../about/index.html">About</a>
+      <a class="nav-cta" href="https://calendly.com/markflournoy/chat-with-mark" target="_blank" rel="noopener" data-cta="calendly">Talk to Mark</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="page">
+<div class="wrap">
+  <header class="page-head"><span class="lbl lbl--signal">Engine note</span><h1>ChatGPT search readiness</h1><p>Which crawlers matter, what gets read, and what gets quoted.</p></header>
+  <div class="doc">
+    <aside class="doc__rail"><span class="lbl lbl--signal">Engine note</span><span class="lbl">Updated / 2026-09-30</span></aside>
+    <div class="prose">
+
+<p class="lead">ChatGPT search fetches live web pages to answer questions and shows its sources. To appear in those sources, your page has to be reachable by OpenAI's crawler, readable without JavaScript, and clear enough to quote.</p>
+
+<h2>Which crawlers OpenAI uses</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>User agent</th><th>What it does</th><th>Affects search answers?</th></tr></thead>
+<tbody>
+<tr><td><code>OAI-SearchBot</code></td><td>Crawls and indexes pages for ChatGPT search results</td><td>Yes</td></tr>
+<tr><td><code>ChatGPT-User</code></td><td>Fetches a page on demand when a user's request needs it</td><td>Yes</td></tr>
+<tr><td><code>GPTBot</code></td><td>Collects data that may be used to train models</td><td>No</td></tr>
+</tbody></table></div>
+<p>The distinction matters. A robots.txt that disallows GPTBot opts you out of training and leaves search alone. A robots.txt that disallows OAI-SearchBot removes you from ChatGPT search. Many "block AI" snippets circulating online disallow all three. Check yours. The exact user-agent list is maintained on OpenAI's site; see <a href="../sources/index.html">sources</a>.</p>
+
+<h2>What ChatGPT search reads</h2>
+<p>Publicly, OpenAI has said its search combines its own crawling with partner search indexes (historically Bing). In practice that means the same fundamentals as any search engine, with a heavier tilt toward the raw HTML: crawlers of this kind generally do not execute JavaScript, so a page whose content appears only after scripts run looks empty to them.</p>
+
+<h2>What gets quoted</h2>
+<p>Answers are composed from short passages. The passages that get used are the ones that stand alone: a direct opening sentence, a question heading with a two-sentence answer beneath it, a definition, a short list. Marketing copy that needs the surrounding page to make sense is not quotable and tends to be skipped.</p>
+
+<h2>A checklist</h2>
+<ol>
+<li>Homepage returns 200 over HTTPS with no <code>noindex</code>.</li>
+<li>robots.txt does not disallow <code>OAI-SearchBot</code> or <code>ChatGPT-User</code>.</li>
+<li>Your H1 and first paragraph are present in the raw HTML (check "view source").</li>
+<li>The first paragraph says what you do, in one sentence, with no adjectives you would not say out loud.</li>
+<li>At least a few headings are phrased as the questions people actually ask.</li>
+<li>An About page and a contact path are linked from every page.</li>
+</ol>
+<p>A CheckAEO scan checks all six.</p>
+
+<h2>Questions people ask</h2><div class="faq"><details><summary>How do I check whether ChatGPT can see my site?</summary><p>Run a CheckAEO scan. The Access category reports your HTTP status, noindex directives, and whether OAI-SearchBot is blocked in robots.txt, and shows how much text is in the raw HTML.</p></details><details><summary>Should I block GPTBot?</summary><p>That is your decision and it concerns model training, not search. Blocking GPTBot does not stop ChatGPT search from fetching your page; blocking OAI-SearchBot does.</p></details><details><summary>Does ChatGPT use my structured data?</summary><p>There is no official statement. Structured data is still worthwhile because it feeds Bing and Google, which ChatGPT search builds on, and because it states your name and identity unambiguously.</p></details></div>
+<div class="page-cta"><div><span class="lbl lbl--signal">Public AEO check</span><h2 class="mt-1">Check your own site</h2><p>Free. No login. About 30 seconds. You get an AEO Card.</p></div><a class="btn arrow" href="../index.html">Check my site</a></div>
+    </div>
+  </div>
+</div>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__grid">
+      <div><span class="lbl lbl--signal">CheckAEO</span><span class="lbl">Public site diagnostic</span></div>
+      <div><p>A free AEO checker for website owners. It reads the public signals answer engines use and returns one understandable record.</p><p class="mt-1 small"><a href="mailto:hello@checkaeo.com">hello@checkaeo.com</a> · Last updated <time datetime="2026-09-30">September 30, 2026</time></p></div>
+      <nav aria-label="Footer">
+        <a href="../what-is-aeo/index.html">What is AEO</a><a href="../aeo-vs-seo/index.html">AEO vs SEO</a><a href="../chatgpt-search/index.html">ChatGPT search</a><a href="../llms-txt/index.html">llms.txt</a><a href="../methodology/index.html">Methodology</a><a href="../sources/index.html">Sources</a><a href="../about/index.html">About</a><a href="../privacy/index.html">Privacy</a>
+      </nav>
+    </div>
+    <div class="site-foot__base"><span class="foot-mark"><svg class="foot__mark glyph" viewBox="0 0 152 192" aria-hidden="true" focusable="false"><path d="M8 63 L48 63 C52 63 54.5 61 57.5 58 L62 53.5 L72 53.5 C64 53.5 55.5 61 55.5 70 L55.5 123 Q55.5 134 66.5 134 L143 134 Q151 134 151 142 L151 183 Q151 191 143 191 L70 191 A70 70 0 0 1 0 121 L0 71 Q0 63 8 63 Z" fill="#111111"/><g fill="#075E45"><rect x="63" y="0" width="88" height="54" rx="8"/></g></svg></span><span>checkaeo.com / Public site diagnostic</span><span>Diagnostic score, not a guarantee</span><span>© 2026 CheckAEO</span></div>
+  </div>
+</footer>
+<script>document.addEventListener('click', function (e) { var a = e.target.closest('[data-cta]'); if (a && typeof window.gtag === 'function') window.gtag('event', 'cta_' + a.dataset.cta, { location: 'page' }); });</script>
+</body>
+</html>

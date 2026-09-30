@@ -1,0 +1,15 @@
+{
+  "name": "checkaeo-scan-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Serverless scan endpoint for CheckAEO (Cloudflare Worker)",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  }
+}

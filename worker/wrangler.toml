@@ -1,0 +1,7 @@
+name = "checkaeo-scan"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+
+# Optional: restrict which sites may call the API (comma-separated). "*" allows all.
+[vars]
+ALLOWED_ORIGINS = "*"

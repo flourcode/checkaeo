@@ -1,0 +1,55 @@
+/* ============================================================
+   CheckAEO design tokens — retrofuturist systems editorial
+   Warm archive paper, black ink, one signal accent.
+   Two type modes: Archivo (display grotesk, variable width) and
+   IBM Plex Mono (system labels, codes, metadata).
+   ============================================================ */
+
+:root {
+  /* Paper + ink */
+  --paper: #EEECE4;        /* page ground: warm archive paper */
+  --paper-2: #E3E0D6;      /* recessed panels, hover */
+  --sheet: #F8F7F2;        /* the record itself */
+  --ink: #111111;
+  --ink-2: #3D3B36;
+  --ink-3: #66635B;        /* 5.2:1 on paper */
+  --rule: #111111;
+  --rule-soft: #CFCBC0;
+  --dot-off: #CFCBC0;
+
+  /* The one accent */
+  --signal: #075E45;       /* deep instrument green: first fix, active unit, labels */
+  --signal-ink: #075E45;   /* same green for small text */
+  --signal-hi: #0A7655;
+  --lime: #B8F000;         /* used almost nowhere: selection only */
+  --warn: #9C3B1B;         /* the one warning colour: weak grades, errors */
+  --on-signal: #F8F7F2;
+
+  --focus: #0A7655;
+
+  /* Type */
+  --display: 'Archivo', 'Arial Narrow', Helvetica, Arial, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --fs-lbl: 0.72rem;
+  --fs-xs: 0.8125rem;
+  --fs-sm: 0.9375rem;
+  --fs-md: 1.0625rem;
+  --fs-lg: 1.3rem;
+  --fs-xl: 1.75rem;
+  --fs-2xl: clamp(2rem, 1.4rem + 2.2vw, 3rem);
+  --fs-3xl: clamp(2.8rem, 1.6rem + 4.6vw, 5.4rem);
+
+  /* Geometry */
+  --line: 1.5px solid var(--rule);
+  --hair: 1px solid var(--rule-soft);
+  --r: 2px;                /* one radius, everywhere */
+  --hard: 3px 3px 0 var(--ink);
+
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --content: 78rem;
+  --rail: 13rem;           /* the left label rail on wide screens */
+
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --dur: 160ms;
+}
+@media (prefers-reduced-motion: reduce) { :root { --dur: 0ms; } }

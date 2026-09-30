@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Methodology: how the AEO score works – CheckAEO</title>
+<meta name="description" content="Exactly how CheckAEO scores a page: Access 30%, Clarity 25%, Answers 25%, Trust 20%, every check with its points and pass condition, gating rules, and the limitations of a single-fetch heuristic scan.">
+<link rel="canonical" href="https://checkaeo.com/methodology/">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#EEECE4">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="CheckAEO">
+<meta property="og:title" content="How the AEO score works">
+<meta property="og:description" content="Exactly how CheckAEO scores a page: Access 30%, Clarity 25%, Answers 25%, Trust 20%, every check with its points and pass condition, gating rules, and the limitations of a single-fetch heuristic scan.">
+<meta property="og:url" content="https://checkaeo.com/methodology/">
+<meta property="og:image" content="https://checkaeo.com/assets/img/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preload" href="../assets/fonts/archivo.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/css/tokens.css">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>document.write(location.protocol === 'file:' ? '<script src="../assets/fonts/fonts.js"><\/script>' : '<link rel="stylesheet" href="../assets/css/fonts.css">');</script>
+<noscript><link rel="stylesheet" href="../assets/css/fonts.css"></noscript>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Article", "headline": "How the AEO score works", "description": "Exactly how CheckAEO scores a page: Access 30%, Clarity 25%, Answers 25%, Trust 20%, every check with its points and pass condition, gating rules, and the limitations of a single-fetch heuristic scan.", "url": "https://checkaeo.com/methodology/", "datePublished": "2026-09-30", "dateModified": "2026-09-30", "author": {"@type": "Person", "name": "Mark Flournoy", "url": "https://www.linkedin.com/in/markflournoy/"}, "publisher": {"@id": "https://checkaeo.com/#org"}, "isPartOf": {"@id": "https://checkaeo.com/#site"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "CheckAEO", "item": "https://checkaeo.com/"}, {"@type": "ListItem", "position": 2, "name": "How the AEO score works", "item": "https://checkaeo.com/methodology/"}]}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="../index.html" aria-label="CheckAEO home"><svg class="brand__mark glyph" viewBox="0 0 152 192" aria-hidden="true" focusable="false"><path d="M8 63 L48 63 C52 63 54.5 61 57.5 58 L62 53.5 L72 53.5 C64 53.5 55.5 61 55.5 70 L55.5 123 Q55.5 134 66.5 134 L143 134 Q151 134 151 142 L151 183 Q151 191 143 191 L70 191 A70 70 0 0 1 0 121 L0 71 Q0 63 8 63 Z" fill="#111111"/><g fill="#075E45"><rect x="63" y="0" width="88" height="54" rx="8"/></g></svg><span class="brand__text"><span class="brand__name">CheckAEO</span><span class="brand__tag">Public site diagnostic</span></span></a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="../what-is-aeo/index.html">What is AEO</a>
+      <a href="../methodology/index.html" aria-current="page">Methodology</a>
+      <a href="../about/index.html">About</a>
+      <a class="nav-cta" href="https://calendly.com/markflournoy/chat-with-mark" target="_blank" rel="noopener" data-cta="calendly">Talk to Mark</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="page">
+<div class="wrap">
+  <header class="page-head"><span class="lbl lbl--signal">Methodology</span><h1>How the AEO score works</h1><p>Four weighted categories, every check, every point. Nothing hidden.</p></header>
+  <div class="doc">
+    <aside class="doc__rail"><span class="lbl lbl--signal">Methodology</span><span class="lbl">Updated / 2026-09-30</span></aside>
+    <div class="prose">
+
+<p class="lead">CheckAEO scores one page (usually your homepage) on four questions, each from 0–100, and combines them into one score. Every check below is a plain heuristic. Nothing is hidden and nothing is learned from your data.</p>
+
+<h2>What the scanner fetches</h2>
+<ul>
+<li>The page you enter, following up to five redirects, reading at most 1.5 MB, with a 12-second timeout. It identifies itself as <code>CheckAEOBot/1.0</code>.</li>
+<li><code>/robots.txt</code>, <code>/sitemap.xml</code> and <code>/llms.txt</code> at the final domain.</li>
+<li>Response headers, including <code>X-Robots-Tag</code>.</li>
+</ul>
+<p>It does not run JavaScript, log in, submit forms, or crawl other pages. It only requests public http and https URLs and refuses private or internal addresses.</p>
+
+<h2>The score</h2>
+<p><strong>Overall = Access × 0.30 + Clarity × 0.25 + Answers × 0.25 + Trust × 0.20</strong>, rounded to a whole number.</p>
+<p>Grades: A 90–100, B 80–89, C 70–79, D 60–69, F below 60. Status labels: Excellent (90+), Strong (80–89), Mostly clear (70–79), Needs work (60–69), Hard to understand (below 60), and Hard to reach when Access is below 40.</p>
+<div class="callout"><strong>Gating rules.</strong> If the page does not return HTTP 200, Access is capped at 30 and the other three categories are marked "not evaluated", because what we received was an error page, not your content. If the page is noindexed, blocks all crawlers, or blocks three or more answer-engine crawlers, Access is capped at 45. If it blocks one or two, Access is capped at 65.</div>
+
+<h2>Access (30%) — can AI reach this page?</h2>
+<div class="table-wrap"><table><thead><tr><th>Check</th><th>Points</th><th>What passes</th></tr></thead><tbody><tr><td>Served over HTTPS</td><td>10</td><td>Final URL is https</td></tr><tr><td>Page responds successfully</td><td>20</td><td>HTTP 200. Other 2xx/3xx earn partial credit; 4xx/5xx earn none.</td></tr><tr><td>Redirect chain is short</td><td>6</td><td>0–1 redirects; 2 earns partial</td></tr><tr><td>robots.txt is present and sane</td><td>8</td><td>Exists and does not disallow everyone. Missing earns partial (allowed, but a sitemap pointer helps).</td></tr><tr><td>AI search crawlers are allowed</td><td>12</td><td>None of OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Googlebot, Bingbot is disallowed. Training crawlers (GPTBot, ClaudeBot, Google-Extended, CCBot) are reported but not scored.</td></tr><tr><td>Page is indexable</td><td>14</td><td>No noindex in meta robots or X-Robots-Tag</td></tr><tr><td>Sitemap is discoverable</td><td>6</td><td>Listed in robots.txt or present at /sitemap.xml</td></tr><tr><td>Meaningful text in the HTML</td><td>14</td><td>150+ words of visible text in the raw HTML; 50–150 earns half</td></tr><tr><td>Responds quickly</td><td>4</td><td>HTML fetched in under 2 s; under 5 s earns half</td></tr><tr><td>Canonical URL is set</td><td>6</td><td>Present and on the same domain. Absent earns partial.</td></tr></tbody></table></div>
+<h2>Clarity (25%) — can a machine tell what this site does?</h2>
+<div class="table-wrap"><table><thead><tr><th>Check</th><th>Points</th><th>What passes</th></tr></thead><tbody><tr><td>Descriptive page title</td><td>15</td><td>Present, 15–70 characters, not generic ("Home", "Welcome")</td></tr><tr><td>Meta description explains the page</td><td>10</td><td>Present, 50–170 characters</td></tr><tr><td>Clear main heading (H1)</td><td>15</td><td>Exactly one H1 of three or more words that is not a greeting</td></tr><tr><td>Site or brand name is identifiable</td><td>10</td><td>og:site_name or Organization/WebSite schema; the title earns partial</td></tr><tr><td>Plain-English statement of what the site does</td><td>20</td><td>A declarative sentence near the top (description, H1, first H2 or first paragraphs) with concrete words. Marketing vagueness ("innovative solutions", "empower", "seamless") lowers it.</td></tr><tr><td>Audience is stated</td><td>8</td><td>A "for [audience]" phrase near the top</td></tr><tr><td>Headings outline the page</td><td>10</td><td>Two or more H2s; skipped levels reduce it</td></tr><tr><td>Semantic HTML landmarks</td><td>7</td><td>main, nav, header, footer — a quarter each</td></tr><tr><td>Descriptive navigation</td><td>5</td><td>Nav links are not "click here" or "learn more"</td></tr></tbody></table></div>
+<h2>Answers (25%) — does the page answer questions directly?</h2>
+<p>The principle behind this category is: <strong>can the page provide clean, self-contained answers?</strong> The four core signals carry 75 of the 100 points. FAQs, question-shaped headings and definition sentences are supporting signals worth 15 points combined, and when a page already explains itself directly their absence costs only a few points. A clear product homepage should be able to score well here without an FAQ or a single question heading. We do not want every homepage to become "What is X? X is a…".</p>
+<div class="table-wrap"><table><thead><tr><th>Check</th><th>Points</th><th>What passes</th></tr></thead><tbody><tr><td>Opens with a direct answer</td><td>25</td><td>First paragraph is 8–60 words and declarative</td></tr><tr><td>Self-contained paragraphs</td><td>25</td><td>Four or more paragraphs of 25–120 words that make sense on their own</td></tr><tr><td>Enough substance to answer from</td><td>15</td><td>300+ words of visible text</td></tr><tr><td>Concise sentences</td><td>10</td><td>Average sentence under 22 words</td></tr><tr><td>Scannable lists</td><td>10</td><td>Lists with three-plus items where content is naturally a sequence or set; absence earns partial</td></tr><tr><td>Question-shaped headings</td><td>6</td><td>Supporting signal. Two or more question headings; a page that explains itself directly earns half without any</td></tr><tr><td>Q&A content</td><td>5</td><td>Supporting signal. FAQ content or FAQPage schema; not inherently a problem if absent</td></tr><tr><td>Defines its key terms</td><td>4</td><td>Supporting signal. One natural "X is a …" sentence; not required</td></tr></tbody></table></div>
+<h2>Trust (20%) — is there enough context to cite it?</h2>
+<div class="table-wrap"><table><thead><tr><th>Check</th><th>Points</th><th>What passes</th></tr></thead><tbody><tr><td>About page is linked</td><td>15</td><td>A link to /about, "about us", "our story" or "team"</td></tr><tr><td>Contact path exists</td><td>15</td><td>A contact link, mailto: or tel: link</td></tr><tr><td>Organization identity is stated</td><td>15</td><td>Organization/LocalBusiness/Person schema; a copyright line and address earn partial</td></tr><tr><td>Structured data (JSON-LD)</td><td>15</td><td>Optional but rewarded: valid JSON-LD with a useful type (Organization, WebSite, Article, FAQPage, Product…)</td></tr><tr><td>Freshness signals</td><td>10</td><td>A time element, "updated" text, or dateModified. Absent earns half — optional on a homepage.</td></tr><tr><td>People behind the content</td><td>10</td><td>Author meta, schema author, or a byline. Absent earns half — optional on a homepage.</td></tr><tr><td>Links out to sources or profiles</td><td>10</td><td>Two or more outbound links, or two or more sameAs profiles</td></tr><tr><td>Privacy or terms page</td><td>10</td><td>A privacy, terms or legal link</td></tr></tbody></table></div>
+<h2>Not scored, but reported</h2>
+<p>llms.txt presence, image alt coverage, the html lang attribute, training-crawler blocks, and HTML size appear under "Also noted". They are useful context and carry zero weight, because their effect on answer engines is either unproven or unrelated to readability.</p>
+
+<h2>What AI sees</h2>
+<p>The summary on your card is our best reading of the page, chosen from the meta description, H1, first H2 and first paragraphs by scoring each candidate sentence for plain declarative structure, concrete words, mention of the site name, and position. Imperative sentences ("Get started", "Book now") and marketing adjectives are penalised. If no candidate clears the bar, the card says so: "Unclear" is a real result, and usually the most useful one.</p>
+<div class="callout"><strong>Grounding rule.</strong> The summary is always a verbatim sentence from your page, and the card names where it came from (meta description, main heading, opening text). CheckAEO never rewrites, paraphrases or synthesises a description of what a business does. When confidence is not high, the summary is prefixed "Appears to be about:". Incomplete-but-accurate beats polished-but-invented.</div>
+
+<h2>Fixes</h2>
+<p>Every failed or partial check has a matching fix. The three shown first are the ones that cost the most points after weighting. Suggested text is built only from facts found on your page (site name, description, links). Anything we did not find is shown as a <code>[bracketed placeholder]</code> rather than invented.</p>
+
+<h2>Limitations, honestly</h2>
+<ul>
+<li>One page, one fetch, no JavaScript. That matches how most AI crawlers behave, but a site that renders client-side may look worse here than it does in Google.</li>
+<li>Heuristics are heuristics. A brilliant page written in an unusual structure may score lower than it deserves. Read the checks, not just the number.</li>
+<li>Nothing here predicts rankings, mentions or citations. It measures readiness: what an answer engine can and cannot get from the page.</li>
+<li>Bot-protection services (challenge pages, WAF rules) will block our scanner just as they block AI crawlers. That result is informative, but the fix is on your hosting side.</li>
+</ul>
+<p>Sources and the research behind these choices are listed on the <a href="../sources/index.html">sources page</a>.</p>
+
+
+<div class="page-cta"><div><span class="lbl lbl--signal">Public AEO check</span><h2 class="mt-1">Check your own site</h2><p>Free. No login. About 30 seconds. You get an AEO Card.</p></div><a class="btn arrow" href="../index.html">Check my site</a></div>
+    </div>
+  </div>
+</div>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__grid">
+      <div><span class="lbl lbl--signal">CheckAEO</span><span class="lbl">Public site diagnostic</span></div>
+      <div><p>A free AEO checker for website owners. It reads the public signals answer engines use and returns one understandable record.</p><p class="mt-1 small"><a href="mailto:hello@checkaeo.com">hello@checkaeo.com</a> · Last updated <time datetime="2026-09-30">September 30, 2026</time></p></div>
+      <nav aria-label="Footer">
+        <a href="../what-is-aeo/index.html">What is AEO</a><a href="../aeo-vs-seo/index.html">AEO vs SEO</a><a href="../chatgpt-search/index.html">ChatGPT search</a><a href="../llms-txt/index.html">llms.txt</a><a href="../methodology/index.html">Methodology</a><a href="../sources/index.html">Sources</a><a href="../about/index.html">About</a><a href="../privacy/index.html">Privacy</a>
+      </nav>
+    </div>
+    <div class="site-foot__base"><span class="foot-mark"><svg class="foot__mark glyph" viewBox="0 0 152 192" aria-hidden="true" focusable="false"><path d="M8 63 L48 63 C52 63 54.5 61 57.5 58 L62 53.5 L72 53.5 C64 53.5 55.5 61 55.5 70 L55.5 123 Q55.5 134 66.5 134 L143 134 Q151 134 151 142 L151 183 Q151 191 143 191 L70 191 A70 70 0 0 1 0 121 L0 71 Q0 63 8 63 Z" fill="#111111"/><g fill="#075E45"><rect x="63" y="0" width="88" height="54" rx="8"/></g></svg></span><span>checkaeo.com / Public site diagnostic</span><span>Diagnostic score, not a guarantee</span><span>© 2026 CheckAEO</span></div>
+  </div>
+</footer>
+<script>document.addEventListener('click', function (e) { var a = e.target.closest('[data-cta]'); if (a && typeof window.gtag === 'function') window.gtag('event', 'cta_' + a.dataset.cta, { location: 'page' }); });</script>
+</body>
+</html>

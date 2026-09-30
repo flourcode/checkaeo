@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sources and references – CheckAEO</title>
+<meta name="description" content="The crawler documentation, web standards and research behind every CheckAEO check, plus an honest note on what has no published source.">
+<link rel="canonical" href="https://checkaeo.com/sources/">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#EEECE4">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="CheckAEO">
+<meta property="og:title" content="Sources">
+<meta property="og:description" content="The crawler documentation, web standards and research behind every CheckAEO check, plus an honest note on what has no published source.">
+<meta property="og:url" content="https://checkaeo.com/sources/">
+<meta property="og:image" content="https://checkaeo.com/assets/img/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preload" href="../assets/fonts/archivo.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/css/tokens.css">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script>document.write(location.protocol === 'file:' ? '<script src="../assets/fonts/fonts.js"><\/script>' : '<link rel="stylesheet" href="../assets/css/fonts.css">');</script>
+<noscript><link rel="stylesheet" href="../assets/css/fonts.css"></noscript>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Article", "headline": "Sources", "description": "The crawler documentation, web standards and research behind every CheckAEO check, plus an honest note on what has no published source.", "url": "https://checkaeo.com/sources/", "datePublished": "2026-09-30", "dateModified": "2026-09-30", "author": {"@type": "Person", "name": "Mark Flournoy", "url": "https://www.linkedin.com/in/markflournoy/"}, "publisher": {"@id": "https://checkaeo.com/#org"}, "isPartOf": {"@id": "https://checkaeo.com/#site"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "CheckAEO", "item": "https://checkaeo.com/"}, {"@type": "ListItem", "position": 2, "name": "Sources", "item": "https://checkaeo.com/sources/"}]}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="../index.html" aria-label="CheckAEO home"><svg class="brand__mark glyph" viewBox="0 0 152 192" aria-hidden="true" focusable="false"><path d="M8 63 L48 63 C52 63 54.5 61 57.5 58 L62 53.5 L72 53.5 C64 53.5 55.5 61 55.5 70 L55.5 123 Q55.5 134 66.5 134 L143 134 Q151 134 151 142 L151 183 Q151 191 143 191 L70 191 A70 70 0 0 1 0 121 L0 71 Q0 63 8 63 Z" fill="#111111"/><g fill="#075E45"><rect x="63" y="0" width="88" height="54" rx="8"/></g></svg><span class="brand__text"><span class="brand__name">CheckAEO</span><span class="brand__tag">Public site diagnostic</span></span></a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="../what-is-aeo/index.html">What is AEO</a>
+      <a href="../methodology/index.html">Methodology</a>
+      <a href="../about/index.html">About</a>
+      <a class="nav-cta" href="https://calendly.com/markflournoy/chat-with-mark" target="_blank" rel="noopener" data-cta="calendly">Talk to Mark</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="page">
+<div class="wrap">
+  <header class="page-head"><span class="lbl lbl--signal">References</span><h1>Sources</h1><p>What the checks rest on: crawler docs, web standards, and research.</p></header>
+  <div class="doc">
+    <aside class="doc__rail"><span class="lbl lbl--signal">References</span><span class="lbl">Updated / 2026-09-30</span></aside>
+    <div class="prose">
+
+<p class="lead">The checks in CheckAEO are grounded in published crawler documentation, web standards, and the observable behaviour of answer engines. Here is what each part of the score rests on.</p>
+
+<h2>Crawler and robots documentation</h2>
+<ul>
+<li><strong>OpenAI</strong> — "Overview of OpenAI crawlers" (platform.openai.com/docs/bots): defines OAI-SearchBot, ChatGPT-User and GPTBot and their separate purposes.</li>
+<li><strong>Anthropic</strong> — Help Center article on Anthropic's crawlers: documents ClaudeBot (training), Claude-User and Claude-SearchBot.</li>
+<li><strong>Perplexity</strong> — docs.perplexity.ai crawler page: PerplexityBot and Perplexity-User.</li>
+<li><strong>Google</strong> — "Google's crawlers and fetchers" (developers.google.com/search/docs/crawling-indexing): Googlebot versus Google-Extended.</li>
+<li><strong>Microsoft Bing</strong> — Bing Webmaster Tools crawler documentation (Bingbot).</li>
+<li><strong>Robots Exclusion Protocol</strong> — RFC 9309 (IETF, 2022): the parsing and longest-match rules CheckAEO implements.</li>
+<li><strong>Google</strong> — "Robots meta tag, data-nosnippet, and X-Robots-Tag specifications": the noindex handling we check.</li>
+</ul>
+
+<h2>Structured data and page semantics</h2>
+<ul>
+<li><strong>Schema.org</strong> — Organization, WebSite, Article, FAQPage, LocalBusiness and Person types.</li>
+<li><strong>Google</strong> — Structured data general guidelines and the FAQ / Organization feature documentation.</li>
+<li><strong>WHATWG HTML Living Standard</strong> — sections on the title element, headings, and the main, nav, header and footer landmarks.</li>
+<li><strong>Sitemaps protocol</strong> — sitemaps.org.</li>
+<li><strong>The Open Graph protocol</strong> — ogp.me (og:site_name).</li>
+</ul>
+
+<h2>Content quality and extractability</h2>
+<ul>
+<li><strong>Google Search Central</strong> — "Creating helpful, reliable, people-first content" and the Search Quality Rater Guidelines (E-E-A-T), which inform the Trust category.</li>
+<li><strong>Nielsen Norman Group</strong> — research on how people read on the web (F-pattern, inverted pyramid), which supports answer-first structure.</li>
+<li><strong>Plain-language guidance</strong> — plainlanguage.gov and the UK GDS style guide, which support the sentence-length and vagueness checks.</li>
+<li><strong>Academic work on generative engines</strong> — "GEO: Generative Engine Optimization" (Aggarwal et al., 2023/2024) found that adding citations, statistics and clear structure increased visibility in generated answers; this supports the Answers and Trust checks, with the caveat that its findings are from experimental engines.</li>
+</ul>
+
+<h2>Emerging conventions</h2>
+<ul>
+<li><strong>llms.txt</strong> — llmstxt.org, proposed by Jeremy Howard (Answer.AI), 2024. Reported by CheckAEO, not scored, pending evidence of adoption by major engines.</li>
+</ul>
+
+<h2>What we do not have a source for</h2>
+<p>No engine publishes its ranking or citation logic. Weightings in CheckAEO (30/25/25/20 and the points within each category) are editorial judgements based on the documents above and on hands-on testing, not on any engine's published formula. We revise them when the evidence changes, and note changes on the <a href="../methodology/index.html">methodology page</a>.</p>
+<p class="small muted">Links above are given as site and document names rather than deep URLs because vendor documentation moves frequently. Search the document title on the vendor's site for the current version.</p>
+
+
+<div class="page-cta"><div><span class="lbl lbl--signal">Public AEO check</span><h2 class="mt-1">Check your own site</h2><p>Free. No login. About 30 seconds. You get an AEO Card.</p></div><a class="btn arrow" href="../index.html">Check my site</a></div>
+    </div>
+  </div>
+</div>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__grid">
+      <div><span class="lbl lbl--signal">CheckAEO</span><span class="lbl">Public site diagnostic</span></div>
+      <div><p>A free AEO checker for website owners. It reads the public signals answer engines use and returns one understandable record.</p><p class="mt-1 small"><a href="mailto:hello@checkaeo.com">hello@checkaeo.com</a> · Last updated <time datetime="2026-09-30">September 30, 2026</time></p></div>
+      <nav aria-label="Footer">
+        <a href="../what-is-aeo/index.html">What is AEO</a><a href="../aeo-vs-seo/index.html">AEO vs SEO</a><a href="../chatgpt-search/index.html">ChatGPT search</a><a href="../llms-txt/index.html">llms.txt</a><a href="../methodology/index.html">Methodology</a><a href="../sources/index.html">Sources</a><a href="../about/index.html">About</a><a href="../privacy/index.html">Privacy</a>
+      </nav>
+    </div>
+    <div class="site-foot__base"><span class="foot-mark"><svg class="foot__mark glyph" viewBox="0 0 152 192" aria-hidden="true" focusable="false"><path d="M8 63 L48 63 C52 63 54.5 61 57.5 58 L62 53.5 L72 53.5 C64 53.5 55.5 61 55.5 70 L55.5 123 Q55.5 134 66.5 134 L143 134 Q151 134 151 142 L151 183 Q151 191 143 191 L70 191 A70 70 0 0 1 0 121 L0 71 Q0 63 8 63 Z" fill="#111111"/><g fill="#075E45"><rect x="63" y="0" width="88" height="54" rx="8"/></g></svg></span><span>checkaeo.com / Public site diagnostic</span><span>Diagnostic score, not a guarantee</span><span>© 2026 CheckAEO</span></div>
+  </div>
+</footer>
+<script>document.addEventListener('click', function (e) { var a = e.target.closest('[data-cta]'); if (a && typeof window.gtag === 'function') window.gtag('event', 'cta_' + a.dataset.cta, { location: 'page' }); });</script>
+</body>
+</html>

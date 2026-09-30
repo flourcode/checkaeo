@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CheckAEO – Can answer engines understand your website? Free AEO check</title>
+<meta name="description" content="CheckAEO is a free public diagnostic that checks whether answer engines like ChatGPT, Claude, Gemini and Perplexity can reach, understand, answer from and trust your homepage. You get an AEO Card: one score, four checks, one thing to fix first.">
+<link rel="canonical" href="https://checkaeo.com/">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta name="theme-color" content="#EEECE4">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CheckAEO">
+<meta property="og:title" content="Can answer engines understand your website?">
+<meta property="og:description" content="A free public diagnostic. One score, four checks, one thing to fix first. Diagnostic score, not a guarantee.">
+<meta property="og:url" content="https://checkaeo.com/">
+<meta property="og:image" content="https://checkaeo.com/assets/img/og-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Can answer engines understand your website?">
+<meta name="twitter:description" content="A free public diagnostic. One score, four checks, one thing to fix first.">
+<meta name="twitter:image" content="https://checkaeo.com/assets/img/og-card.png">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/archivo.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/plex-mono-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/main.css">
+<script>document.write(location.protocol === 'file:' ? '<script src="assets/fonts/fonts.js"><\/script>' : '<link rel="stylesheet" href="assets/css/fonts.css">');</script>
+<noscript><link rel="stylesheet" href="assets/css/fonts.css"></noscript>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "Organization", "@id": "https://checkaeo.com/#org", "name": "CheckAEO", "url": "https://checkaeo.com/", "logo": "https://checkaeo.com/assets/img/logo.png", "description": "CheckAEO is a free AEO checker that shows how ready a website is for AI answer engines.", "founder": { "@type": "Person", "name": "Mark Flournoy", "image": "https://checkaeo.com/assets/img/mark.jpg", "sameAs": ["https://www.linkedin.com/in/markflournoy/"] } },
+    { "@type": "WebSite", "@id": "https://checkaeo.com/#site", "name": "CheckAEO", "url": "https://checkaeo.com/", "publisher": { "@id": "https://checkaeo.com/#org" } },
+    { "@type": "WebApplication", "name": "CheckAEO", "url": "https://checkaeo.com/", "applicationCategory": "DeveloperApplication", "operatingSystem": "Web", "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }, "description": "Paste a URL and get an AEO Card: a scorecard showing whether AI systems can reach, understand, extract answers from, and trust your website." },
+    { "@type": "FAQPage", "mainEntity": [
+      { "@type": "Question", "name": "What is an AEO Card?", "acceptedAnswer": { "@type": "Answer", "text": "An AEO Card is a one-page diagnostic record that shows how ready a website is for AI answer engines. It grades four things: whether answer engines can reach the page, tell what the site does, extract useful answers, and trust it enough to cite it. It ends with the one change most worth making first." } },
+      { "@type": "Question", "name": "Does a high AEO score mean ChatGPT will cite my site?", "acceptedAnswer": { "@type": "Answer", "text": "No. The score is a diagnostic of readiness, not a prediction of rankings or citations. It tells you what AI systems can and cannot understand from your page, and what to fix first." } },
+      { "@type": "Question", "name": "Is CheckAEO free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The homepage check is free and needs no login. Scans read only public pages and public files like robots.txt." } }
+    ] }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="CheckAEO home"><svg class="brand__mark glyph" viewBox="0 0 152 192" aria-hidden="true" focusable="false"><path d="M8 63 L48 63 C52 63 54.5 61 57.5 58 L62 53.5 L72 53.5 C64 53.5 55.5 61 55.5 70 L55.5 123 Q55.5 134 66.5 134 L143 134 Q151 134 151 142 L151 183 Q151 191 143 191 L70 191 A70 70 0 0 1 0 121 L0 71 Q0 63 8 63 Z" fill="#111111"/><g fill="#075E45"><rect x="63" y="0" width="88" height="54" rx="8"/></g></svg><span class="brand__text"><span class="brand__name">CheckAEO</span><span class="brand__tag">Public site diagnostic</span></span></a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="what-is-aeo/index.html">What is AEO</a>
+      <a href="methodology/index.html">Methodology</a>
+      <a href="about/index.html">About</a>
+      <a class="nav-cta" href="https://calendly.com/markflournoy/chat-with-mark" target="_blank" rel="noopener" data-cta="calendly">Talk to Mark</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="sec hero" id="hero" aria-labelledby="hero-h">
+    <div class="wrap"><div class="sec__in"><div class="hero__grid">
+      <div>
+        <span class="lbl lbl--signal">Public AEO check</span>
+        <h1 id="hero-h"><span>Can answer engines</span> <span>understand your website?</span></h1>
+        <p class="hero__lede">Check whether your homepage can be reached, understood, answered from, and trusted by AI search systems.</p>
+        <form class="scan-form" id="scan-form" novalidate>
+          <label class="sr-only" for="url-input">Website URL</label>
+          <div class="scan-form__row">
+            <input id="url-input" name="url" type="url" inputmode="url" autocomplete="url" spellcheck="false" placeholder="https://yourwebsite.com" required aria-describedby="form-hint form-error">
+            <button class="btn arrow" type="submit" id="scan-submit">Check my site</button>
+          </div>
+          <p class="scan-form__hint" id="form-hint">Free homepage check. No login. About 30 seconds.</p>
+          <p class="scan-form__error" id="form-error" aria-live="polite"></p>
+          <p class="scan-form__hint" id="demo-hint" hidden>The live scanner is not connected on this copy of the site. <button class="btn btn--sm btn--ghost" type="button" data-demo="">See an example AEO Card</button></p>
+        </form>
+        <div class="engines"><span class="lbl">Engine targets</span><span>ChatGPT · Claude · Gemini · Perplexity</span></div>
+      </div>
+      <div id="hero-aside">
+        <div class="hero__example" id="hero-example" aria-label="Example AEO Card">
+          
+        </div>
+      </div>
+    </div></div></div>
+  </section>
+
+  <section class="results" id="results" hidden aria-label="Your AEO Card and report"></section>
+
+  <section class="sec home-only" aria-labelledby="out-h">
+    <div class="wrap"><div class="sec__in">
+      <div class="sec__rail"><span class="lbl lbl--signal">Output</span></div>
+      <div>
+        <h2 class="sec__title" id="out-h">This is what comes back.</h2>
+        <p class="sec__lede">One score. Four checks. One thing to fix first. No dashboard. No 47-point audit.</p>
+        <div class="table">
+          <div class="table__row"><h3>Score</h3><p>A diagnostic score from 0 to 100, with a letter grade.</p></div>
+          <div class="table__row"><h3>Site read</h3><p>What the page appears to be about, quoted in the page's own words. Never rewritten.</p></div>
+          <div class="table__row"><h3>First fix</h3><p>The highest-value change to make first.</p></div>
+          <div class="table__row"><h3>Evidence</h3><p>Every check behind the score, in plain English, with a concrete fix for each.</p></div>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="sec home-only" aria-labelledby="model-h">
+    <div class="wrap"><div class="sec__in">
+      <div class="sec__rail"><span class="lbl lbl--signal">Diagnostic model</span></div>
+      <div>
+        <h2 class="sec__title" id="model-h">Four checks. One readable result.</h2>
+        <div class="cells cells--4">
+          <div><svg class="glyph" viewBox="0 0 48 48" fill="#141414" aria-hidden="true" focusable="false"><path d="M10 6h32v36H10V31h7v4h18V13H17v4h-7z"/><rect x="3" y="21" width="17" height="6"/></svg><span class="lbl lbl--signal">01</span><h3>Access</h3><p>Can answer engines reach the page?</p></div>
+          <div><svg class="glyph" viewBox="0 0 48 48" fill="#141414" aria-hidden="true" focusable="false"><circle cx="24" cy="24" r="19" fill="none" stroke="#141414" stroke-width="5"/><circle cx="24" cy="24" r="8.5" fill="none" stroke="#141414" stroke-width="5"/><circle cx="24" cy="24" r="1.8"/></svg><span class="lbl lbl--signal">02</span><h3>Clarity</h3><p>Can they tell what the site does?</p></div>
+          <div><svg class="glyph" viewBox="0 0 48 48" fill="#141414" aria-hidden="true" focusable="false"><rect x="4" y="7" width="40" height="6"/><rect x="4" y="18" width="30" height="6"/><rect x="4" y="29" width="40" height="6"/><rect x="4" y="40" width="18" height="6"/></svg><span class="lbl lbl--signal">03</span><h3>Answers</h3><p>Can they extract useful answers?</p></div>
+          <div><svg class="glyph" viewBox="0 0 48 48" fill="#141414" aria-hidden="true" focusable="false"><rect x="21" y="3" width="6" height="42" transform="rotate(0 24 24)"/><rect x="21" y="3" width="6" height="42" transform="rotate(45 24 24)"/><rect x="21" y="3" width="6" height="42" transform="rotate(90 24 24)"/><rect x="21" y="3" width="6" height="42" transform="rotate(135 24 24)"/><circle cx="24" cy="24" r="7" fill="#ECE8E0"/><circle cx="24" cy="24" r="3.5"/></svg><span class="lbl lbl--signal">04</span><h3>Trust</h3><p>Is there enough context to quote or cite it?</p></div>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="sec home-only" aria-labelledby="method-h">
+    <div class="wrap"><div class="sec__in">
+      <div class="sec__rail"><span class="lbl lbl--signal">Method</span></div>
+      <div>
+        <h2 class="sec__title" id="method-h">A small, honest tool for a noisy topic.</h2>
+        <p class="sec__lede">CheckAEO does not promise rankings, citations, or secret AI tricks. It checks the public signals answer engines can actually use and turns them into one understandable report.</p>
+        <div class="cells cells--4">
+          <div><span class="lbl">Reads</span><h3>Public HTML</h3><p>The page as a crawler receives it, before any JavaScript runs.</p></div>
+          <div><span class="lbl">Reads</span><h3>Crawler rules</h3><p>robots.txt, noindex, and which answer-engine crawlers are allowed.</p></div>
+          <div><span class="lbl">Reads</span><h3>Page structure</h3><p>Title, headings, landmarks and structured data.</p></div>
+          <div><span class="lbl">Reads</span><h3>Visible content</h3><p>What the page says, and whether it can be quoted cleanly.</p></div>
+        </div>
+        <p class="mt-3"><span class="lbl">Diagnostic score, not a guarantee.</span></p>
+        <p class="mt-1"><a class="btn btn--ghost btn--sm arrow" href="methodology/index.html">Read the methodology</a></p>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="sec home-only" aria-labelledby="builder-h">
+    <div class="wrap"><div class="sec__in">
+      <div class="sec__rail"><span class="lbl lbl--signal">Built by</span></div>
+      <div>
+        <article class="mark mark--wide">
+          <div class="mark__bar"><span class="lbl"><b>Builder record</b></span><span class="lbl">Mark Flournoy</span></div>
+          <div class="mark__body">
+            <img class="mark__photo" src="assets/img/mark.jpg" width="128" height="128" alt="Mark Flournoy" loading="lazy">
+            <div>
+              <h2 class="mark__name" id="builder-h">Built by Mark Flournoy.</h2>
+              <p>I built CheckAEO after watching AI answers change the value of a click. I wanted a simpler way to see whether a site could be reached, understood, quoted, and trusted without sitting through another giant SEO dashboard.</p>
+            </div>
+          </div>
+          <div class="mark__actions">
+            <a class="btn arrow" href="https://calendly.com/markflournoy/chat-with-mark" target="_blank" rel="noopener" data-cta="calendly">Talk to Mark</a>
+            <a class="btn btn--ghost" href="https://www.linkedin.com/in/markflournoy/" target="_blank" rel="noopener" data-cta="linkedin">Message on LinkedIn</a>
+          </div>
+        </article>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="sec home-only" aria-labelledby="faq-h">
+    <div class="wrap"><div class="sec__in">
+      <div class="sec__rail"><span class="lbl lbl--signal">Q&amp;A</span></div>
+      <div>
+        <h2 class="sec__title" id="faq-h">Questions people ask.</h2>
+        <div class="faq mt-3">
+          <details><summary>What is an AEO Card?</summary><p>A one-page diagnostic record that shows how ready a website is for AI answer engines. It grades four things: whether answer engines can reach the page, tell what the site does, extract useful answers, and trust it enough to cite it. It ends with the one change most worth making first.</p></details>
+          <details><summary>Does a good score mean ChatGPT will cite me?</summary><p>No. Nobody can promise that. The score tells you whether your page is easy or hard for AI systems to reach, understand and quote. Fixing what it flags removes obstacles; it does not buy placement.</p></details>
+          <details><summary>What does the scanner actually read?</summary><p>Your homepage HTML, response headers, robots.txt, whether a sitemap exists, and whether an llms.txt file exists. It follows up to five redirects and reads at most 1.5 MB. It does not run JavaScript, log in, or crawl other pages.</p></details>
+          <details><summary>Is it free? Do you store my site?</summary><p>Free, no login. Results are cached for about ten minutes so repeat scans are fast. Nothing else is stored.</p></details>
+          <details><summary>What is AEO?</summary><p>Answer Engine Optimization: making your site easier for AI-powered answer systems to reach, understand, extract and cite. <a href="what-is-aeo/index.html">Read the longer explanation.</a></p></details>
+        </div>
+      </div>
+    </div></div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__grid">
+      <div><span class="lbl lbl--signal">CheckAEO</span><span class="lbl">Public site diagnostic</span></div>
+      <div><p>A free AEO checker for website owners. It reads the public signals answer engines use and returns one understandable record.</p><p class="mt-1 small"><a href="mailto:hello@checkaeo.com">hello@checkaeo.com</a></p></div>
+      <nav aria-label="Footer">
+        <a href="what-is-aeo/index.html">What is AEO</a><a href="aeo-vs-seo/index.html">AEO vs SEO</a><a href="chatgpt-search/index.html">ChatGPT search</a><a href="llms-txt/index.html">llms.txt</a><a href="methodology/index.html">Methodology</a><a href="sources/index.html">Sources</a><a href="about/index.html">About</a><a href="privacy/index.html">Privacy</a>
+      </nav>
+    </div>
+    <div class="site-foot__base"><span class="foot-mark"><svg class="foot__mark glyph" viewBox="0 0 152 192" aria-hidden="true" focusable="false"><path d="M8 63 L48 63 C52 63 54.5 61 57.5 58 L62 53.5 L72 53.5 C64 53.5 55.5 61 55.5 70 L55.5 123 Q55.5 134 66.5 134 L143 134 Q151 134 151 142 L151 183 Q151 191 143 191 L70 191 A70 70 0 0 1 0 121 L0 71 Q0 63 8 63 Z" fill="#111111"/><g fill="#075E45"><rect x="63" y="0" width="88" height="54" rx="8"/></g></svg></span><span>checkaeo.com / Public site diagnostic</span><span>Diagnostic score, not a guarantee</span><span>© 2026 CheckAEO</span></div>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="sr-only" id="live" aria-live="polite"></div>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/demo-data.js" defer></script>
+<script src="assets/js/card.js" defer></script>
+<script src="assets/js/export.js" defer></script>
+<script src="assets/js/app.js" defer></script>
+</body>
+</html>
