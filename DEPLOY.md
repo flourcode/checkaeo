@@ -1,4 +1,4 @@
-# Deploying CheckAEO
+# Deploying Aeoden
 
 Two parts: a **static site** (any host — Amplify, Cloudflare Pages, Netlify, Vercel…) and **one small serverless function** that performs the scan.
 
@@ -39,25 +39,37 @@ You should get JSON with `"ok": true`, a `score`, and four `categories`.
 ### Optional hardening
 
 - **Lock CORS to your domain**: in `worker/wrangler.toml` set  
-  `ALLOWED_ORIGINS = "https://checkaeo.com,https://www.checkaeo.com"`  
+  `ALLOWED_ORIGINS = "https://aeoden.com,https://www.aeoden.com"`  
   (comma-separated, no spaces required). `*` allows any site to call your scanner.
-- **Custom domain** (e.g. `scan.checkaeo.com`): Cloudflare dashboard → Workers → your worker → Settings → Domains & Routes.
+- **Custom domain** (e.g. `scan.aeoden.com`): Cloudflare dashboard → Workers → your worker → Settings → Domains & Routes.
 - **Rate limiting**: the worker has a best-effort in-memory limit (12 scans/min/IP per isolate). For a hard limit, add Cloudflare's Rate Limiting rules on the route.
 - **Caching**: results are cached at the edge for 10 minutes (`CACHE_TTL` in `src/index.js`). Append `?fresh=1` to bypass while testing.
 
-## Option B — AWS Lambda (all-AWS with Amplify)
+## Option B — AWS Lambda (all-AWS with Amplify) · current production setup
 
-1. Build the package: `cd worker && ./build-lambda.sh` → `worker/lambda.zip` (≈70 KB, no dependencies).
-2. AWS Console → Lambda → **Create function** → Author from scratch → Runtime **Node.js 20.x** (or newer), architecture arm64 is fine.
+1. Build the package: `cd worker && ./build-lambda.sh` → `worker/lambda.zip` (four files, no dependencies).
+2. AWS Console → Lambda → **Create function** → Author from scratch → Runtime **Node.js 20.x** or newer.
 3. Code → **Upload from .zip** → `lambda.zip`. Runtime settings → Handler: **`lambda.handler`**.
 4. Configuration → General: **Timeout 30 s**, Memory 256 MB.
-5. Configuration → **Function URL** → Create → Auth type **NONE** → tick **Configure CORS** → Allow origin `*` (or `https://checkaeo.com`), Allow methods `GET, POST`, Allow headers `content-type`.
-6. Copy the Function URL (looks like `https://abc123.lambda-url.us-east-1.on.aws/`). Test: `curl "<url>scan?url=example.com"`.
-7. Put it in `assets/js/config.js` as `SCAN_API_URL` (trailing slash is fine either way).
+5. Configuration → **Function URL** → Auth type **NONE** → **Configure CORS**:
+   - Allow origins: `https://aeoden.com`, `https://www.aeoden.com`
+   - Allow methods: `GET`, `POST`
+   - Allow headers: `Content-Type`
+6. Copy the Function URL into `assets/js/config.js` as `SCAN_API_URL`.
 
-Optional: put CloudFront or API Gateway in front for a custom domain (`scan.checkaeo.com`) and AWS WAF rate limiting. The function also has a best-effort in-memory limit of 12 scans/minute/IP.
+**CORS lives in the Function URL settings only.** `lambda.js` deliberately sends no `Access-Control-*` headers. If both the function and the Function URL add them, browsers receive duplicated values such as `*, *` and reject every scan. `worker/test/lambda.test.mjs` fails if CORS headers are ever added back to the function.
 
-You can also run the same zip through **Amplify Gen 2 functions**, SAM or CDK — the handler has no AWS-specific dependencies.
+**Testing on another origin:** with the origins above, the site only works on aeoden.com. While testing on the default Amplify domain (`https://<branch>.<id>.amplifyapp.com`) or locally, add that origin to the Function URL CORS list, then remove it afterwards. Otherwise the site shows "We could not reach the scanner."
+
+Routes: `GET /health`, `GET /scan?url=…`, `POST /scan` with `{"url":"…"}`. Unknown paths return 404 and other methods return 405. Add `?fresh=1` to bypass the ten-minute cache.
+
+Console test event:
+```json
+{ "version": "2.0", "rawPath": "/scan", "rawQueryString": "fresh=1", "queryStringParameters": { "fresh": "1" },
+  "headers": { "content-type": "application/json" },
+  "requestContext": { "http": { "method": "POST", "path": "/scan", "sourceIp": "1.2.3.4" } },
+  "body": "{\"url\":\"github.com\"}", "isBase64Encoded": false }
+```
 
 ## 2. Configure the front end
 
@@ -77,9 +89,9 @@ Upload the project root (everything except `worker/`) to any static host. The si
 
 **AWS Amplify Hosting** (GitHub repo)
 1. Amplify Console → New app → Host web app → connect the GitHub repo and branch.
-2. Amplify detects the included `amplify.yml`. It has no build step — it just copies the site into `dist/` and excludes the `worker/` source so it isn't published. Every push to the branch redeploys.
+2. Amplify detects the included `amplify.yml`. There is no compile step: it copies the site into `dist/` with `find … -exec cp` (standard tools only; `rsync` is not available in Amplify's build image) and leaves out `worker/`, `amplify.yml`, `README.md` and `DEPLOY.md`. Every push to the branch redeploys.
 3. App settings → **Rewrites and redirects** → add a rule: Source `/<*>`, Target `/404.html`, Type **404 (Rewrite)** so unknown URLs show the styled 404 page. Clean URLs (`/methodology/` → `methodology/index.html`) work by default.
-4. Domain management → add `checkaeo.com` (Amplify issues the certificate). Redirect `www` → apex.
+4. Domain management → add `aeoden.com` (Amplify issues the certificate). Redirect `www` → apex.
 5. Before your first push, set `SCAN_API_URL` (and optionally `GA4_MEASUREMENT_ID`) in `assets/js/config.js` — it's a plain file in the repo, no environment variables needed.
 
 **Cloudflare Pages** (same account as the worker if you chose Option A)
@@ -122,4 +134,4 @@ Add these at your host (e.g. a `_headers` file for Cloudflare Pages / Netlify):
 ## Remaining placeholders
 
 - `assets/js/config.js` → `SCAN_API_URL`, `GA4_MEASUREMENT_ID`
-- `hello@checkaeo.com` appears in the footer and on the About page — change if you use a different contact address.
+- `hello@aeoden.com` appears in the footer and on the About page — change if you use a different contact address.

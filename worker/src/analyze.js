@@ -1,5 +1,5 @@
 /**
- * CheckAEO analyzer
+ * Aeoden analyzer
  * Pure function: takes a fetched page (html, headers, robots.txt, timing)
  * and returns a structured scan result that powers the AEO Card.
  *

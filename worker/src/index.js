@@ -1,5 +1,5 @@
 /**
- * CheckAEO scan worker (Cloudflare Workers)
+ * Aeoden scan worker (Cloudflare Workers)
  *
  *   POST /scan   { "url": "https://example.com" }
  *   GET  /scan?url=https://example.com
@@ -10,7 +10,7 @@
  */
 import { analyze } from './analyze.js';
 
-const USER_AGENT = 'CheckAEOBot/1.0 (+https://checkaeo.com/about/)';
+const USER_AGENT = 'AeodenBot/1.0 (+https://aeoden.com/about/)';
 const MAX_REDIRECTS = 5;
 const MAX_BYTES = 1_500_000;
 const TIMEOUT_MS = 12_000;

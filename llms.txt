@@ -1,17 +1,17 @@
-# CheckAEO
+# Aeoden
 
-> CheckAEO is a free AEO (Answer Engine Optimization) checker. Paste a URL and get an AEO Card: a scorecard from 0–100 showing whether AI answer engines like ChatGPT, Claude, Gemini and Perplexity can reach the page, tell what the site does, extract direct answers from it, and trust it enough to cite. It gives a diagnostic score, not a guarantee of rankings or citations.
+> Aeoden is a free AEO (Answer Engine Optimization) checker. Paste a URL and get an AEO Card: a scorecard from 0–100 showing whether AI answer engines like ChatGPT, Claude, Gemini and Perplexity can reach the page, tell what the site does, extract direct answers from it, and trust it enough to cite. It gives a diagnostic score, not a guarantee of rankings or citations.
 
 ## Key pages
 
-- [Homepage and checker](https://checkaeo.com/): paste a URL, get an AEO Card, download it as an image
-- [Methodology](https://checkaeo.com/methodology/): every check, its points, and the 30/25/25/20 weighting
-- [What is AEO?](https://checkaeo.com/what-is-aeo/): Answer Engine Optimization explained in four questions
-- [AEO vs SEO](https://checkaeo.com/aeo-vs-seo/): where the emphasis shifts
-- [ChatGPT search readiness](https://checkaeo.com/chatgpt-search/): which OpenAI crawlers matter and what gets quoted
-- [What is llms.txt?](https://checkaeo.com/llms-txt/): the convention, and why it is reported but not scored
+- [Homepage and checker](https://aeoden.com/): paste a URL, get an AEO Card, download it as an image
+- [Methodology](https://aeoden.com/methodology/): every check, its points, and the 30/25/25/20 weighting
+- [What is AEO?](https://aeoden.com/what-is-aeo/): Answer Engine Optimization explained in four questions
+- [AEO vs SEO](https://aeoden.com/aeo-vs-seo/): where the emphasis shifts
+- [ChatGPT search readiness](https://aeoden.com/chatgpt-search/): which OpenAI crawlers matter and what gets quoted
+- [What is llms.txt?](https://aeoden.com/llms-txt/): the convention, and why it is reported but not scored
 
 ## Optional
 
-- [Sources](https://checkaeo.com/sources/): crawler documentation, standards and research behind the checks
-- [About](https://checkaeo.com/about/): who runs it, how the CheckAEOBot crawler behaves, contact
+- [Sources](https://aeoden.com/sources/): crawler documentation, standards and research behind the checks
+- [About](https://aeoden.com/about/): who runs it, how the AeodenBot crawler behaves, contact

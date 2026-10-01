@@ -1,5 +1,5 @@
 /* ============================================================
-   CheckAEO app — homepage checker + results
+   Aeoden app — homepage checker + results
    ============================================================ */
 (function () {
   'use strict';
@@ -33,43 +33,46 @@
   const input = $('#url-input');
   const submitBtn = $('#scan-submit');
   const formError = $('#form-error');
-  const hero = $('#hero');
-  const heroExample = $('#hero-example');
-  const heroAside = $('#hero-aside');
-  const scanState = $('#scan-state');
-  const results = $('#results');
+  const slot = $('#card-slot');
+  const caption = $('#card-caption');
+  const actions = $('#card-actions');
+  const report = $('#report');
   const live = $('#live');
   const toast = $('#toast');
 
-  let current = null;       // current result
+  let current = null;
   let demoKey = null;
+  let lastUrl = null;
 
-  /* ---------------- Boot ---------------- */
+  /* ---------------- Boot: the example card is the placeholder ---------------- */
   document.addEventListener('DOMContentLoaded', () => {
-    // Example card in the hero, always rendered from bundled data.
-    const demo = firstDemo();
-    if (heroExample && demo) heroExample.insertAdjacentHTML('beforeend', R.renderCardHTML(demo));
-    if (!apiConfigured()) $('#demo-hint')?.removeAttribute('hidden');
-
     const params = new URLSearchParams(location.search);
-    if (location.hash.startsWith('#demo')) {
-      showDemo(location.hash.split('=')[1] || null);
-    } else if (params.get('url')) {
-      input.value = params.get('url');
-      startScan(params.get('url'));
+    if (location.hash.startsWith('#demo')) showDemo(location.hash.split('=')[1] || null);
+    else {
+      showExample();
+      if (params.get('url')) { input.value = params.get('url'); startScan(params.get('url')); }
     }
-    document.querySelectorAll('[data-demo]').forEach(b => b.addEventListener('click', () => showDemo(b.dataset.demo || null)));
-    document.querySelectorAll('[data-example-url]').forEach(b => b.addEventListener('click', () => { input.value = b.dataset.exampleUrl; input.focus(); }));
+    if (!apiConfigured()) $('#demo-hint')?.removeAttribute('hidden');
+    document.addEventListener('click', e => {
+      const d = e.target.closest('[data-demo]');
+      if (d) { e.preventDefault(); showDemo(d.dataset.demo || null); }
+    });
   });
 
-  form?.addEventListener('submit', e => {
-    e.preventDefault();
-    startScan(input.value);
-  });
+  form?.addEventListener('submit', e => { e.preventDefault(); startScan(input.value); });
+  input?.addEventListener('input', () => { if (formError.textContent) { formError.textContent = ''; input.removeAttribute('aria-invalid'); } });
 
-  function firstDemo(key) {
-    const demos = window.CHECKAEO_DEMOS || {};
-    return demos[key] || demos.quotabird || Object.values(demos)[0] || null;
+  function firstDemo(key) { const d = window.CHECKAEO_DEMOS || {}; return d[key] || d.quotabird || Object.values(d)[0] || null; }
+
+  function showExample() {
+    const ex = firstDemo();
+    if (!ex) return;
+    current = null;
+    slot.innerHTML = R.renderCardHTML(ex);
+    caption.hidden = false;
+    actions.hidden = true;
+    report.hidden = true; report.innerHTML = '';
+    document.body.classList.remove('results-mode');
   }
 
   /* ---------------- URL handling ---------------- */
@@ -84,83 +87,48 @@
     return { url: u.href };
   }
 
-  /* ---------------- Scan flow ---------------- */
-  const STEPS = ['Reach site', 'Read robots.txt + headers', 'Read public HTML', 'Score access / clarity / answers / trust', 'Write AEO Card'];
+  /* ---------------- Scan flow: the card fills in place ---------------- */
+  const STEPS = ['Reaching the site', 'Reading robots.txt and headers', 'Reading the public HTML', 'Scoring the four checks', 'Writing your AEO Card'];
 
   async function startScan(raw) {
     const n = normalizeUrl(raw);
     if (n.error) { formError.textContent = n.error; input.focus(); input.setAttribute('aria-invalid', 'true'); return; }
-    formError.textContent = '';
-    input.removeAttribute('aria-invalid');
-    const url = n.url;
-    history.replaceState(null, '', '?url=' + encodeURIComponent(url.replace(/^https:\/\//, '').replace(/\/$/, '')));
+    formError.textContent = ''; input.removeAttribute('aria-invalid');
+    const url = n.url; lastUrl = url;
+    const domain = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    history.replaceState(null, '', '?url=' + encodeURIComponent(domain));
     track('scan_start');
+    if (!apiConfigured()) { showError(domain, 'The live scanner is not connected on this copy of the site.'); return; }
 
-    if (!apiConfigured()) { showUnavailable(url, 'The live scanner is not configured yet.'); return; }
-
-    setScanning(url);
-    let stepTimer = animateSteps();
+    submitBtn.disabled = true; submitBtn.setAttribute('aria-busy', 'true');
+    slot.innerHTML = R.renderCardLoading(domain);
+    caption.hidden = true; actions.hidden = true; report.hidden = true;
+    announce('Checking ' + domain);
+    let i = 0;
+    const stepTimer = setInterval(() => { const el = $('#acard-step'); if (el && i < STEPS.length - 1) el.textContent = STEPS[++i]; }, 1500);
     try {
       const ctrl = new AbortController();
       const t = setTimeout(() => ctrl.abort(), CFG.SCAN_TIMEOUT_MS || 25000);
-      const res = await fetch(CFG.SCAN_API_URL.replace(/\/$/, '') + '/scan', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }), signal: ctrl.signal
-      });
+      const res = await fetch(CFG.SCAN_API_URL.replace(/\/$/, '') + '/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }), signal: ctrl.signal });
       clearTimeout(t);
       const data = await res.json().catch(() => ({}));
-      clearInterval(stepTimer);
-      if (!res.ok || !data.ok) {
-        showUnavailable(url, data.error || `The scanner returned an error (${res.status}).`, true);
-        track('scan_error', { reason: data.error || res.status });
-        return;
-      }
+      if (!res.ok || !data.ok) { showError(domain, data.error || `The scanner returned an error (${res.status}).`); track('scan_error', { reason: data.error || res.status }); return; }
       demoKey = null;
-      renderResults(data);
+      showResult(data);
       track('scan_complete', { score: data.score, grade: data.grade });
     } catch (err) {
-      clearInterval(stepTimer);
-      const msg = err && err.name === 'AbortError' ? 'The scan took too long. The site may be slow or blocking automated requests.' : 'We could not reach the scanner. Check your connection and try again.';
-      showUnavailable(url, msg, true);
+      showError(domain, err && err.name === 'AbortError' ? 'The scan took too long. The site may be slow or blocking automated requests.' : 'We could not reach the scanner. Check your connection and try again.');
       track('scan_error', { reason: err && err.name });
+    } finally {
+      clearInterval(stepTimer);
+      submitBtn.disabled = false; submitBtn.removeAttribute('aria-busy');
     }
   }
 
-  function setScanning(url) {
-    document.body.classList.remove('results-mode');
-    submitBtn.disabled = true;
-    hero.classList.add('hero--compact');
-    heroAside.innerHTML = `<div class="scanning" role="status" aria-live="polite">
-      <div class="scan-glyph" aria-hidden="true">${R.glyphSVG()}</div><span class="lbl lbl--signal">Status / Running</span>
-      <div class="scanning__domain">${esc(url.replace(/^https?:\/\//, '').replace(/\/$/, ''))}</div>
-      <ol class="scanning__steps" id="scan-steps">${STEPS.map((s, i) => `<li data-state="${i === 0 ? 'active' : ''}">${esc(s)}</li>`).join('')}</ol>
-    </div>`;
-    results.hidden = true;
-    results.innerHTML = '';
-    announce('Scanning ' + url);
-  }
-  function animateSteps() {
-    let i = 0;
-    return setInterval(() => {
-      const items = document.querySelectorAll('#scan-steps li');
-      if (!items.length) return;
-      if (i < items.length - 1) { items[i].dataset.state = 'done'; i++; items[i].dataset.state = 'active'; }
-    }, 1400);
-  }
-
-  function showUnavailable(url, message, isError) {
-    document.body.classList.remove('results-mode');
-    results.hidden = true;
-    submitBtn.disabled = false;
-    hero.classList.add('hero--compact');
-    heroAside.innerHTML = `<div class="notice ${isError ? 'notice--error' : ''}" role="alert">
-      <span class="lbl lbl--signal">Status / Stopped</span><p class="mt-1"><strong>${esc(message)}</strong></p><p class="small muted mt-1">You can still look at an example AEO Card while you sort it out.</p>
-    </div>
-    <div class="card-actions">
-      <button class="btn" type="button" data-demo="">See an example AEO Card</button>
-      <button class="btn btn--ghost" type="button" id="retry-btn">Try again</button>
-    </div>`;
-    heroAside.querySelector('[data-demo]').addEventListener('click', () => showDemo(null));
-    $('#retry-btn')?.addEventListener('click', () => startScan(url));
+  function showError(domain, message) {
+    slot.innerHTML = R.renderCardError(domain, message);
+    caption.hidden = true; actions.hidden = true; report.hidden = true;
+    $('#retry-btn')?.addEventListener('click', () => startScan(lastUrl || domain));
     announce(message);
   }
 
@@ -171,83 +139,99 @@
     if (!data) return;
     history.replaceState(null, '', '#demo=' + demoKey);
     input.value = '';
-    renderResults(data);
+    showResult(data);
     track('demo_view', { key: demoKey });
   }
 
-  /* ---------------- Results ----------------
-     Mobile-first order: slim scan bar → the AEO Card → two actions → 3 fixes → all checks (collapsed).
-     The hero and homepage marketing are hidden while a result is on screen, so the card is the first thing seen. */
+  /* Result: fill the card, count the score up once, reveal actions + report below */
+  function showResult(r) {
+    current = r;
+    slot.innerHTML = R.renderCardHTML(r);
+    caption.hidden = true;
+    actions.hidden = false;
+    renderActions(r);
+    renderReport(r);
+    document.body.classList.add('results-mode');
+    countUp();
+    announce(`${r.demo ? 'Example' : 'Your'} AEO Card: ${r.domain} scored ${r.score} out of 100, ${r.status}.`);
+  }
+
+  function countUp() {
+    const el = slot.querySelector('.acard__num[data-count]');
+    if (!el || prefersReducedMotion()) return;
+    const target = +el.dataset.count, t0 = performance.now(), dur = 700;
+    const step = now => { const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3); el.textContent = Math.round(target * e); if (p < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }
+
+  function renderActions(r) {
+    actions.innerHTML = `
+      <div class="menu-wrap">
+        <button class="btn btn--ghost btn--sm" type="button" id="dl-btn" aria-haspopup="true" aria-expanded="false" aria-controls="dl-menu">${icon('download')} Download card</button>
+        <div class="menu" id="dl-menu" hidden role="menu" aria-label="Choose a size">
+          ${Object.entries(X.SIZES).map(([k, s]) => `<button type="button" role="menuitem" data-size="${k}"><strong>${esc(s.label)}</strong><span>${esc(s.hint)}</span></button>`).join('')}
+        </div>
+      </div>
+      <button class="btn btn--ghost btn--sm" type="button" id="share-btn">${icon('share')} Share</button>
+      <div class="menu-wrap">
+        <button class="btn btn--ghost btn--sm btn--icon" type="button" id="more-btn" aria-label="More options" aria-haspopup="true" aria-expanded="false" aria-controls="more-menu">${icon('more')}</button>
+        <div class="menu menu--end" id="more-menu" hidden role="menu" aria-label="More options">
+          ${X.canCopyImage() ? `<button type="button" role="menuitem" data-act="copy-img"><strong>Copy image</strong><span>Paste straight into a post</span></button>` : ''}
+          <button type="button" role="menuitem" data-act="copy-txt"><strong>Copy summary</strong><span>Plain text for an email or post</span></button>
+          <button type="button" role="menuitem" data-act="svg"><strong>Download SVG</strong><span>Vector, editable</span></button>
+        </div>
+      </div>
+      <a class="actions__report" href="#report">Full report <span aria-hidden="true">↓</span></a>`;
+    wireActions(r);
+  }
+
   const EFFORT_WORD = { Easy: 'Easy fix', Medium: 'Medium effort', Hard: 'Bigger job' };
 
-  function renderResults(r) {
-    current = r;
-    submitBtn.disabled = false;
-    document.body.classList.add('results-mode');
-    results.hidden = false;
-    const cats = ['access', 'clarity', 'answers', 'trust'];
-    const againLabel = r.demo ? 'Check my site' : 'Check another site';
-
-    results.innerHTML = `
-      <div class="wrap results__grid">
-        <div class="scanbar">
-          <div>
-            <span class="lbl lbl--signal">AEO Card / ${esc(R.recordId(r))} / ${r.demo ? 'Sample' : 'Complete'}</span>
-            <h1 class="scanbar__title" id="your-card-h" tabindex="-1">${r.demo ? 'Example AEO Card' : 'Your AEO Card'}</h1>
-            <p class="scanbar__meta">${r.demo ? 'Sample result, not a live scan' : esc(r.domain)}</p>
-          </div>
-          <button class="btn btn--tonal btn--sm" type="button" id="scanbar-again">${againLabel}</button>
+  function renderReport(r) {
+    const sees = r.whatAiSees, cats = ['access', 'clarity', 'answers', 'trust'];
+    report.innerHTML = `
+      <div class="wrap">
+        <div class="report__grid">
+          <section aria-labelledby="fixes-h">
+            <h2 class="report__h" id="fixes-h">Fix these first</h2>
+            <p class="report__sub">Ranked by how many points they cost you.</p>
+            ${r.fixes.length ? `<ol class="fixes">${r.fixes.map((f, i) => renderFix(f, i + 1)).join('')}</ol>` : `<p class="report__empty">Nothing urgent. Every weighted check passes.</p>`}
+            ${r.moreFixes && r.moreFixes.length ? `<details class="more-fixes"><summary>${r.moreFixes.length} more improvements</summary><ul>${r.moreFixes.map(f => `<li><span>${esc(f.title)}</span><span>${esc(f.categoryName)}</span></li>`).join('')}</ul></details>` : ''}
+          </section>
+          <aside class="report__side">
+            <section class="sees" aria-labelledby="sees-h">
+              <h2 class="report__h report__h--sm" id="sees-h">What AI sees</h2>
+              ${sees.unclear ? `<p class="sees__quote">${esc(sees.summary)}</p>` : `<p class="sees__quote"><q>${esc(sees.purpose)}</q></p><p class="sees__src">Quoted from the page's ${esc(sees.source || 'text')}, never rewritten. Confidence: ${esc(sees.confidence)}.</p>`}
+              <dl class="sees__list">
+                <div><dt>Site name</dt><dd>${esc(sees.siteName || 'Not found')}</dd></div>
+                <div><dt>Audience</dt><dd>${esc(sees.audience || 'Not stated')}</dd></div>
+                <div><dt>Topics</dt><dd>${esc(sees.topics && sees.topics.length ? sees.topics.join(', ') : 'No clear sections')}</dd></div>
+              </dl>
+            </section>
+            ${renderMark(r)}
+          </aside>
         </div>
-
-        <div class="results__card-wrap">
-          <div id="card-mount">${R.renderCardHTML(r)}</div>
-          <div class="card-actions" aria-label="Card actions">
-            <div class="menu-wrap menu-wrap--grow">
-              <button class="btn btn--accent" type="button" id="dl-btn" aria-haspopup="true" aria-expanded="false" aria-controls="dl-menu">${icon('download')} Download card</button>
-              <div class="menu" id="dl-menu" hidden role="menu" aria-label="Choose a size">
-                ${Object.entries(X.SIZES).map(([k, s]) => `<button type="button" role="menuitem" data-size="${k}"><strong>${esc(s.label)}</strong><span>${esc(s.hint)}</span></button>`).join('')}
-              </div>
-            </div>
-            <button class="btn btn--tonal" type="button" id="share-btn">${icon('share')} Share</button>
-            <div class="menu-wrap">
-              <button class="btn btn--tonal btn--icon" type="button" id="more-btn" aria-label="More options" aria-haspopup="true" aria-expanded="false" aria-controls="more-menu">${icon('more')}</button>
-              <div class="menu menu--end" id="more-menu" hidden role="menu" aria-label="More options">
-                ${X.canCopyImage() ? `<button type="button" role="menuitem" data-act="copy-img"><strong>Copy image</strong><span>paste straight into a post</span></button>` : ''}
-                <button type="button" role="menuitem" data-act="copy-txt"><strong>Copy summary</strong><span>plain text for an email or post</span></button>
-                <button type="button" role="menuitem" data-act="svg"><strong>Download SVG</strong><span>vector, editable</span></button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <section class="results__fixes" aria-labelledby="fixes-h" id="full-report">
-          <span class="lbl lbl--signal">Priority</span>
-          <h2 class="results__h" id="fixes-h">Fix these 3 things first</h2>
-          <p class="results__sub">Ranked by how many points they cost you.</p>
-          ${r.fixes.length ? `<ol class="fixes">${r.fixes.map((f, i) => renderFix(f, i + 1)).join('')}</ol>` : `<div class="empty">${R.motifSVG()}<p><strong>Nothing urgent.</strong> Every weighted check passes. Keep the content current and specific.</p></div>`}
-          ${r.moreFixes && r.moreFixes.length ? `<details class="more-fixes"><summary>${r.moreFixes.length} more improvements</summary><ul>${r.moreFixes.map(f => `<li><strong>${esc(f.title)}</strong><span>${esc(f.categoryName)} · ${esc(EFFORT_WORD[f.effort] || f.effort)}</span></li>`).join('')}</ul></details>` : ''}
-        </section>
-
-        ${renderMark(r)}
-
-        <section class="results__checks" aria-labelledby="checks-h">
-          <span class="lbl lbl--signal">All checks</span>
-          <h2 class="results__h" id="checks-h">Every check, in plain English</h2>
-          <p class="results__sub">Open a category to see what needs attention.</p>
+        <section class="report__checks" aria-labelledby="checks-h">
+          <h2 class="report__h" id="checks-h">Every check</h2>
+          <p class="report__sub">Open a category to see what passed and what needs attention.</p>
           <div class="acc">
-            ${cats.map(k => renderCat(r.categories[k])).join('')}
-            ${renderSees(r.whatAiSees)}
+            ${cats.map(k => renderCat(r.categories[k], k)).join('')}
             ${r.extras && r.extras.length ? `<details class="acc__row acc__row--plain"><summary><span class="acc__name">Also noted</span><span class="acc__label">Not scored</span><span class="acc__chev" aria-hidden="true"></span></summary><div class="acc__body"><ul class="checks">${r.extras.map(renderCheck).join('')}</ul></div></details>` : ''}
           </div>
-          <p class="results__method">A diagnostic score, not a guarantee. <a href="methodology/index.html">How the score works</a></p>
-          <p class="again"><button class="btn btn--text" type="button" id="again-btn">${againLabel}</button></p>
+          <p class="report__note">A diagnostic score, not a guarantee. <a href="methodology/index.html">How the score works</a></p>
         </section>
+        <p class="report__again"><button class="btn btn--ghost" type="button" id="again-btn">${r.demo ? 'Check my site' : 'Check another site'}</button></p>
       </div>`;
-
-    wireActions(r);
-    window.scrollTo({ top: 0, behavior: 'auto' });
-    $('#your-card-h')?.focus({ preventScroll: true });
-    announce(`AEO Card ready. ${r.domain} scored ${r.score} out of 100, ${r.status}.`);
+    report.hidden = false;
+    report.querySelectorAll('[data-reveal]').forEach(b => b.addEventListener('click', () => {
+      const p = document.getElementById(b.dataset.reveal), open = p.hidden;
+      p.hidden = !open; b.setAttribute('aria-expanded', String(open));
+      if (open) track('show_fix', { fix: b.dataset.reveal });
+    }));
+    report.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(document.getElementById(b.dataset.copy).querySelector('.snippet').textContent); showToast('Copied'); } catch { showToast('Could not copy.'); }
+    }));
+    $('#again-btn').addEventListener('click', checkAnother);
   }
 
   function renderMark(r) {
@@ -260,8 +244,8 @@
         <img class="mark__photo" src="assets/img/mark.jpg" width="88" height="88" alt="Mark Flournoy" loading="lazy">
         <div>
           <span class="lbl lbl--signal">${esc(ask)}</span>
-          <h2 class="mark__name" id="mark-h">Talk it through with Mark.</h2>
-          <p>I built CheckAEO after watching AI answers change the value of a click. If your record has more to fix than you'd like, I'm happy to walk through it with you.</p>
+          <h3 class="mark__name" id="mark-h">Talk it through with Mark.</h3>
+          <p>I built Aeoden after watching AI answers change the value of a click. If your card has more to fix than you'd like, I'm happy to walk through it with you.</p>
         </div>
       </div>
       <div class="mark__actions">
@@ -274,24 +258,22 @@
   function renderFix(f, n) {
     const id = 'fix-' + f.id;
     return `<li class="fix">
-      <span class="fix__n" aria-hidden="true">0${n}</span>
+      <span class="fix__n" aria-hidden="true">${n}</span>
       <div class="fix__body">
         <h3 class="fix__title">${esc(n === 1 ? R.shareFix(current) : f.title)}</h3>
         <p class="fix__why">${esc(f.why)}</p>
         <p class="fix__meta">${esc(f.categoryName)} · ${esc(EFFORT_WORD[f.effort] || f.effort)}</p>
-        ${f.action ? `<button class="btn btn--text btn--sm fix__toggle" type="button" aria-expanded="false" aria-controls="${id}" data-reveal="${id}">${esc(f.action.label)}</button>
+        ${f.action ? `<button class="fix__toggle" type="button" aria-expanded="false" aria-controls="${id}" data-reveal="${id}">${esc(f.action.label)}</button>
         <div class="fix__reveal" id="${id}" hidden>
           ${f.action.kind === 'code' ? `<pre class="snippet"><code>${esc(f.action.content)}</code></pre>` : `<div class="snippet snippet--text">${esc(f.action.content)}</div>`}
-          <div class="fix__tools">
-            <button class="btn btn--tonal btn--sm" type="button" data-copy="${id}">Copy</button>
-            ${/\[/.test(f.action.content) ? `<span class="snippet__note">Anything in [brackets] is a placeholder. We did not find that fact on your page, so we did not invent it.</span>` : ''}
-          </div>
+          <div class="fix__tools"><button class="btn btn--ghost btn--sm" type="button" data-copy="${id}">Copy</button>
+          ${/\[/.test(f.action.content) ? `<span class="snippet__note">Anything in [brackets] is a placeholder. We did not find that fact on your page, so we did not invent it.</span>` : ''}</div>
         </div>` : ''}
       </div>
     </li>`;
   }
 
-  function renderCat(c) {
+  function renderCat(c, k) {
     const needs = c.checks.filter(k => k.status !== 'pass');
     const passing = c.checks.filter(k => k.status === 'pass');
     const pct = c.notEvaluated ? 0 : c.score;
@@ -301,7 +283,7 @@
       body = needs.length ? `<ul class="checks">${needs.map(renderCheck).join('')}</ul>` : `<p class="acc__empty">Everything in this category passes.</p>`;
       if (passing.length) body += `<details class="acc__passing"><summary>Show ${passing.length} passing check${passing.length === 1 ? '' : 's'}</summary><ul class="checks">${passing.map(renderCheck).join('')}</ul></details>`;
     }
-    return `<details class="acc__row">
+    return `<details class="acc__row" id="cat-${k || c.name.toLowerCase()}">
       <summary>
         <span class="acc__name">${esc(c.name)}</span>
         <span class="acc__score">${c.notEvaluated ? '–' : c.score}</span>
@@ -311,21 +293,6 @@
         <span class="sr-only">${c.notEvaluated ? 'not evaluated' : `${c.score} out of 100`}</span>
       </summary>
       <div class="acc__body"><p class="acc__q">${esc(c.question)}</p>${body}</div>
-    </details>`;
-  }
-
-  function renderSees(sees) {
-    const row = (k, v, empty) => `<div><dt>${esc(k)}</dt><dd class="${v ? '' : 'muted'}">${esc(v || empty)}</dd></div>`;
-    return `<details class="acc__row acc__row--plain">
-      <summary><span class="acc__name">Site interpretation</span><span class="acc__label">Confidence: ${esc(cap(sees.confidence))}</span><span class="acc__chev" aria-hidden="true"></span></summary>
-      <div class="acc__body">
-        ${sees.unclear ? `<p class="acc__q">${esc(sees.summary)}</p>` : `<p class="acc__quote"><q>${esc(sees.purpose)}</q></p><p class="acc__q">Quoted from the page's ${esc(sees.source || 'text')}. We show the page's own words, never a rewrite.</p>`}
-        <dl class="sees__list">
-          ${row('Site name', sees.siteName, 'Not found')}
-          ${row('Likely audience', sees.audience, 'Not stated')}
-          ${row('Likely topics', sees.topics && sees.topics.length ? sees.topics.join(', ') : '', 'No clear sections')}
-        </dl>
-      </div>
     </details>`;
   }
 
@@ -371,69 +338,35 @@
 
   function wireActions(r) {
     const dlBtn = $('#dl-btn'), dlMenu = $('#dl-menu'), moreBtn = $('#more-btn'), moreMenu = $('#more-menu');
-    wireMenu(dlBtn, dlMenu);
-    wireMenu(moreBtn, moreMenu);
-
+    wireMenu(dlBtn, dlMenu); wireMenu(moreBtn, moreMenu);
     dlMenu.querySelectorAll('[data-size]').forEach(b => b.addEventListener('click', async () => {
-      closeMenus(); dlBtn.focus();
-      busy(dlBtn, true);
+      closeMenus(); dlBtn.focus(); busy(dlBtn, true);
       try { await X.downloadPNG(r, b.dataset.size); showToast('Card downloaded'); track('export_png', { size: b.dataset.size }); }
       catch (err) { showToast('Could not create the image. Try another browser.'); console.error(err); }
       finally { busy(dlBtn, false); }
     }));
-
     moreMenu.addEventListener('click', async e => {
-      const b = e.target.closest('[data-act]');
-      if (!b) return;
+      const b = e.target.closest('[data-act]'); if (!b) return;
       closeMenus(); moreBtn.focus();
-      const act = b.dataset.act;
       try {
-        if (act === 'copy-img') { await X.copyPNG(r, 'square'); showToast('Card image copied'); track('copy_image'); }
-        if (act === 'copy-txt') { await navigator.clipboard.writeText(R.summaryText(r)); showToast('Summary copied'); track('copy_summary'); }
-        if (act === 'svg') { await X.downloadSVG(r, 'square'); showToast('SVG downloaded'); track('export_svg'); }
-      } catch {
-        showToast(act === 'copy-img' ? 'Your browser blocked image copying. Download instead.' : 'That did not work. Try again.');
-      }
+        if (b.dataset.act === 'copy-img') { await X.copyPNG(r, 'square'); showToast('Card image copied'); track('copy_image'); }
+        if (b.dataset.act === 'copy-txt') { await navigator.clipboard.writeText(R.summaryText(r)); showToast('Summary copied'); track('copy_summary'); }
+        if (b.dataset.act === 'svg') { await X.downloadSVG(r, 'square'); showToast('SVG downloaded'); track('export_svg'); }
+      } catch { showToast(b.dataset.act === 'copy-img' ? 'Your browser blocked image copying. Download instead.' : 'That did not work. Try again.'); }
     });
-
     $('#share-btn').addEventListener('click', async () => {
       const shareUrl = r.demo ? `${CFG.SITE_URL}/#demo=${demoKey || 'quotabird'}` : `${CFG.SITE_URL}/?url=${encodeURIComponent(r.domain)}`;
-      const text = `${r.domain} scored ${r.score}/100 (${r.status}) on its AEO Card — how ready it is for AI search.`;
-      if (navigator.share) {
-        try { await navigator.share({ title: `AEO Card — ${r.domain}`, text, url: shareUrl }); track('share', { method: 'native' }); } catch { /* cancelled */ }
-      } else {
-        try { await navigator.clipboard.writeText(`${text}\n${shareUrl}`); showToast('Link copied'); track('share', { method: 'copy_link' }); } catch { showToast('Could not copy the link.'); }
-      }
+      const text = `${r.domain} scored ${r.score}/100 (${r.status}) on its AEO Card: how well AI can understand the site.`;
+      if (navigator.share) { try { await navigator.share({ title: `AEO Card — ${r.domain}`, text, url: shareUrl }); track('share', { method: 'native' }); } catch { /* cancelled */ } }
+      else { try { await navigator.clipboard.writeText(`${text}\n${shareUrl}`); showToast('Link copied'); track('share', { method: 'copy_link' }); } catch { showToast('Could not copy the link.'); } }
     });
-
-    document.querySelectorAll('[data-reveal]').forEach(b => b.addEventListener('click', () => {
-      const panel = document.getElementById(b.dataset.reveal);
-      const open = panel.hidden;
-      panel.hidden = !open;
-      b.setAttribute('aria-expanded', String(open));
-      if (open) track('show_fix', { fix: b.dataset.reveal });
-    }));
-    document.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', async () => {
-      const text = document.getElementById(b.dataset.copy).querySelector('.snippet').textContent;
-      try { await navigator.clipboard.writeText(text); showToast('Copied'); } catch { showToast('Could not copy.'); }
-    }));
-    $('#again-btn').addEventListener('click', backToChecker);
-    $('#scanbar-again').addEventListener('click', backToChecker);
   }
 
-  function backToChecker() {
-    document.body.classList.remove('results-mode');
-    results.hidden = true;
-    results.innerHTML = '';
-    hero.classList.remove('hero--compact');
-    heroAside.innerHTML = `<div class="hero__example" id="hero-example"><div class="specimen__bar"><span class="lbl"><b>AEO Card</b> / Object CA-01</span><span class="lbl">Status / Sample record</span></div>${R.renderCardHTML(firstDemo())}</div>`;
-    history.replaceState(null, '', location.pathname);
-    input.value = '';
-    window.scrollTo({ top: 0, behavior: 'auto' });
-    input.focus();
+  function checkAnother() {
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+    input.focus(); input.select();
   }
 
-  /* ---------------- Utilities ---------------- */
   function busy(btn, on) { if (!btn) return; btn.disabled = on; btn.setAttribute('aria-busy', String(on)); }
   let toastTimer;
   function showToast(msg) {
@@ -453,6 +386,8 @@
       text: '<path d="M4 6h16M4 12h10M4 18h13"/>',
       share: '<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.6M8.2 13.2l7.6 4.6"/>',
       report: '<path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6M9 13h6M9 17h6"/>',
+      arrow: '<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>',
+      grid: '<circle cx="6" cy="6" r="1.6" fill="currentColor"/><circle cx="12" cy="6" r="1.6" fill="currentColor"/><circle cx="18" cy="6" r="1.6" fill="currentColor"/><circle cx="6" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="18" cy="12" r="1.6" fill="currentColor"/><circle cx="6" cy="18" r="1.6" fill="currentColor"/><circle cx="12" cy="18" r="1.6" fill="currentColor"/><circle cx="18" cy="18" r="1.6" fill="currentColor"/>',
       more: '<circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/>'
     };
     return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || ''}</svg>`;

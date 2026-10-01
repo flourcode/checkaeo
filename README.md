@@ -1,9 +1,9 @@
-# CheckAEO
+# Aeoden
 
-**CheckAEO** is the tool. The **AEO Card** is the result it produces.
+**Aeoden** is the tool. The **AEO Card** is the result it produces.
 
 **Can AI understand your website?**  
-CheckAEO checks how ready a site is for AI answer engines (ChatGPT, Claude, Gemini, Perplexity) and produces a shareable **AEO Card**: an overall score, four category grades (Access · Clarity · Answers · Trust), a "What AI sees" summary, and the three things to fix first.
+Aeoden checks how ready a site is for AI answer engines (ChatGPT, Claude, Gemini, Perplexity) and produces a shareable **AEO Card**: an overall score, four category grades (Access · Clarity · Answers · Trust), a "What AI sees" summary, and the three things to fix first.
 
 It is a diagnostic, not a guarantee. The site never promises rankings or citations.
 
@@ -28,12 +28,12 @@ checkaeo/
 │   └── img/                   favicon.svg, apple-touch-icon.png, logo.png, og-card.png
 ├── worker/                    Cloudflare Worker scan endpoint
 │   ├── src/index.js           Fetch pipeline, SSRF guard, CORS, cache, rate limit (Cloudflare)
-│   ├── src/lambda.js          AWS Lambda Function URL adapter for the same engine
+│   ├── src/lambda.js          AWS Lambda Function URL adapter (production); CORS is set on the Function URL, not here
 │   ├── build-lambda.sh        Packages worker/lambda.zip
 │   ├── src/analyze.js         Scoring engine (pure function, testable in Node)
 │   ├── test/                  node --test suite + HTML fixtures
 │   ├── wrangler.toml · package.json
-├── amplify.yml                AWS Amplify Hosting build config (static, no build step)
+├── amplify.yml                AWS Amplify Hosting build: copies the site to dist/ (no rsync), excludes worker/ and docs
 ├── DEPLOY.md                  Step-by-step deployment (Amplify, Cloudflare, Netlify, Vercel; Worker or Lambda)
 └── README.md
 ```
@@ -83,7 +83,7 @@ Prints one line per site (score, grade, status, four category scores, what AI se
 cd worker && npm test
 ```
 
-Covers scoring of good/vague/blocked pages, robots.txt parsing (longest-match, wildcard), noindex handling, unreachable pages, and URL/SSRF validation.
+Covers scoring of good/vague/blocked pages, robots.txt parsing (longest-match, wildcard), noindex handling, unreachable pages, URL/SSRF validation, and the Lambda adapter (routing, 404/405, and no duplicate CORS headers).
 
 ## Accessibility & performance
 
@@ -91,4 +91,4 @@ WCAG 2.2 AA target: semantic landmarks, one H1 per page, visible focus rings, `a
 
 ## Licence notes
 
-Manrope is licensed under the SIL Open Font License (see `assets/fonts/LICENSE-Manrope.txt`). Everything else in this repository is yours to use for CheckAEO.
+Manrope is licensed under the SIL Open Font License (see `assets/fonts/LICENSE-Manrope.txt`). Everything else in this repository is yours to use for Aeoden.

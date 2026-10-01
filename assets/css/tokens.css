@@ -1,55 +1,76 @@
 /* ============================================================
-   CheckAEO design tokens — retrofuturist systems editorial
-   Warm archive paper, black ink, one signal accent.
-   Two type modes: Archivo (display grotesk, variable width) and
-   IBM Plex Mono (system labels, codes, metadata).
+   Aeoden tokens — rich forest, cream and lime
+   Two themes share every class:
+   :root          cream reading surfaces (report, sections, pages)
+   .theme-forest  deep forest header, hero, card and footer
+   One accent (lime) · one typeface: Google Sans Flex
    ============================================================ */
-
 :root {
-  /* Paper + ink */
-  --paper: #EEECE4;        /* page ground: warm archive paper */
-  --paper-2: #E3E0D6;      /* recessed panels, hover */
-  --sheet: #F8F7F2;        /* the record itself */
-  --ink: #111111;
-  --ink-2: #3D3B36;
-  --ink-3: #66635B;        /* 5.2:1 on paper */
-  --rule: #111111;
-  --rule-soft: #CFCBC0;
-  --dot-off: #CFCBC0;
+  --page: #F3F6EC;
+  --frame: #E9EFDF;
+  --surface: #FFFFFF;
+  --edge: #DAE3CF;
+  --edge-2: #C4D3B6;
 
-  /* The one accent */
-  --signal: #075E45;       /* deep instrument green: first fix, active unit, labels */
-  --signal-ink: #075E45;   /* same green for small text */
-  --signal-hi: #0A7655;
-  --lime: #B8F000;         /* used almost nowhere: selection only */
-  --warn: #9C3B1B;         /* the one warning colour: weak grades, errors */
-  --on-signal: #F8F7F2;
+  --ink: #12372A;            /* forest as ink */
+  --ink-2: #2B4A3D;
+  --ink-3: #56705F;          /* 5.4:1 on cream */
 
-  --focus: #0A7655;
+  --g-50: #E6F2D3;           /* tints */
+  --g-100: #D3E8B4;
+  --g-200: #B6D98A;
+  --g-500: #7DB52C;          /* lime fill on light */
+  --g-600: #2C6A2F;          /* green text on light */
+  --g-700: #1F5024;
+  --g-900: #12372A;
+  --lime: #A3D93F;
+  --on-lime: #12372A;
 
-  /* Type */
-  --display: 'Archivo', 'Arial Narrow', Helvetica, Arial, sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --fs-lbl: 0.72rem;
-  --fs-xs: 0.8125rem;
-  --fs-sm: 0.9375rem;
+  --warn: #9A5A06;
+  --bad: #B0301C;
+  --focus: #2C6A2F;
+
+  --font: 'Google Sans Flex', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --serif: var(--font);
+  --fs-xs: .8125rem;
+  --fs-sm: .9375rem;
   --fs-md: 1.0625rem;
-  --fs-lg: 1.3rem;
-  --fs-xl: 1.75rem;
-  --fs-2xl: clamp(2rem, 1.4rem + 2.2vw, 3rem);
-  --fs-3xl: clamp(2.8rem, 1.6rem + 4.6vw, 5.4rem);
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.7rem;
+  --fs-2xl: clamp(2rem, 1.3rem + 2.2vw, 3rem);
+  --fs-hero: clamp(2.5rem, 1.2rem + 4.4vw, 4.6rem);
 
-  /* Geometry */
-  --line: 1.5px solid var(--rule);
-  --hair: 1px solid var(--rule-soft);
-  --r: 2px;                /* one radius, everywhere */
-  --hard: 3px 3px 0 var(--ink);
+  --r: 12px;
+  --r-card: 22px;
+  --pill: 999px;
+  --shadow: 0 1px 2px rgba(18, 55, 42, .06), 0 16px 40px -22px rgba(18, 55, 42, .3);
 
-  --gutter: clamp(1rem, 4vw, 2.5rem);
-  --content: 78rem;
-  --rail: 13rem;           /* the left label rail on wide screens */
-
+  --gutter: clamp(1.1rem, 4vw, 2.5rem);
+  --content: 70rem;
   --ease: cubic-bezier(.2, .7, .2, 1);
-  --dur: 160ms;
+  --dur: 180ms;
+}
+.theme-forest {
+  --page: #12372A;
+  --frame: #0E2E22;
+  --surface: #1A4434;
+  --edge: #2A5646;
+  --edge-2: #3D6A58;
+  --ink: #EEF4E2;            /* cream headings */
+  --ink-2: #D6E3CB;
+  --ink-3: #A9BFAC;          /* 6.2:1 on forest */
+  --g-50: #214F3D;           /* fix strip */
+  --g-100: #2D5B48;          /* inactive bar */
+  --g-200: #4C7A4F;
+  --g-500: #A3D93F;          /* lime */
+  --g-600: #B3E25A;          /* lime text */
+  --g-700: #C6EC7E;
+  --g-900: #EEF4E2;
+  --warn: #F2B65B;
+  --bad: #FF9478;
+  --focus: #B3E25A;
+  --shadow: 0 1px 0 rgba(238, 244, 226, .05) inset, 0 30px 60px -30px rgba(0, 0, 0, .45);
+  background: var(--page);
+  color: var(--ink-2);
 }
 @media (prefers-reduced-motion: reduce) { :root { --dur: 0ms; } }

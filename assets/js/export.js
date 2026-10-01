@@ -1,5 +1,5 @@
 /* ============================================================
-   CheckAEO export — turns the SVG card object into a crisp PNG.
+   Aeoden export — turns the SVG card object into a crisp PNG.
    No screenshotting, no third-party libraries.
    ============================================================ */
 (function () {
@@ -31,7 +31,7 @@
 
   async function ensureFontsReady() {
     if (!document.fonts || !document.fonts.load) return;
-    try { await Promise.all(['800 100px Archivo', '600 24px Archivo', '400 24px Archivo', '400 20px "IBM Plex Mono"', '600 20px "IBM Plex Mono"'].map(f => document.fonts.load(f))); } catch { /* fine */ }
+    try { await Promise.all(["600 100px 'Google Sans Flex'", "600 40px 'Google Sans Flex'", "400 24px 'Google Sans Flex'"].map(f => document.fonts.load(f))); } catch { /* fine */ }
   }
 
   async function renderPNG(result, size = 'square') {

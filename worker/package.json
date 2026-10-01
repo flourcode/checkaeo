@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Serverless scan endpoint for CheckAEO (Cloudflare Worker)",
+  "description": "Serverless scan endpoint for Aeoden (Cloudflare Worker)",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
