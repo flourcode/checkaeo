@@ -148,6 +148,14 @@
     current = r;
     slot.innerHTML = R.renderCardHTML(r);
     caption.hidden = true;
+    if (r.blocked) {
+      actions.hidden = true;
+      renderBlockedReport(r);
+      $('#retry-btn')?.addEventListener('click', () => startScan(lastUrl || r.domain));
+      document.body.classList.add('results-mode');
+      announce(`${r.domain} blocked our scanner, so there is no score. ${R.knownText(r.familiarity) || ''}`);
+      return;
+    }
     actions.hidden = false;
     renderActions(r);
     renderReport(r);
@@ -187,6 +195,30 @@
 
   const EFFORT_WORD = { Easy: 'Easy fix', Medium: 'Medium effort', Hard: 'Bigger job' };
 
+  function renderBlockedReport(r) {
+    const f = r.familiarity, bots = r.aiBots;
+    report.innerHTML = `<div class="wrap"><div class="report__grid">
+      <section aria-labelledby="bots-h">
+        <h2 class="report__h" id="bots-h">What we could verify</h2>
+        <p class="report__sub">Its robots.txt, which is what AI crawlers actually obey.</p>
+        ${bots ? `<ul class="checks mt-2">${bots.map(b => `<li class="check" data-status="${b.allowed ? 'pass' : 'fail'}"><span class="check__dot" aria-hidden="true"></span><div><p class="check__title">${esc(b.name)}: ${b.allowed ? 'allowed' : 'blocked'}</p><p class="check__detail">${b.kind === 'search' ? 'Answers and citations' : 'Model training'}</p></div></li>`).join('')}</ul>` : '<p class="report__empty">We couldn’t read its robots.txt either.</p>'}
+      </section>
+      <aside class="report__side">${familiarityBlock(f)}${renderMark(r)}</aside>
+    </div></div>`;
+    report.hidden = false;
+  }
+
+  function familiarityBlock(f, r) {
+    if (!f) return `<section class="sees"><h2 class="report__h report__h--sm">AI familiarity</h2><p class="sees__src">We couldn’t reach Wikidata during this scan, so the score uses page readiness only.</p></section>`;
+    return `<section class="sees" aria-labelledby="fam-h">
+      <h2 class="report__h report__h--sm" id="fam-h">AI familiarity</h2>
+      ${f.known ? `<p class="sees__quote">${esc(f.label || '')}${f.description ? ` <span class="muted">— ${esc(f.description)}</span>` : ''}</p>
+        <p class="sees__src">${esc(f.level)}: a Wikidata entity with ${f.sitelinks} Wikipedia editions. <a href="https://www.wikidata.org/wiki/${esc(f.id)}" target="_blank" rel="noopener">${esc(f.id)}</a></p>`
+      : `<p class="sees__quote">Not yet a known entity.</p><p class="sees__src">We didn’t find this site as the official website of any Wikidata entity. AI systems lean on knowledge graphs like Wikidata and Wikipedia; for most young or small sites this is normal, and it builds with coverage over time.</p>`}
+      ${r && r.readiness != null ? `<dl class="sees__list"><div><dt>Page readiness</dt><dd>${r.readiness} / 100 · 75% of the score</dd></div><div><dt>AI familiarity</dt><dd>${f.score} / 100 · 25% of the score</dd></div></dl>` : ''}
+    </section>`;
+  }
+
   function renderReport(r) {
     const sees = r.whatAiSees, cats = ['access', 'clarity', 'answers', 'trust'];
     report.innerHTML = `
@@ -208,6 +240,7 @@
                 <div><dt>Topics</dt><dd>${esc(sees.topics && sees.topics.length ? sees.topics.join(', ') : 'No clear sections')}</dd></div>
               </dl>
             </section>
+            ${familiarityBlock(r.familiarity, r)}
             ${renderMark(r)}
           </aside>
         </div>

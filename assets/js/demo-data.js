@@ -1,4 +1,4 @@
-/* Bundled example scans for demo mode. Generated with the real analyzer from fixture pages.
+/* Bundled example scans for demo mode. Generated with the real analyzer from fixture pages; scores include illustrative AI familiarity.
    These are illustrative: quotabird.example is a fictional example site; the others use .example domains. */
 window.CHECKAEO_DEMOS = {
  "quotabird": {
@@ -7,7 +7,7 @@ window.CHECKAEO_DEMOS = {
   "finalUrl": "https://quotabird.example/",
   "domain": "quotabird.example",
   "scannedAt": "2026-09-30T09:00:00.000Z",
-  "score": 87,
+  "score": 82,
   "grade": "B",
   "status": "Strong",
   "categories": {
@@ -499,7 +499,17 @@ window.CHECKAEO_DEMOS = {
     "WebSite"
    ]
   },
-  "demo": true
+  "demo": true,
+  "readiness": 87,
+  "familiarity": {
+   "score": 65,
+   "known": true,
+   "level": "Known",
+   "id": "Q0",
+   "label": "Quotabird",
+   "description": "sales software company (example)",
+   "sitelinks": 9
+  }
  },
  "harborandoak": {
   "ok": true,
@@ -507,9 +517,9 @@ window.CHECKAEO_DEMOS = {
   "finalUrl": "https://harborandoak.example/",
   "domain": "harborandoak.example",
   "scannedAt": "2026-09-30T09:00:00.000Z",
-  "score": 62,
-  "grade": "D",
-  "status": "Needs work",
+  "score": 47,
+  "grade": "F",
+  "status": "Hard to understand",
   "categories": {
    "access": {
     "name": "Access",
@@ -1011,7 +1021,13 @@ window.CHECKAEO_DEMOS = {
    "lang": "en",
    "ldTypes": []
   },
-  "demo": true
+  "demo": true,
+  "readiness": 62,
+  "familiarity": {
+   "score": 0,
+   "known": false,
+   "level": "Not yet a known entity"
+  }
  },
  "northwind": {
   "ok": true,
@@ -1019,9 +1035,9 @@ window.CHECKAEO_DEMOS = {
   "finalUrl": "https://northwind-tools.example/",
   "domain": "northwind-tools.example",
   "scannedAt": "2026-09-30T09:00:00.000Z",
-  "score": 86,
-  "grade": "B",
-  "status": "Strong",
+  "score": 65,
+  "grade": "D",
+  "status": "Needs work",
   "categories": {
    "access": {
     "name": "Access",
@@ -1478,6 +1494,12 @@ window.CHECKAEO_DEMOS = {
     "FAQPage"
    ]
   },
-  "demo": true
+  "demo": true,
+  "readiness": 86,
+  "familiarity": {
+   "score": 0,
+   "known": false,
+   "level": "Not yet a known entity"
+  }
  }
 };

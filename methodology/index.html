@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Methodology: how the AEO score works – Aeoden</title>
-<meta name="description" content="Exactly how Aeoden scores a page: Access 30%, Clarity 25%, Answers 25%, Trust 20%, every check with its points and pass condition, gating rules, and the limitations of a single-fetch heuristic scan.">
+<meta name="description" content="Exactly how Aeoden scores a page: page readiness (Access 30%, Clarity 25%, Answers 25%, Trust 20%) blended 75/25 with AI familiarity from Wikidata, every check with its points, gating rules, blocked scans, and the limitations of a heuristic scan.">
 <link rel="canonical" href="https://aeoden.com/methodology/">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#12372A">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Aeoden">
 <meta property="og:title" content="How the AEO score works">
-<meta property="og:description" content="Exactly how Aeoden scores a page: Access 30%, Clarity 25%, Answers 25%, Trust 20%, every check with its points and pass condition, gating rules, and the limitations of a single-fetch heuristic scan.">
+<meta property="og:description" content="Exactly how Aeoden scores a page: page readiness (Access 30%, Clarity 25%, Answers 25%, Trust 20%) blended 75/25 with AI familiarity from Wikidata, every check with its points, gating rules, blocked scans, and the limitations of a heuristic scan.">
 <meta property="og:url" content="https://aeoden.com/methodology/">
 <meta property="og:image" content="https://aeoden.com/assets/img/og-card.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -22,7 +22,7 @@
 <link rel="stylesheet" href="../assets/css/main.css">
 <script>document.write(location.protocol === 'file:' ? '<script src="../assets/fonts/fonts.js"><\/script>' : '<link rel="stylesheet" href="../assets/css/fonts.css">');</script>
 <noscript><link rel="stylesheet" href="../assets/css/fonts.css"></noscript>
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Article", "headline": "How the AEO score works", "description": "Exactly how Aeoden scores a page: Access 30%, Clarity 25%, Answers 25%, Trust 20%, every check with its points and pass condition, gating rules, and the limitations of a single-fetch heuristic scan.", "url": "https://aeoden.com/methodology/", "datePublished": "2026-09-30", "dateModified": "2026-09-30", "author": {"@type": "Person", "name": "Mark Flournoy", "url": "https://www.linkedin.com/in/markflournoy/"}, "publisher": {"@id": "https://aeoden.com/#org"}, "isPartOf": {"@id": "https://aeoden.com/#site"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Aeoden", "item": "https://aeoden.com/"}, {"@type": "ListItem", "position": 2, "name": "How the AEO score works", "item": "https://aeoden.com/methodology/"}]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Article", "headline": "How the AEO score works", "description": "Exactly how Aeoden scores a page: page readiness (Access 30%, Clarity 25%, Answers 25%, Trust 20%) blended 75/25 with AI familiarity from Wikidata, every check with its points, gating rules, blocked scans, and the limitations of a heuristic scan.", "url": "https://aeoden.com/methodology/", "datePublished": "2026-09-30", "dateModified": "2026-09-30", "author": {"@type": "Person", "name": "Mark Flournoy", "url": "https://www.linkedin.com/in/markflournoy/"}, "publisher": {"@id": "https://aeoden.com/#org"}, "isPartOf": {"@id": "https://aeoden.com/#site"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Aeoden", "item": "https://aeoden.com/"}, {"@type": "ListItem", "position": 2, "name": "How the AEO score works", "item": "https://aeoden.com/methodology/"}]}]}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -45,20 +45,34 @@
     <aside class="doc__rail"><span class="lbl lbl--signal">Methodology</span><span class="lbl">Updated / 2026-09-30</span></aside>
     <div class="prose">
 
-<p class="lead">Aeoden scores one page (usually your homepage) on four questions, each from 0–100, and combines them into one score. Every check below is a plain heuristic. Nothing is hidden and nothing is learned from your data.</p>
+<p class="lead">Aeoden scores one page (usually your homepage) on four questions, each from 0–100, and adds one outside signal: whether AI already knows the site as an entity. Every check below is a plain heuristic. Nothing is hidden and nothing is learned from your data.</p>
 
 <h2>What the scanner fetches</h2>
 <ul>
 <li>The page you enter, following up to five redirects, reading at most 1.5 MB, with a 12-second timeout. It identifies itself as <code>AeodenBot/1.0</code>.</li>
 <li><code>/robots.txt</code>, <code>/sitemap.xml</code> and <code>/llms.txt</code> at the final domain.</li>
 <li>Response headers, including <code>X-Robots-Tag</code>.</li>
+<li>One query to <a href="https://www.wikidata.org/">Wikidata</a>, the open knowledge graph behind Wikipedia, asking which entity lists this exact domain as its official website.</li>
 </ul>
 <p>It does not run JavaScript, log in, submit forms, or crawl other pages. It only requests public http and https URLs and refuses private or internal addresses.</p>
 
 <h2>The score</h2>
-<p><strong>Overall = Access × 0.30 + Clarity × 0.25 + Answers × 0.25 + Trust × 0.20</strong>, rounded to a whole number.</p>
+<p><strong>Page readiness = Access × 0.30 + Clarity × 0.25 + Answers × 0.25 + Trust × 0.20</strong>. This is what your page itself does to help AI read it.</p>
+<p><strong>Overall = Page readiness × 0.75 + AI familiarity × 0.25</strong>, rounded to a whole number. Both parts are shown in the full report.</p>
+<h3>AI familiarity</h3>
+<p>Language models don't learn what a company is from its homepage alone. They learn it from the wider web, and knowledge graphs like Wikidata and Wikipedia are a large part of that. A famous brand with a sparse homepage is still well understood; a new site with a perfect homepage is understood only through its page. Familiarity measures the first part:</p>
+<div class="table-wrap"><table><thead><tr><th>What we find in Wikidata</th><th>Familiarity</th></tr></thead><tbody>
+<tr><td>Entity with 50+ Wikipedia editions</td><td>100 · Widely known</td></tr>
+<tr><td>20–49 editions</td><td>85 · Well known</td></tr>
+<tr><td>5–19 editions</td><td>65 · Known</td></tr>
+<tr><td>1–4 editions</td><td>45 · Known</td></tr>
+<tr><td>Listed, no Wikipedia article</td><td>30 · Listed</td></tr>
+<tr><td>No entity lists this domain as its official website</td><td>0 · Not yet a known entity</td></tr>
+</tbody></table></div>
+<p>We match on the official-website property only, never on a name, so a site is never credited with someone else's fame. If Wikidata can't be reached during a scan, the score falls back to page readiness alone and the report says so. Familiarity isn't something to "fix" quickly; it grows with real coverage, so it never appears as a first fix.</p>
+<div class="callout"><strong>When a site blocks our scanner.</strong> Many large sites refuse unknown bots (HTTP 401, 403, 429 or 503, or a Cloudflare, Akamai, Imperva or similar challenge page). That tells us about their bot protection, not about AI: those same sites often allow or license access to AI crawlers. In that case Aeoden gives <strong>no score</strong>. It shows what it could verify instead: which AI crawlers the site's robots.txt allows, and its AI familiarity.</div>
 <p>Grades: A 90–100, B 80–89, C 70–79, D 60–69, F below 60. Status labels: Excellent (90+), Strong (80–89), Mostly clear (70–79), Needs work (60–69), Hard to understand (below 60), and Hard to reach when Access is below 40.</p>
-<div class="callout"><strong>Gating rules.</strong> If the page does not return HTTP 200, Access is capped at 30 and the other three categories are marked "not evaluated", because what we received was an error page, not your content. If the page is noindexed, blocks all crawlers, or blocks three or more answer-engine crawlers, Access is capped at 45. If it blocks one or two, Access is capped at 65.</div>
+<div class="callout"><strong>Gating rules.</strong> If the page returns another error (for example 404 or 500), Access is capped at 30 and the other three categories are marked "not evaluated", because what we received was an error page, not your content. If the page is noindexed, blocks all crawlers, or blocks three or more answer-engine crawlers, Access is capped at 45. If it blocks one or two, Access is capped at 65.</div>
 
 <h2>Access (30%) — can AI reach this page?</h2>
 <div class="table-wrap"><table><thead><tr><th>Check</th><th>Points</th><th>What passes</th></tr></thead><tbody><tr><td>Served over HTTPS</td><td>10</td><td>Final URL is https</td></tr><tr><td>Page responds successfully</td><td>20</td><td>HTTP 200. Other 2xx/3xx earn partial credit; 4xx/5xx earn none.</td></tr><tr><td>Redirect chain is short</td><td>6</td><td>0–1 redirects; 2 earns partial</td></tr><tr><td>robots.txt is present and sane</td><td>8</td><td>Exists and does not disallow everyone. Missing earns partial (allowed, but a sitemap pointer helps).</td></tr><tr><td>AI search crawlers are allowed</td><td>12</td><td>None of OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Googlebot, Bingbot is disallowed. Training crawlers (GPTBot, ClaudeBot, Google-Extended, CCBot) are reported but not scored.</td></tr><tr><td>Page is indexable</td><td>14</td><td>No noindex in meta robots or X-Robots-Tag</td></tr><tr><td>Sitemap is discoverable</td><td>6</td><td>Listed in robots.txt or present at /sitemap.xml</td></tr><tr><td>Meaningful text in the HTML</td><td>14</td><td>150+ words of visible text in the raw HTML; 50–150 earns half</td></tr><tr><td>Responds quickly</td><td>4</td><td>HTML fetched in under 2 s; under 5 s earns half</td></tr><tr><td>Canonical URL is set</td><td>6</td><td>Present and on the same domain. Absent earns partial.</td></tr></tbody></table></div>

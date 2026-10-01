@@ -71,10 +71,13 @@ export async function scan(url) {
   let origin;
   try { origin = new URL(page.finalUrl).origin; } catch { origin = new URL(url).origin; }
 
-  const [robots, sitemap, llms] = await Promise.all([
+  let host;
+  try { host = new URL(page.finalUrl || url).hostname; } catch { host = ''; }
+  const [robots, sitemap, llms, entity] = await Promise.all([
     probe(`${origin}/robots.txt`, true),
     probe(`${origin}/sitemap.xml`, false),
-    probe(`${origin}/llms.txt`, false)
+    probe(`${origin}/llms.txt`, false),
+    lookupEntity(host)
   ]);
 
   let sitemapFound = sitemap.ok;
@@ -92,8 +95,41 @@ export async function scan(url) {
     sitemapFound,
     llmsTxtFound: llms.ok,
     fetchMs,
-    error: page.error
+    error: page.error,
+    entity
   });
+}
+
+/* ---------------- AI familiarity: is this site a known entity? ----------------
+   Looks the site up in Wikidata by its official-website property (P856), using exact URL
+   matches only (no name guessing). Returns { found, id, label, description, sitelinks },
+   { found: false }, or null when the lookup itself failed (treated as "unknown", never as "absent"). */
+const WIKIDATA_SPARQL = 'https://query.wikidata.org/sparql';
+const WIKIDATA_UA = 'AeodenBot/1.0 (+https://aeoden.com/about/; hello@aeoden.com)';
+export async function lookupEntity(host, fetchImpl = fetch, timeoutMs = 3500) {
+  const bare = String(host || '').toLowerCase().replace(/^www\./, '');
+  if (!bare || !bare.includes('.')) return null;
+  const urls = [];
+  for (const scheme of ['https', 'http']) for (const h of [`www.${bare}`, bare]) for (const tail of ['/', '']) urls.push(`<${scheme}://${h}${tail}>`);
+  const query = `SELECT ?item ?itemLabel ?itemDescription ?links WHERE {
+  VALUES ?url { ${urls.join(' ')} }
+  ?item wdt:P856 ?url ; wikibase:sitelinks ?links .
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+} ORDER BY DESC(?links) LIMIT 1`;
+  try {
+    const res = await fetchImpl(`${WIKIDATA_SPARQL}?format=json&query=${encodeURIComponent(query)}`, {
+      headers: { 'User-Agent': WIKIDATA_UA, 'Accept': 'application/sparql-results+json' },
+      signal: AbortSignal.timeout(timeoutMs)
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const b = data && data.results && data.results.bindings && data.results.bindings[0];
+    if (!b) return { found: false };
+    const id = (b.item && b.item.value || '').split('/').pop();
+    return { found: true, id, label: b.itemLabel && b.itemLabel.value || null, description: b.itemDescription && b.itemDescription.value || null, sitelinks: Number(b.links && b.links.value) || 0 };
+  } catch {
+    return null;
+  }
 }
 
 async function fetchPage(startUrl) {

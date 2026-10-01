@@ -43,9 +43,11 @@ test('noindex tanks access', () => {
   assert.ok(r.categories.access.score < 90);
 });
 
-test('non-200 page is hard to reach', () => {
-  const r = analyze({ ...base, status: 503, html: '', robotsTxt: null, fetchMs: 900 });
-  assert.equal(r.status, 'Hard to reach');
+test('a genuinely broken page (500, 404) is hard to reach; 503 is reported as unavailable, not scored', () => {
+  assert.equal(analyze({ ...base, status: 500, html: '', robotsTxt: null, fetchMs: 900 }).status, 'Hard to reach');
+  assert.equal(analyze({ ...base, status: 404, html: '', robotsTxt: null }).status, 'Hard to reach');
+  const r = analyze({ ...base, status: 503, html: '', robotsTxt: null });
+  assert.equal(r.score, null); assert.match(r.blocked.reason, /unavailable/);
 });
 
 test('headings are found in minimal, unclosed markup (example.com style)', () => {

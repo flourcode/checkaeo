@@ -237,12 +237,20 @@ function catScore(checks) {
 export function analyze(input) {
   const {
     url, finalUrl = url, status = 0, headers = {}, html = '', robotsTxt = null, robotsStatus = 0,
-    redirectCount = 0, sitemapFound = null, llmsTxtFound = null, fetchMs = 0, error = null
+    redirectCount = 0, sitemapFound = null, llmsTxtFound = null, fetchMs = 0, error = null, entity = undefined
   } = input;
   const x = extract(html, finalUrl);
   const robots = robotsTxt != null ? parseRobots(robotsTxt) : null;
   let pathname = '/';
   try { pathname = new URL(finalUrl).pathname || '/'; } catch { /* ignore */ }
+  const familiarity = familiarityFrom(entity);
+
+  /* ---------------- Blocked scan ----------------
+     Bot protection that refuses OUR crawler says nothing about whether AI can read the site:
+     large sites routinely block unknown bots while allowing (or licensing to) AI crawlers.
+     So we report what we can verify and do not invent a score. */
+  const block = detectBlock(status, html, x.wordCount);
+  if (block) return blockedResult({ url, finalUrl, status, robots, pathname, familiarity, block, x, fetchMs });
   const isHttps = /^https:/i.test(finalUrl);
 
   /* ---------------- ACCESS ---------------- */
@@ -477,7 +485,10 @@ export function analyze(input) {
   }
   for (const c of Object.values(cats)) { c.grade = c.notEvaluated ? '–' : grade(c.score); c.label = c.notEvaluated ? 'Not evaluated' : categoryLabel(c); }
 
-  const overall = Math.round(Object.entries(WEIGHTS).reduce((s, [k, w]) => s + cats[k].score * w, 0));
+  const readiness = Math.round(Object.entries(WEIGHTS).reduce((s, [k, w]) => s + cats[k].score * w, 0));
+  // Overall = 75% page readiness (the four checks) + 25% AI familiarity (known entity). If the
+  // familiarity lookup failed, we fall back to readiness alone rather than guessing.
+  const overall = familiarity ? Math.round(readiness * (1 - FAMILIARITY_WEIGHT) + familiarity.score * FAMILIARITY_WEIGHT) : readiness;
 
   /* ---------------- What AI sees ---------------- */
   const topicPool = [...h2s.map(h => h.text), ...x.headings.filter(h => h.level === 3).map(h => h.text)]
@@ -513,12 +524,50 @@ export function analyze(input) {
     ok: true,
     url, finalUrl, domain: x.host || safeHost(finalUrl), scannedAt: new Date().toISOString(),
     score: overall, grade: grade(overall), status: statusLabel(overall, cats.access.score),
+    readiness, familiarity,
     categories: cats,
     whatAiSees,
     fixes: fixes.slice(0, 3),
     moreFixes: fixes.slice(3, 8),
     extras,
     meta: { title: x.title, description: desc, h1: x.h1s, wordCount: x.wordCount, httpStatus: status, fetchMs, redirectCount, lang: x.lang, ldTypes: [...new Set(x.ldTypes)] }
+  };
+}
+
+/* ---------------- AI familiarity ---------------- */
+export const FAMILIARITY_WEIGHT = 0.25;
+export function familiarityFrom(entity) {
+  if (entity == null) return null;                       // lookup failed: unknown, not absent
+  if (!entity.found) return { score: 0, known: false, level: 'Not yet a known entity' };
+  const n = entity.sitelinks || 0;
+  const score = n >= 50 ? 100 : n >= 20 ? 85 : n >= 5 ? 65 : n >= 1 ? 45 : 30;
+  const level = n >= 50 ? 'Widely known' : n >= 20 ? 'Well known' : n >= 5 ? 'Known' : 'Listed';
+  return { score, known: true, level, id: entity.id, label: entity.label, description: entity.description, sitelinks: n };
+}
+
+/* ---------------- Blocked scans ---------------- */
+const CHALLENGE = /cf-chl-|challenge-platform|<title>\s*Just a moment\.\.\.|Attention Required! \| Cloudflare|_Incapsula_Resource|Request unsuccessful\. Incapsula|px-captcha|perimeterx|<title>\s*Access Denied\s*<\/title>[\s\S]{0,4000}Reference\s*#|datadome|ak_bmsc/i;
+export function detectBlock(status, html, wordCount) {
+  if ([401, 403, 429, 503].includes(status)) return { status, reason: status === 429 ? 'rate-limited our scanner' : status === 503 ? 'was unavailable to our scanner' : 'refused our scanner' };
+  if (status === 200 && wordCount < 400 && CHALLENGE.test(String(html).slice(0, 60000))) return { status, reason: 'served a bot challenge instead of the page' };
+  return null;
+}
+function blockedResult({ url, finalUrl, status, robots, pathname, familiarity, block, x, fetchMs }) {
+  const host = x.host || safeHost(finalUrl);
+  const bots = robots ? [...AI_BOTS.search, ...AI_BOTS.training].map(name => ({ name, allowed: !isBlocked(robots, name, pathname), kind: AI_BOTS.search.includes(name) ? 'search' : 'training' })) : null;
+  const cats = {};
+  for (const [k, name, question] of [['access', 'Access', 'Can AI crawlers reach the page?'], ['clarity', 'Clarity', 'Can they tell what the site does?'], ['answers', 'Answers', 'Does the page answer questions directly?'], ['trust', 'Trust', 'Is there enough context to cite it?']])
+    cats[k] = { name, question, score: 0, grade: '–', label: 'Not checked', notEvaluated: true, checks: [] };
+  const allowedSearch = bots ? bots.filter(b => b.kind === 'search' && b.allowed).length : null;
+  return {
+    ok: true, blocked: { ...block, allowedSearch, searchTotal: AI_BOTS.search.length },
+    url, finalUrl, domain: host, scannedAt: new Date().toISOString(),
+    score: null, readiness: null, grade: '–', status: 'Couldn’t read',
+    familiarity, aiBots: bots, categories: cats,
+    whatAiSees: { siteName: host, purpose: null, source: null, verbatim: true, audience: null, topics: [], confidence: 'low', unclear: true,
+      summary: `${host} ${block.reason} (HTTP ${status}). That is common for large sites with bot protection, and it does not mean AI crawlers are blocked.` },
+    fixes: [], moreFixes: [], extras: [],
+    meta: { httpStatus: status, fetchMs, title: x.title || null }
   };
 }
 

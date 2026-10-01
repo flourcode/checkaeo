@@ -8,12 +8,14 @@ import { scan } from '../src/index.js';
 const urls = process.argv.slice(2);
 if (!urls.length) { console.log('usage: node test/calibrate.mjs <url> [url...]'); process.exit(1); }
 const pad = (s, n) => String(s).padEnd(n).slice(0, n);
-console.log(pad('site', 28), pad('score', 6), pad('grade', 6), pad('status', 20), pad('A/C/An/T', 16), 'top fix');
+console.log(pad('site', 28), pad('score', 6), pad('ready', 6), pad('known', 22), pad('grade', 6), pad('status', 20), pad('A/C/An/T', 16), 'top fix');
 for (const u of urls) {
   try {
     const r = await scan(/^https?:/.test(u) ? u : 'https://' + u);
     const c = r.categories;
-    console.log(pad(r.domain, 28), pad(r.score, 6), pad(r.grade, 6), pad(r.status, 20), pad(`${c.access.score}/${c.clarity.score}/${c.answers.score}/${c.trust.score}`, 16), r.fixes[0]?.title || '—');
+    const known = r.familiarity ? (r.familiarity.known ? `${r.familiarity.level} (${r.familiarity.sitelinks})` : 'not known') : 'lookup failed';
+    if (r.blocked) { console.log(pad(r.domain, 28), pad('—', 6), pad('—', 6), pad(known, 22), pad('–', 6), pad(r.status, 20), `blocked: HTTP ${r.blocked.status}, AI search crawlers allowed ${r.blocked.allowedSearch}/${r.blocked.searchTotal}`); continue; }
+    console.log(pad(r.domain, 28), pad(r.score, 6), pad(r.readiness, 6), pad(known, 22), pad(r.grade, 6), pad(r.status, 20), pad(`${c.access.score}/${c.clarity.score}/${c.answers.score}/${c.trust.score}`, 16), r.fixes[0]?.title || '—');
     console.log('   sees:', r.whatAiSees.summary, `(${r.whatAiSees.confidence}${r.whatAiSees.source ? ', ' + r.whatAiSees.source : ''})`);
   } catch (e) { console.log(pad(u, 28), 'ERROR', e.message); }
 }

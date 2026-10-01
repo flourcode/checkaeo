@@ -18,6 +18,7 @@
   const C = { bg: '#12372A', frame: '#0E2E22', line: '#2A5646', ink: '#EEF4E2', ink2: '#D6E3CB', ink3: '#A9BFAC',
     g50: '#214F3D', g100: '#2D5B48', g200: '#4C7A4F', g500: '#A3D93F', g600: '#B3E25A', g700: '#C6EC7E', g900: '#EEF4E2',
     warn: '#F2B65B', bad: '#FF9478', green: '#A3D93F', cream: '#E4F0D0' };
+  const toneOf = score => (score >= 80 ? 'good' : score >= 70 ? 'mixed' : 'poor');
   const gradeColor = g => (g === 'C' ? C.warn : g === 'D' || g === 'F' ? C.bad : C.ink);
 
   const FIX_SHARE = {
@@ -90,19 +91,21 @@
 
   /* ---------------- On-page card ---------------- */
   function renderCardHTML(r) {
+    if (r.blocked) return renderCardBlocked(r);
     const fix = fixText(r);
     const rows = CATS.map(k => {
       const c = r.categories[k];
       return `<li class="acard__row${WEAK(c.grade) ? ' is-weak' : ''}"><span class="acard__k">${esc(c.name)}</span><span class="acard__l">${esc(c.label)}</span><span class="acard__g" aria-label="grade ${esc(c.grade)}">${esc(c.grade)}</span></li>`;
     }).join('');
-    return `<article class="acard" data-mode="${r.demo ? 'example' : 'result'}" data-tone="${r.score >= 75 ? 'good' : r.score >= 60 ? 'mixed' : 'poor'}" aria-labelledby="acard-domain">
+    return `<article class="acard" data-mode="${r.demo ? 'example' : 'result'}" data-tone="${toneOf(r.score)}" aria-labelledby="acard-domain">
       <header class="acard__head"><span class="acard__kick">${r.demo ? 'Example result' : 'Your result'}</span><span class="acard__date">${r.demo ? 'Sample, not a live scan' : esc(scannedLabel(r.scannedAt))}</span></header>
       <div class="acard__body">
         <div class="acard__main">
           <h2 class="acard__domain" id="acard-domain">${esc(r.domain).replace(/\./g, '.<wbr>')}</h2>
+          ${knownLine(r)}
           <div class="acard__readout">
             <p class="acard__score"><span class="acard__num" data-count="${r.score}">${r.score}</span><span class="acard__of">/100</span></p>
-            <div class="acard__meta"><p class="acard__status">${esc(r.status)} · Grade ${esc(r.grade)}</p><div class="acard__bar" aria-hidden="true">${bar(r.score)}</div></div>
+            <div class="acard__meta"><p class="acard__status">${esc(r.status)}<span class="acard__gradeword">Grade ${esc(r.grade)}</span></p><div class="acard__bar" aria-hidden="true">${bar(r.score)}</div></div>
           </div>
           <p class="sr-only">AEO score ${r.score} out of 100, grade ${esc(r.grade)}, ${esc(r.status)}.</p>
         </div>
@@ -111,6 +114,32 @@
         </div>
       </div>
       <div class="acard__fix"><span class="acard__fixlbl">First fix</span><p>${esc(fix)}</p></div>
+    </article>`;
+  }
+
+  /* AI familiarity, in plain words */
+  function knownText(f) {
+    if (!f) return null;
+    if (!f.known) return 'Not yet a known entity to AI';
+    return `${f.level} to AI${f.sitelinks ? ` · ${f.sitelinks} Wikipedia editions` : ''}`;
+  }
+  const knownLine = r => { const t = knownText(r.familiarity); return t ? `<p class="acard__known${r.familiarity.known ? ' is-known' : ''}">${esc(t)}</p>` : ''; };
+
+  /* Blocked scan: report what we could verify, never a made-up number */
+  function renderCardBlocked(r) {
+    const b = r.blocked, f = r.familiarity;
+    const bots = b.allowedSearch == null ? 'We could not read its robots.txt either.' : `Its robots.txt allows ${b.allowedSearch} of ${b.searchTotal} AI search crawlers.`;
+    return `<article class="acard" data-mode="blocked" aria-labelledby="acard-domain">
+      <header class="acard__head"><span class="acard__kick">Couldn’t read this site</span><span class="acard__date">HTTP ${esc(b.status)}</span></header>
+      <div class="acard__body acard__body--error">
+        <div class="acard__main">
+          <h2 class="acard__domain" id="acard-domain">${esc(r.domain).replace(/\./g, '.<wbr>')}</h2>
+          ${knownLine(r)}
+          <p class="acard__err">${esc(r.domain)} ${esc(b.reason)}. Large sites often block unknown bots, so this is <strong>not</strong> a sign that ChatGPT, Claude or Gemini are blocked. ${esc(bots)}</p>
+          <p class="acard__err acard__err--quiet">We don’t score what we can’t read. If this is your site, allow <code>AeodenBot</code> in your bot protection and scan again.</p>
+          <div class="acard__actions"><button class="btn btn--sm" type="button" id="retry-btn">Try again</button><button class="btn btn--ghost btn--sm" type="button" data-demo="">See an example</button></div>
+        </div>
+      </div>
     </article>`;
   }
 
@@ -179,7 +208,9 @@
     if (!fit(dl, 56)) dl = domainLines(r.domain).slice(0, 2);
     while (ds > 36 && !fit(dl, ds)) ds -= 2;
     dl.forEach((t, i) => P.push(T(M, 224 + i * ds * 1.05, t, { size: ds, weight: 600, ls: -ds * 0.01, serif: true })));
-    const dBottom = 224 + (dl.length - 1) * ds * 1.05;
+    let dBottom = 224 + (dl.length - 1) * ds * 1.05;
+    const kt = knownText(r.familiarity);
+    if (kt) { P.push(T(M, dBottom + 42, kt, { size: 24, weight: 500, fill: r.familiarity.known ? C.g600 : C.ink3 })); dBottom += 40; }
 
     // score — a framed sub-card with a chunky number
     const sq = size === 'square';
@@ -191,7 +222,7 @@
     const px = tileX + 34;
     const sy = tileY + 28 + nSize * 0.74;
     const nw = measure(String(r.score), nSize, 800) - nSize * 0.055 * (String(r.score).length - 1);
-    const tone = r.score >= 75 ? C.g500 : r.score >= 60 ? C.warn : C.bad, toneSoft = r.score >= 75 ? C.g100 : r.score >= 60 ? '#4A4A2C' : '#4F3A30';
+    const tn = toneOf(r.score), tone = tn === 'good' ? C.g500 : tn === 'mixed' ? C.warn : C.bad, toneSoft = tn === 'good' ? C.g100 : tn === 'mixed' ? '#4A4A2C' : '#4F3A30';
     P.push(T(px - 4, sy, String(r.score), { size: nSize, weight: 800, fill: tone, ls: -nSize * 0.055 }));
     P.push(T(px + nw + 10, sy, '/100', { size: 36, weight: 600, fill: C.ink3 }));
     P.push(T(px, sy + 58, `${r.status} · Grade ${r.grade}`, { size: 30, weight: 600, fill: C.ink }));
@@ -244,5 +275,5 @@
     return `AEO Card — ${r.domain}\nScore ${r.score}/100 · ${r.status} · Grade ${r.grade}\n${cats}\n\nFirst fix: ${fixText(r)}\nWhat AI sees: ${r.whatAiSees.summary}\n\nChecked with Aeoden (aeoden.com). Diagnostic score, not a guarantee.`;
   }
 
-  window.AEOCardRender = { renderCardHTML, renderCardLoading, renderCardError, buildCardSVG, summaryText, stateOf, scannedLabel, recordId, glyphSVG: markSVG, shareFix: fixText };
+  window.AEOCardRender = { renderCardHTML, knownText, toneOf, renderCardLoading, renderCardError, buildCardSVG, summaryText, stateOf, scannedLabel, recordId, glyphSVG: markSVG, shareFix: fixText };
 })();

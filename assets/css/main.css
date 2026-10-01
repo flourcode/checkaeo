@@ -541,3 +541,18 @@ body { font-family: var(--font); font-weight: 400; }
 .theme-forest .acard[data-tone="poor"] .acard__bar i.on { background: var(--bad); }
 .acard__readout { margin-top: .7rem; padding: .85rem 1rem .9rem; }
 .acard__main { padding-bottom: 1.1rem; }
+
+/* ============ Familiarity line, blocked card, unbreakable grade ============ */
+.nowrap { white-space: nowrap; }
+.acard__known { margin-top: .3rem; font-size: var(--fs-xs); font-weight: 500; color: var(--ink-3); }
+.acard__known.is-known { color: var(--g-600); }
+.acard__known.is-known::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--g-500); margin-right: .45rem; vertical-align: .05em; }
+.acard[data-mode="blocked"] .acard__kick { color: var(--warn); }
+.acard__err { margin-top: .7rem; color: var(--ink-2); font-size: var(--fs-sm); line-height: 1.5; }
+.acard__err strong { color: var(--ink); }
+.acard__err--quiet { color: var(--ink-3); font-size: var(--fs-xs); }
+.acard__err code { background: rgba(238, 244, 226, .08); padding: .05em .35em; border-radius: 6px; }
+
+.acard__gradeword { white-space: nowrap; }
+.acard__gradeword::before { content: ' · '; }
+@container (max-width: 559px) { .acard__gradeword { display: block; font-weight: 500; color: var(--ink-3); } .acard__gradeword::before { content: ''; } }
