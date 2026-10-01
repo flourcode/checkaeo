@@ -556,3 +556,29 @@ body { font-family: var(--font); font-weight: 400; }
 .acard__gradeword { white-space: nowrap; }
 .acard__gradeword::before { content: ' · '; }
 @container (max-width: 559px) { .acard__gradeword { display: block; font-weight: 500; color: var(--ink-3); } .acard__gradeword::before { content: ''; } }
+
+/* ============ Card strip: What AI sees ============ */
+.acard__sees { flex-wrap: wrap; row-gap: .15rem; }
+.acard__sees p { font-weight: 500; }
+.acard__sees q { quotes: '\201C' '\201D'; }
+.acard__sees.is-unclear p { color: var(--ink-2); }
+.acard__src { flex-basis: 100%; font-size: var(--fs-xs); color: var(--ink-3); }
+@container (min-width: 560px) { .acard__sees .acard__src { padding-left: 0; } }
+@container (min-width: 560px) {
+  .acard__sees { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: .85rem; align-items: baseline; }
+  .acard__sees .acard__src { grid-column: 2; }
+}
+
+/* Strip budget: source sits with the label; quote clamps (full sentence is in the report) */
+.acard__sees .acard__fixlbl { display: flex; flex-direction: column; gap: .1rem; }
+.acard__sees .acard__src { font-weight: 500; color: var(--ink-3); font-size: .72rem; }
+.acard__sees p { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+@container (max-width: 559px) {
+  .acard__sees .acard__fixlbl { flex-direction: row; gap: .4rem; align-items: baseline; }
+  .acard__sees .acard__src::before { content: '· '; }
+  .acard__sees p { -webkit-line-clamp: 3; }
+}
+/* The points row repeats what the card shows; drop it where height is scarce */
+@media (max-width: 560px), (max-height: 800px) { .points { display: none; } }
+@media (max-height: 800px) { .hero__rule { margin-top: .6rem; } .scan-form { margin-top: .9rem; } .card-stage { margin-top: .9rem; } }
+@media (max-width: 560px) { .hero { padding-top: .6rem; } .hero__rule { margin-top: .6rem; } .scan-form { margin-top: .9rem; } .card-stage { margin-top: .8rem; } .acard__known { margin-top: .15rem; } }

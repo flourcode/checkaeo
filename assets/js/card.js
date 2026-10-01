@@ -92,7 +92,6 @@
   /* ---------------- On-page card ---------------- */
   function renderCardHTML(r) {
     if (r.blocked) return renderCardBlocked(r);
-    const fix = fixText(r);
     const rows = CATS.map(k => {
       const c = r.categories[k];
       return `<li class="acard__row${WEAK(c.grade) ? ' is-weak' : ''}"><span class="acard__k">${esc(c.name)}</span><span class="acard__l">${esc(c.label)}</span><span class="acard__g" aria-label="grade ${esc(c.grade)}">${esc(c.grade)}</span></li>`;
@@ -113,9 +112,13 @@
           <ul class="acard__rows" aria-label="Four checks">${rows}</ul>
         </div>
       </div>
-      <div class="acard__fix"><span class="acard__fixlbl">First fix</span><p>${esc(fix)}</p></div>
+      <div class="acard__fix acard__sees${r.whatAiSees.unclear ? ' is-unclear' : ''}"><span class="acard__fixlbl"><span class="nowrap">What AI sees</span>${r.whatAiSees.source && !r.whatAiSees.unclear ? `<span class="acard__src">${esc(r.whatAiSees.source)}</span>` : ''}</span><p title="${esc(seesText(r))}">${r.whatAiSees.unclear ? '' : '<q>'}${esc(seesText(r))}${r.whatAiSees.unclear ? '' : '</q>'}</p></div>
     </article>`;
   }
+
+  /* What AI sees: the page's own sentence (verbatim, hedged when unsure) and its source */
+  const seesText = r => r.whatAiSees.summary;
+  const seesSource = r => (r.whatAiSees.source && !r.whatAiSees.unclear ? `From the page's ${r.whatAiSees.source}` : '');
 
   /* AI familiarity, in plain words */
   function knownText(f) {
@@ -159,7 +162,7 @@
           <ul class="acard__rows" aria-label="Four checks">${rows}</ul>
         </div>
       </div>
-      <div class="acard__fix acard__fix--idle"><span class="acard__fixlbl">First fix</span><p>Appears here in about 30 seconds.</p></div>
+      <div class="acard__fix acard__fix--idle"><span class="acard__fixlbl">What AI sees</span><p>Appears here in about 30 seconds.</p></div>
     </article>`;
   }
 
@@ -249,19 +252,25 @@
       fixY = colTop + 4 * rowH + 30;
     } else if (size === 'portrait') {
       const ry = tileY + tileH + 34; P.push(Ln(M, ry, x1, ry));
-      drawRows(M, ry, W - 2 * M, 96, 58);
-      fixY = ry + 4 * 96 + 36;
+      drawRows(M, ry, W - 2 * M, 82, 52);
+      fixY = ry + 4 * 82 + 30;
     } else {
       drawRows(800, 180, x1 - 800, 92, 54);
-      fixX = 800; fixW = x1 - 800; fixY = 180 + 4 * 92 + 30;
+      fixX = 800; fixW = x1 - 800; fixY = 180 + 4 * 92 + 22;
     }
-    // first fix
-    const fSize = size === 'landscape' ? 32 : 38;
-    const fl = wrap(fixText(r), fSize, 600, fixW - 80, 2);
-    const fh = 76 + fl.length * fSize * 1.2;
+    // what AI sees: the page's own words, quoted, with their source — fitted to the space above the footer
+    const unclear = r.whatAiSees.unclear;
+    const quote = unclear ? seesText(r) : `\u201c${seesText(r)}\u201d`;
+    const src = seesSource(r);
+    const limit = H - 120;                                   // keep clear of the footer rule
+    let fSize = size === 'landscape' ? 28 : 32, maxL = 3, fl, fh;
+    const measureStrip = () => { fl = wrap(quote, fSize, 500, fixW - 80, maxL); fh = 82 + fl.length * fSize * 1.25 + (src ? 50 : 14); };
+    measureStrip();
+    while (fixY + fh > limit && (maxL > 2 || fSize > 22)) { if (maxL > 2) maxL--; else fSize -= 2; measureStrip(); }
     P.push(Rr(fixX, fixY, fixW, fh, 22, C.g50));
-    P.push(T(fixX + 40, fixY + 50, 'First fix', { size: 24, weight: 700, fill: C.g500 }));
-    fl.forEach((ln, i) => P.push(T(fixX + 40, fixY + 50 + 20 + fSize + i * fSize * 1.2, ln, { size: fSize, weight: 600, fill: C.ink, ls: -.4 })));
+    P.push(T(fixX + 40, fixY + 50, 'What AI sees', { size: 24, weight: 700, fill: C.g500 }));
+    fl.forEach((ln, i) => P.push(T(fixX + 40, fixY + 50 + 20 + fSize + i * fSize * 1.25, ln, { size: fSize, weight: 500, fill: C.ink, ls: -.3 })));
+    if (src) P.push(T(fixX + 40, fixY + 50 + 20 + fSize + (fl.length - 1) * fSize * 1.25 + 46, src, { size: 21, weight: 500, fill: C.ink3 }));
     // footer
     const fy = H - 64;
     P.push(Ln(M, fy - 44, x1, fy - 44));
@@ -272,7 +281,7 @@
 
   function summaryText(r) {
     const cats = CATS.map(k => `${r.categories[k].name} ${r.categories[k].grade}`).join(' · ');
-    return `AEO Card — ${r.domain}\nScore ${r.score}/100 · ${r.status} · Grade ${r.grade}\n${cats}\n\nFirst fix: ${fixText(r)}\nWhat AI sees: ${r.whatAiSees.summary}\n\nChecked with Aeoden (aeoden.com). Diagnostic score, not a guarantee.`;
+    return `AEO Card — ${r.domain}\nScore ${r.score}/100 · ${r.status} · Grade ${r.grade}\n${cats}\n\nWhat AI sees: ${r.whatAiSees.summary}\nFirst fix: ${fixText(r)}\n\nChecked with Aeoden (aeoden.com). Diagnostic score, not a guarantee.`;
   }
 
   window.AEOCardRender = { renderCardHTML, knownText, toneOf, renderCardLoading, renderCardError, buildCardSVG, summaryText, stateOf, scannedLabel, recordId, glyphSVG: markSVG, shareFix: fixText };
