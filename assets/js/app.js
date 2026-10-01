@@ -33,9 +33,8 @@
   const input = $('#url-input');
   const submitBtn = $('#scan-submit');
   const formError = $('#form-error');
-  const slot = $('#card-slot');
-  const caption = $('#card-caption');
-  const actions = $('#card-actions');
+  const slot = $('#panel-slot');
+  const caption = $('#panel-caption');
   const report = $('#report');
   const live = $('#live');
   const toast = $('#toast');
@@ -44,7 +43,10 @@
   let demoKey = null;
   let lastUrl = null;
 
-  /* ---------------- Boot: the example card is the placeholder ---------------- */
+  const STATUS = { ok: ['Ready', 'ok'], fix: ['Needs fix', 'fix'], missing: ['Missing', 'missing'], optional: ['Optional', 'optional'] };
+  const ORDER = ['llms', 'jsonld', 'robots', 'catalog'];
+
+  /* ---------------- Boot: the example files are the placeholder ---------------- */
   document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(location.search);
     if (location.hash.startsWith('#demo')) showDemo(location.hash.split('=')[1] || null);
@@ -68,9 +70,9 @@
     const ex = firstDemo();
     if (!ex) return;
     current = null;
-    slot.innerHTML = R.renderCardHTML(ex);
+    slot.innerHTML = renderPanel(ex, 'example');
+    wirePanel(ex);
     caption.hidden = false;
-    actions.hidden = true;
     report.hidden = true; report.innerHTML = '';
     document.body.classList.remove('results-mode');
   }
@@ -87,37 +89,38 @@
     return { url: u.href };
   }
 
-  /* ---------------- Scan flow: the card fills in place ---------------- */
-  const STEPS = ['Reaching the site', 'Reading robots.txt and headers', 'Reading the public HTML', 'Scoring the four checks', 'Writing your AEO Card'];
+  /* ---------------- Scan flow: the panel fills in place ---------------- */
+  const STEPS = ['Reaching the site', 'Reading robots.txt and headers', 'Reading the page and sitemap', 'Checking your llms.txt and AI catalog', 'Writing your AI files'];
 
-  async function startScan(raw) {
+  async function startScan(raw, fresh = false) {
     const n = normalizeUrl(raw);
     if (n.error) { formError.textContent = n.error; input.focus(); input.setAttribute('aria-invalid', 'true'); return; }
     formError.textContent = ''; input.removeAttribute('aria-invalid');
     const url = n.url; lastUrl = url;
     const domain = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
     history.replaceState(null, '', '?url=' + encodeURIComponent(domain));
-    track('scan_start');
+    track('scan_start', { fresh });
     if (!apiConfigured()) { showError(domain, 'The live scanner is not connected on this copy of the site.'); return; }
 
     submitBtn.disabled = true; submitBtn.setAttribute('aria-busy', 'true');
-    slot.innerHTML = R.renderCardLoading(domain);
-    caption.hidden = true; actions.hidden = true; report.hidden = true;
+    slot.innerHTML = renderLoading(domain);
+    caption.hidden = true; report.hidden = true;
+    slot.scrollIntoView({ block: 'nearest', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
     announce('Checking ' + domain);
     let i = 0;
-    const stepTimer = setInterval(() => { const el = $('#acard-step'); if (el && i < STEPS.length - 1) el.textContent = STEPS[++i]; }, 1500);
+    const stepTimer = setInterval(() => { const el = $('#fp-step'); if (el && i < STEPS.length - 1) el.textContent = STEPS[++i]; }, 1500);
     try {
       const ctrl = new AbortController();
       const t = setTimeout(() => ctrl.abort(), CFG.SCAN_TIMEOUT_MS || 25000);
-      const res = await fetch(CFG.SCAN_API_URL.replace(/\/$/, '') + '/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }), signal: ctrl.signal });
+      const res = await fetch(CFG.SCAN_API_URL.replace(/\/$/, '') + '/scan' + (fresh ? '?fresh=1' : ''), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }), signal: ctrl.signal });
       clearTimeout(t);
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) { showError(domain, data.error || `The scanner returned an error (${res.status}).`); track('scan_error', { reason: data.error || res.status }); return; }
       demoKey = null;
       showResult(data);
-      track('scan_complete', { score: data.score, grade: data.grade });
+      track('scan_complete', { ready: data.aiFiles ? data.aiFiles.ready : null, blocked: !!data.blocked });
     } catch (err) {
-      showError(domain, err && err.name === 'AbortError' ? 'The scan took too long. The site may be slow or blocking automated requests.' : 'We could not reach the scanner. Check your connection and try again.');
+      showError(domain, err && err.name === 'AbortError' ? 'The check took too long. The site may be slow or blocking automated requests.' : 'We could not reach the scanner. Check your connection and try again.');
       track('scan_error', { reason: err && err.name });
     } finally {
       clearInterval(stepTimer);
@@ -126,8 +129,11 @@
   }
 
   function showError(domain, message) {
-    slot.innerHTML = R.renderCardError(domain, message);
-    caption.hidden = true; actions.hidden = true; report.hidden = true;
+    slot.innerHTML = `<section class="fp" data-mode="error" aria-labelledby="fp-domain">
+      <header class="fp__head"><div><p class="fp__kick">Couldn’t check this site</p><h2 class="fp__domain" id="fp-domain">${esc(domain)}</h2><p class="fp__summary">${esc(message)}</p></div></header>
+      <div class="fp__actions"><button class="btn btn--primary btn--sm" type="button" id="retry-btn">Try again</button><button class="btn btn--ghost btn--sm" type="button" data-demo="">See an example</button></div>
+    </section>`;
+    caption.hidden = true; report.hidden = true;
     $('#retry-btn')?.addEventListener('click', () => startScan(lastUrl || domain));
     announce(message);
   }
@@ -143,143 +149,264 @@
     track('demo_view', { key: demoKey });
   }
 
-  /* Result: fill the card, count the score up once, reveal actions + report below */
   function showResult(r) {
     current = r;
-    slot.innerHTML = R.renderCardHTML(r);
+    slot.innerHTML = r.blocked ? renderBlocked(r) : renderPanel(r, r.demo ? 'demo' : 'result');
+    if (!r.blocked) wirePanel(r);
+    $('#retry-btn')?.addEventListener('click', () => startScan(lastUrl || r.domain, true));
     caption.hidden = true;
-    if (r.blocked) {
-      actions.hidden = true;
-      renderBlockedReport(r);
-      $('#retry-btn')?.addEventListener('click', () => startScan(lastUrl || r.domain));
-      document.body.classList.add('results-mode');
-      announce(`${r.domain} blocked our scanner, so there is no score. ${R.knownText(r.familiarity) || ''}`);
-      return;
-    }
-    actions.hidden = false;
-    renderActions(r);
     renderReport(r);
     document.body.classList.add('results-mode');
-    countUp();
-    announce(`${r.demo ? 'Example' : 'Your'} AEO Card: ${r.domain} scored ${r.score} out of 100, ${r.status}.`);
+    announce(r.blocked ? `${r.domain} blocked our scanner. ${R.knownText(r.familiarity) || ''}` : `${r.domain}: ${summaryLine(r)}. Your AI files are ready to copy or download.`);
   }
 
-  function countUp() {
-    const el = slot.querySelector('.acard__num[data-count]');
-    if (!el || prefersReducedMotion()) return;
-    const target = +el.dataset.count, t0 = performance.now(), dur = 700;
-    const step = now => { const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3); el.textContent = Math.round(target * e); if (p < 1) requestAnimationFrame(step); };
-    requestAnimationFrame(step);
-  }
-
-  function renderActions(r) {
-    actions.innerHTML = `
-      <div class="menu-wrap">
-        <button class="btn btn--ghost btn--sm" type="button" id="dl-btn" aria-haspopup="true" aria-expanded="false" aria-controls="dl-menu">${icon('download')} Download card</button>
-        <div class="menu" id="dl-menu" hidden role="menu" aria-label="Choose a size">
-          ${Object.entries(X.SIZES).map(([k, s]) => `<button type="button" role="menuitem" data-size="${k}"><strong>${esc(s.label)}</strong><span>${esc(s.hint)}</span></button>`).join('')}
-        </div>
-      </div>
-      <button class="btn btn--ghost btn--sm" type="button" id="share-btn">${icon('share')} Share</button>
-      <div class="menu-wrap">
-        <button class="btn btn--ghost btn--sm btn--icon" type="button" id="more-btn" aria-label="More options" aria-haspopup="true" aria-expanded="false" aria-controls="more-menu">${icon('more')}</button>
-        <div class="menu menu--end" id="more-menu" hidden role="menu" aria-label="More options">
-          ${X.canCopyImage() ? `<button type="button" role="menuitem" data-act="copy-img"><strong>Copy image</strong><span>Paste straight into a post</span></button>` : ''}
-          <button type="button" role="menuitem" data-act="copy-txt"><strong>Copy summary</strong><span>Plain text for an email or post</span></button>
-          <button type="button" role="menuitem" data-act="svg"><strong>Download SVG</strong><span>Vector, editable</span></button>
-        </div>
-      </div>
-      ${r.aiFiles ? `<a class="btn btn--primary btn--sm" href="#ai-files" data-cta="ai-files">Get your AI files <span class="files-count">${r.aiFiles.ready}/${r.aiFiles.total} ready</span></a>` : ''}
-      <a class="actions__report" href="#report">Full report <span aria-hidden="true">↓</span></a>`;
-    wireActions(r);
-  }
-
-  const EFFORT_WORD = { Easy: 'Easy fix', Medium: 'Medium effort', Hard: 'Bigger job' };
-
-  function renderBlockedReport(r) {
-    const f = r.familiarity, bots = r.aiBots;
-    report.innerHTML = `<div class="wrap"><div class="report__grid">
-      <section aria-labelledby="bots-h">
-        <h2 class="report__h" id="bots-h">What we could verify</h2>
-        <p class="report__sub">Its robots.txt, which is what AI crawlers actually obey.</p>
-        ${bots ? `<ul class="checks mt-2">${bots.map(b => `<li class="check" data-status="${b.allowed ? 'pass' : 'fail'}"><span class="check__dot" aria-hidden="true"></span><div><p class="check__title">${esc(b.name)}: ${b.allowed ? 'allowed' : 'blocked'}</p><p class="check__detail">${b.kind === 'search' ? 'Answers and citations' : 'Model training'}</p></div></li>`).join('')}</ul>` : '<p class="report__empty">We couldn’t read its robots.txt either.</p>'}
-      </section>
-      <aside class="report__side">${familiarityBlock(f)}${renderMark(r)}</aside>
-    </div></div>`;
-    report.hidden = false;
-  }
-
-  function familiarityBlock(f, r) {
-    if (!f) return `<section class="sees"><h2 class="report__h report__h--sm">AI familiarity</h2><p class="sees__src">We couldn’t reach Wikidata during this scan, so the score uses page readiness only.</p></section>`;
-    return `<section class="sees" aria-labelledby="fam-h">
-      <h2 class="report__h report__h--sm" id="fam-h">AI familiarity</h2>
-      ${f.known ? `<p class="sees__quote">${esc(f.label || '')}${f.description ? ` <span class="muted">— ${esc(f.description)}</span>` : ''}</p>
-        <p class="sees__src">${esc(f.level)}: a Wikidata entity with ${f.sitelinks} Wikipedia editions. <a href="https://www.wikidata.org/wiki/${esc(f.id)}" target="_blank" rel="noopener">${esc(f.id)}</a></p>`
-      : `<p class="sees__quote">Not yet a known entity.</p><p class="sees__src">We didn’t find this site as the official website of any Wikidata entity. AI systems lean on knowledge graphs like Wikidata and Wikipedia; for most young or small sites this is normal, and it builds with coverage over time.</p>`}
-      ${r && r.readiness != null ? `<dl class="sees__list"><div><dt>Page readiness</dt><dd>${r.readiness} / 100 · 75% of the score</dd></div><div><dt>AI familiarity</dt><dd>${f.score} / 100 · 25% of the score</dd></div></dl>` : ''}
-    </section>`;
-  }
-
-  /* ---------------- AI files: validate, generate, install ---------------- */
-  const FILE_STATUS = { ok: ['Ready', 'ok'], fix: ['Needs fix', 'fix'], missing: ['Missing', 'missing'], optional: ['Optional', 'optional'] };
-  function renderFiles(r) {
+  /* ---------------- The files panel ---------------- */
+  function summaryLine(r) {
     const F = r.aiFiles; if (!F) return '';
-    const tab = (f, i) => `<button class="ftab" role="tab" id="ftab-${f.id}" aria-controls="fpanel-${f.id}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}" data-file="${f.id}">
-        <span class="ftab__name">${esc(f.name)}</span><span class="fstatus fstatus--${FILE_STATUS[f.status][1]}">${FILE_STATUS[f.status][0]}</span></button>`;
-    const panel = (f, i) => `<div class="fpanel" role="tabpanel" id="fpanel-${f.id}" aria-labelledby="ftab-${f.id}" ${i === 0 ? '' : 'hidden'}>
-        <p class="fpanel__what">${esc(f.what)}</p>
-        ${f.optionalNote ? `<p class="fpanel__note">${esc(f.optionalNote)}</p>` : ''}
-        ${(f.issues || []).length || (f.notes || []).length ? `<ul class="fpanel__issues">${(f.issues || []).map(t => `<li class="is-issue">${esc(t)}</li>`).join('')}${(f.notes || []).map(t => `<li>${esc(t)}</li>`).join('')}</ul>`
-          : f.status === 'ok' ? `<p class="fpanel__note">We found a valid ${esc(f.name)} on your site. The version below is a refreshed draft built from your pages, if you want it.</p>` : ''}
-        <div class="fcode"><div class="fcode__bar"><span>${esc(f.status === 'ok' ? 'Suggested refresh' : f.id === 'robots' && f.status !== 'missing' ? 'Add to your robots.txt' : 'Ready to install')} · <code>${esc(f.path)}</code></span>
-          <span class="fcode__tools"><button class="btn btn--ghost btn--sm" type="button" data-fcopy="${f.id}">Copy</button><button class="btn btn--ghost btn--sm" type="button" data-fdl="${f.id}">Download</button></span></div>
-          <pre class="fcode__pre" tabindex="0"><code>${esc(f.generated)}</code></pre></div>
-        ${f.template ? `<details class="fpanel__more"><summary>Template entry for when you launch an MCP server or agent</summary><pre class="fcode__pre fcode__pre--sm"><code>${esc(f.template)}</code></pre></details>` : ''}
-        <p class="fpanel__install"><strong>Where it goes:</strong> ${esc(f.install)}</p>
-        ${/\[[^\]\n]+\](?!\()/.test(f.generated) ? `<p class="fpanel__note">Anything in [brackets] is a placeholder: we didn’t find that fact on your site, so we didn’t invent it.</p>` : ''}
+    const missing = F.files.filter(f => f.id !== 'catalog' && f.status !== 'ok').length;
+    if (!missing) return 'All AI files ready';
+    return `${missing} of ${F.total} files ${missing === 1 ? 'needs' : 'need'} work`;
+  }
+  const orderFiles = F => ORDER.map(id => F.files.find(f => f.id === id)).filter(Boolean);
+  const firstToShow = F => (orderFiles(F).find(f => f.status === 'missing' || f.status === 'fix') || orderFiles(F)[0]).id;
+  const pill = st => `<span class="fstatus fstatus--${STATUS[st][1]}">${STATUS[st][0]}</span>`;
+  const hasPlaceholder = t => /\[[^\]\n]+\](?!\()/.test(t);
+
+  function renderPanel(r, mode) {
+    const F = r.aiFiles, files = orderFiles(F), sel = firstToShow(F);
+    const known = R.knownText(r.familiarity);
+    const kick = mode === 'example' ? 'Example' : mode === 'demo' ? 'Example result' : 'Your AI files';
+    const tab = f => `<li role="presentation"><button class="ftab" role="tab" id="ftab-${f.id}" aria-controls="fpanel-${f.id}" aria-selected="${f.id === sel}" tabindex="${f.id === sel ? 0 : -1}" data-file="${f.id}">
+        <span class="ftab__name">${esc(f.name)}</span>${pill(f.status)}</button></li>`;
+    const view = f => `<div class="fview" role="tabpanel" id="fpanel-${f.id}" aria-labelledby="ftab-${f.id}" ${f.id === sel ? '' : 'hidden'}>
+        <div class="fview__bar"><span>${esc(f.status === 'ok' ? 'Found on your site · a refreshed draft' : f.id === 'robots' && f.status !== 'missing' ? 'Add to your robots.txt' : 'Ready to install')} · <code>${esc(f.path)}</code></span>
+          <span class="fview__tools"><button class="btn btn--sm fbtn" type="button" data-fcopy="${f.id}">${icon('copy')} Copy</button><button class="btn btn--sm fbtn" type="button" data-fdl="${f.id}">${icon('download')} Download</button></span></div>
+        <pre class="fview__code" tabindex="0" aria-label="${esc(f.name)} contents"><code>${esc(f.generated)}</code></pre>
+        <div class="fview__info">
+          <p>${esc(f.what)}</p>
+          ${f.optionalNote ? `<p class="muted">${esc(f.optionalNote)}</p>` : ''}
+          ${(f.issues || []).length || (f.notes || []).length ? `<ul class="fview__issues">${(f.issues || []).map(t => `<li class="is-issue">${esc(t)}</li>`).join('')}${(f.notes || []).map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+          <p><strong>Where it goes:</strong> ${esc(f.install)}</p>
+          ${hasPlaceholder(f.generated) ? `<p class="muted">Anything in [brackets] is a placeholder: we didn’t find that fact on your site, so we didn’t invent it.</p>` : ''}
+          ${f.template ? `<details class="fview__more"><summary>Template entry for when you launch an MCP server or agent</summary><pre class="fview__code fview__code--sm"><code>${esc(f.template)}</code></pre></details>` : ''}
+        </div>
       </div>`;
-    return `<section class="files" id="ai-files" aria-labelledby="files-h">
-      <div class="files__head">
-        <div><h2 class="report__h" id="files-h">Your AI files</h2>
-          <p class="report__sub">Written from your own site. ${F.ready} of ${F.total} ready today; the AI catalog is optional.</p></div>
-        <button class="btn btn--primary" type="button" id="files-zip">${icon('download')} Download all (.zip)</button>
+    return `<section class="fp" data-mode="${mode}" aria-labelledby="fp-domain">
+      <header class="fp__head">
+        <div>
+          <p class="fp__kick">${kick}</p>
+          <h2 class="fp__domain" id="fp-domain">${esc(r.domain).replace(/\./g, '.<wbr>')}</h2>
+          <p class="fp__summary"><strong>${esc(summaryLine(r))}</strong>${known ? ` <span class="fp__dot" aria-hidden="true">·</span> <span class="fp__known${r.familiarity.known ? ' is-known' : ''}">${esc(known)}</span>` : ''}</p>
+        </div>
+        ${mode === 'example' ? '' : `<button class="btn btn--primary" type="button" id="files-zip">${icon('download')} Download all files</button>`}
+      </header>
+      <div class="fp__body">
+        <ul class="fp__list" role="tablist" aria-label="AI files" aria-orientation="vertical">${files.map(tab).join('')}</ul>
+        <div class="fp__views">${files.map(view).join('')}</div>
       </div>
-      <div class="ftabs" role="tablist" aria-label="AI files">${F.files.map(tab).join('')}</div>
-      ${F.files.map(panel).join('')}
-      <p class="files__honest">These files make your site easier for AI tools and agents to read. They don’t guarantee you’ll be cited: no file can. <a href="methodology/index.html#ai-files">How we build them</a></p>
     </section>`;
   }
 
-  function wireFiles(r) {
+  function renderLoading(domain) {
+    const names = ['llms.txt', 'Structured data', 'robots.txt rules', 'ai-catalog.json'];
+    return `<section class="fp" data-mode="loading" aria-busy="true" aria-labelledby="fp-domain">
+      <header class="fp__head"><div><p class="fp__kick">Checking</p><h2 class="fp__domain" id="fp-domain">${esc(domain).replace(/\./g, '.<wbr>')}</h2><p class="fp__summary" id="fp-step">${STEPS[0]}</p></div></header>
+      <div class="fp__body">
+        <ul class="fp__list">${names.map(n => `<li><span class="ftab is-idle"><span class="ftab__name">${n}</span><span class="fstatus fstatus--idle">Checking…</span></span></li>`).join('')}</ul>
+        <div class="fp__views"><div class="fview"><div class="fview__bar"><span>Your files appear here in about 30 seconds</span></div><pre class="fview__code fview__code--idle" aria-hidden="true"><code># ……………………\n\n&gt; ……………………………………………………\n\n## Pages\n\n- [……………](………………)\n- [……………](………………)</code></pre></div></div>
+      </div>
+    </section>`;
+  }
+
+  function renderBlocked(r) {
+    const b = r.blocked, known = R.knownText(r.familiarity);
+    const bots = r.aiBots ? `<ul class="fp__bots">${r.aiBots.map(x => `<li><span>${esc(x.name)}</span><span class="fstatus fstatus--${x.allowed ? 'ok' : 'missing'}">${x.allowed ? 'Allowed' : 'Blocked'}</span></li>`).join('')}</ul>` : '<p class="muted">We couldn’t read its robots.txt either.</p>';
+    return `<section class="fp" data-mode="blocked" aria-labelledby="fp-domain">
+      <header class="fp__head"><div>
+        <p class="fp__kick fp__kick--warn">Couldn’t read this site · HTTP ${esc(b.status)}</p>
+        <h2 class="fp__domain" id="fp-domain">${esc(r.domain).replace(/\./g, '.<wbr>')}</h2>
+        <p class="fp__summary">${esc(r.domain)} ${esc(b.reason)}. Large sites often block unknown bots, so this is <strong>not</strong> a sign that ChatGPT, Claude or Gemini are blocked.${known ? ` <span class="fp__known${r.familiarity.known ? ' is-known' : ''}">${esc(known)}.</span>` : ''}</p>
+      </div></header>
+      <div class="fp__blocked">
+        <div><h3>What its robots.txt tells AI crawlers</h3>${bots}</div>
+        <div><h3>Is this your site?</h3><p>Allow <code>AeodenBot</code> in your bot protection (Cloudflare, Akamai, etc.) and check again to get your AI files.</p>
+          <div class="fp__actions"><button class="btn btn--primary btn--sm" type="button" id="retry-btn">Check again</button><button class="btn btn--ghost btn--sm" type="button" data-demo="">See an example</button></div></div>
+      </div>
+    </section>`;
+  }
+
+  function wirePanel(r) {
     const F = r.aiFiles; if (!F) return;
     const byId = id => F.files.find(f => f.id === id);
-    const tabs = [...report.querySelectorAll('.ftab')];
-    const select = t => {
+    const tabs = [...slot.querySelectorAll('.ftab[role="tab"]')];
+    const select = (t, focus) => {
       tabs.forEach(x => { const on = x === t; x.setAttribute('aria-selected', String(on)); x.tabIndex = on ? 0 : -1; document.getElementById('fpanel-' + x.dataset.file).hidden = !on; });
+      if (focus) t.focus();
       track('ai_file_tab', { file: t.dataset.file });
     };
     tabs.forEach((t, i) => {
       t.addEventListener('click', () => select(t));
       t.addEventListener('keydown', e => {
-        const k = e.key; let j = null;
-        if (k === 'ArrowRight') j = (i + 1) % tabs.length; else if (k === 'ArrowLeft') j = (i - 1 + tabs.length) % tabs.length; else if (k === 'Home') j = 0; else if (k === 'End') j = tabs.length - 1;
-        if (j != null) { e.preventDefault(); tabs[j].focus(); select(tabs[j]); }
+        const k = e.key, n = tabs.length; let j = null;
+        if (k === 'ArrowDown' || k === 'ArrowRight') j = (i + 1) % n; else if (k === 'ArrowUp' || k === 'ArrowLeft') j = (i - 1 + n) % n; else if (k === 'Home') j = 0; else if (k === 'End') j = n - 1;
+        if (j != null) { e.preventDefault(); select(tabs[j], true); }
       });
     });
-    report.querySelectorAll('[data-fcopy]').forEach(b => b.addEventListener('click', async () => {
+    slot.querySelectorAll('[data-fcopy]').forEach(b => b.addEventListener('click', async () => {
       try { await navigator.clipboard.writeText(byId(b.dataset.fcopy).generated); showToast('Copied'); track('ai_file_copy', { file: b.dataset.fcopy }); } catch { showToast('Could not copy.'); }
     }));
-    report.querySelectorAll('[data-fdl]').forEach(b => b.addEventListener('click', () => {
+    slot.querySelectorAll('[data-fdl]').forEach(b => b.addEventListener('click', () => {
       const f = byId(b.dataset.fdl); saveBlob(new Blob([f.generated], { type: 'text/plain' }), f.filename); track('ai_file_download', { file: f.id });
     }));
     $('#files-zip')?.addEventListener('click', () => {
       const readme = `AI files for ${r.domain}\nGenerated by Aeoden (aeoden.com) on ${new Date().toISOString().slice(0, 10)}.\n\n` +
-        F.files.map(f => `${f.filename}\n  ${f.name} — ${f.what}\n  Where it goes: ${f.install}\n`).join('\n') +
-        `\nAnything in [brackets] is a placeholder: we didn't find that fact on your site, so we didn't invent it.\n`;
-      const entries = [...F.files.map(f => ({ name: f.id === 'catalog' ? '.well-known/ai-catalog.json' : f.filename, text: f.generated })), { name: 'README.txt', text: readme }];
+        orderFiles(F).map(f => `${f.id === 'catalog' ? '.well-known/ai-catalog.json' : f.filename}\n  ${f.name} \u2014 ${f.what}\n  Where it goes: ${f.install}\n`).join('\n') +
+        `\nAnything in [brackets] is a placeholder: we didn't find that fact on your site, so we didn't invent it.\nWhen you've installed them, check again at https://aeoden.com/?url=${encodeURIComponent(r.domain)}\n`;
+      const entries = [...orderFiles(F).map(f => ({ name: f.id === 'catalog' ? '.well-known/ai-catalog.json' : f.filename, text: f.generated })), { name: 'README.txt', text: readme }];
       saveBlob(zipStore(entries), `${r.domain.replace(/[^a-z0-9.-]/gi, '')}-ai-files.zip`);
       showToast('AI files downloaded'); track('ai_files_zip');
     });
+  }
+
+  /* ---------------- Below the panel: what we noticed, what AI sees, after you install ---------------- */
+  const EFFORT_WORD = { Easy: 'Easy fix', Medium: 'Medium effort', Hard: 'Bigger job' };
+  function renderReport(r) {
+    if (r.blocked) { report.innerHTML = `<div class="wrap"><div class="next">${renderMark(r)}</div></div>`; report.hidden = false; return; }
+    const sees = r.whatAiSees, f = r.familiarity;
+    const noticed = [...(r.fixes || []), ...(r.moreFixes || [])].slice(0, 5);
+    const ready = R.isReady(r);
+    report.innerHTML = `<div class="wrap">
+      <div class="next">
+        <section class="ncard ncard--wide" aria-labelledby="noticed-h">
+          <h2 class="ncard__h" id="noticed-h">What we noticed</h2>
+          <p class="ncard__sub">Beyond the files: the changes on your page that help AI most.</p>
+          ${noticed.length ? `<ol class="fixes">${noticed.map((x, i) => renderFix(x, i + 1)).join('')}</ol>` : `<p class="ncard__sub">Nothing stood out. Your page is in good shape for AI to read.</p>`}
+        </section>
+        <section class="ncard" aria-labelledby="sees-h">
+          <h2 class="ncard__h" id="sees-h">What AI sees</h2>
+          ${sees.unclear ? `<p class="sees__quote">${esc(sees.summary)}</p>` : `<p class="sees__quote"><q>${esc(sees.purpose)}</q></p><p class="sees__src">Quoted from your page’s ${esc(sees.source || 'text')}, never rewritten.</p>`}
+          <dl class="sees__list">
+            <div><dt>Known to AI</dt><dd>${f ? (f.known ? `${esc(f.level)} · <a href="https://www.wikidata.org/wiki/${esc(f.id)}" target="_blank" rel="noopener">Wikidata ${esc(f.id)}</a>` : 'Not yet. AI learns entities from knowledge graphs like Wikidata and Wikipedia; this grows with real coverage.') : 'We couldn’t check this time.'}</dd></div>
+            <div><dt>Site name</dt><dd>${esc(sees.siteName || 'Not found')}</dd></div>
+            <div><dt>Audience</dt><dd>${esc(sees.audience || 'Not stated')}</dd></div>
+          </dl>
+        </section>
+        <section class="ncard" aria-labelledby="after-h">
+          <h2 class="ncard__h" id="after-h">${ready ? 'You’re AI-ready' : 'After you install'}</h2>
+          <p class="ncard__sub">${ready ? 'Every core file is in place. Share it, or check again any time you change your site.' : 'Check again to turn Missing into Ready. When everything is in place, share your AI-ready card.'}</p>
+          <div class="ncard__actions">
+            ${r.demo ? `<a class="btn btn--primary btn--sm" href="#hero" data-cta="try-own">Check my site</a>` : `<button class="btn btn--primary btn--sm" type="button" id="recheck-btn">${icon('refresh')} Check again</button>`}
+            <div class="menu-wrap">
+              <button class="btn btn--ghost btn--sm" type="button" id="dl-btn" aria-haspopup="true" aria-expanded="false" aria-controls="dl-menu">${icon('download')} ${ready ? 'AI-ready card' : 'Status card'}</button>
+              <div class="menu" id="dl-menu" hidden role="menu" aria-label="Choose a size">
+                ${Object.entries(X.SIZES).map(([k, s]) => `<button type="button" role="menuitem" data-size="${k}"><strong>${esc(s.label)}</strong><span>${esc(s.hint)}</span></button>`).join('')}
+              </div>
+            </div>
+            <button class="btn btn--ghost btn--sm" type="button" id="share-btn">${icon('share')} Share</button>
+          </div>
+        </section>
+        ${renderMark(r)}
+      </div>
+    </div>`;
+    report.hidden = false;
+    report.querySelectorAll('[data-reveal]').forEach(b => b.addEventListener('click', () => {
+      const p = document.getElementById(b.dataset.reveal), open = p.hidden;
+      p.hidden = !open; b.setAttribute('aria-expanded', String(open));
+    }));
+    report.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(document.getElementById(b.dataset.copy).querySelector('.snippet').textContent); showToast('Copied'); } catch { showToast('Could not copy.'); }
+    }));
+    $('#recheck-btn')?.addEventListener('click', () => { track('recheck'); window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' }); startScan(lastUrl || r.domain, true); });
+    wireShare(r);
+  }
+
+  function renderMark(r) {
+    const cal = CFG.CALENDLY_URL, li = CFG.LINKEDIN_URL;
+    if (!cal && !li) return '';
+    const ask = r.demo ? 'Questions about your own site?' : r.aiFiles && r.aiFiles.ready === r.aiFiles.total ? 'Want a second pair of eyes?' : 'Want help installing these?';
+    return `<aside class="mark results__mark" aria-labelledby="mark-h">
+      <div class="mark__bar"><span class="lbl"><b>Follow-up</b></span><span class="lbl">Mark Flournoy</span></div>
+      <div class="mark__body">
+        <img class="mark__photo" src="assets/img/mark.jpg" width="88" height="88" alt="Mark Flournoy" loading="lazy">
+        <div>
+          <span class="lbl lbl--signal">${esc(ask)}</span>
+          <h3 class="mark__name" id="mark-h">Talk it through with Mark.</h3>
+          <p>I built Aeoden after watching AI answers change the value of a click. If you'd like a hand installing these files, or want to talk through what AI makes of your site, I'm happy to help.</p>
+        </div>
+      </div>
+      <div class="mark__actions">
+        ${cal ? `<a class="btn arrow" href="${esc(cal)}" target="_blank" rel="noopener" data-cta="calendly">Talk to Mark</a>` : ''}
+        ${li ? `<a class="btn btn--ghost" href="${esc(li)}" target="_blank" rel="noopener" data-cta="linkedin">Message on LinkedIn</a>` : ''}
+      </div>
+    </aside>`;
+  }
+
+  function renderFix(f, n) {
+    const id = 'fix-' + f.id;
+    return `<li class="fix">
+      <span class="fix__n" aria-hidden="true">${n}</span>
+      <div class="fix__body">
+        <h3 class="fix__title">${esc(f.title)}</h3>
+        <p class="fix__why">${esc(f.why)}</p>
+        ${f.action ? `<button class="fix__toggle" type="button" aria-expanded="false" aria-controls="${id}" data-reveal="${id}">${esc(f.action.label)}</button>
+        <div class="fix__reveal" id="${id}" hidden>
+          ${f.action.kind === 'code' ? `<pre class="snippet"><code>${esc(f.action.content)}</code></pre>` : `<div class="snippet snippet--text">${esc(f.action.content)}</div>`}
+          <div class="fix__tools"><button class="btn btn--ghost btn--sm" type="button" data-copy="${id}">Copy</button></div>
+        </div>` : ''}
+      </div>
+    </li>`;
+  }
+
+  document.addEventListener('click', e => {
+    const a = e.target.closest('[data-cta]');
+    if (a) track('cta_' + a.dataset.cta, { location: a.closest('.results') ? 'results' : a.closest('.site-head') ? 'nav' : 'page', score: current ? current.score : undefined });
+  });
+
+  /* ---------------- Card + share ---------------- */
+  function closeMenus(except) {
+    document.querySelectorAll('.menu').forEach(m => { if (m !== except) m.hidden = true; });
+    document.querySelectorAll('[aria-haspopup="true"]').forEach(b => { if (!except || b.getAttribute('aria-controls') !== except.id) b.setAttribute('aria-expanded', 'false'); });
+  }
+  document.addEventListener('click', e => { if (!e.target.closest('.menu-wrap')) closeMenus(); });
+  function wireMenu(btn, menu) {
+    btn.addEventListener('click', () => {
+      const open = menu.hidden;
+      closeMenus(open ? menu : null);
+      menu.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+      if (open) menu.querySelector('button')?.focus();
+    });
+    menu.addEventListener('keydown', e => {
+      const items = [...menu.querySelectorAll('button')];
+      const i = items.indexOf(document.activeElement);
+      if (e.key === 'Escape') { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); btn.focus(); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+    });
+  }
+
+  function wireShare(r) {
+    const dlBtn = $('#dl-btn'), dlMenu = $('#dl-menu');
+    if (dlBtn && dlMenu) {
+      wireMenu(dlBtn, dlMenu);
+      dlMenu.querySelectorAll('[data-size]').forEach(b => b.addEventListener('click', async () => {
+        closeMenus(); dlBtn.focus(); busy(dlBtn, true);
+        try { await X.downloadPNG(r, b.dataset.size); showToast('Card downloaded'); track('export_png', { size: b.dataset.size }); }
+        catch (err) { showToast('Could not create the image. Try another browser.'); console.error(err); }
+        finally { busy(dlBtn, false); }
+      }));
+    }
+    $('#share-btn')?.addEventListener('click', async () => {
+      const shareUrl = r.demo ? `${CFG.SITE_URL}/#demo=${demoKey || 'quotabird'}` : `${CFG.SITE_URL}/?url=${encodeURIComponent(r.domain)}`;
+      const text = R.isReady(r) ? `${r.domain} is AI-ready: llms.txt, structured data and AI crawler rules all in place.` : `Checked ${r.domain} for the files AI reads. Get yours free:`;
+      if (navigator.share) { try { await navigator.share({ title: `${r.domain} on Aeoden`, text, url: shareUrl }); track('share', { method: 'native' }); } catch { /* cancelled */ } }
+      else { try { await navigator.clipboard.writeText(`${text}\n${shareUrl}`); showToast('Link copied'); track('share', { method: 'copy_link' }); } catch { showToast('Could not copy the link.'); } }
+    });
+  }
+
+  function checkAnother() {
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+    input.focus(); input.select();
   }
 
   function saveBlob(blob, name) {
@@ -309,189 +436,6 @@
     return new Blob([...parts, ...central, new Uint8Array(end.buffer)], { type: 'application/zip' });
   }
 
-  function renderReport(r) {
-    const sees = r.whatAiSees, cats = ['access', 'clarity', 'answers', 'trust'];
-    report.innerHTML = `
-      <div class="wrap">
-        ${renderFiles(r)}
-        <div class="report__grid">
-          <section aria-labelledby="fixes-h">
-            <h2 class="report__h" id="fixes-h">Fix these first</h2>
-            <p class="report__sub">Ranked by how many points they cost you.</p>
-            ${r.fixes.length ? `<ol class="fixes">${r.fixes.map((f, i) => renderFix(f, i + 1)).join('')}</ol>` : `<p class="report__empty">Nothing urgent. Every weighted check passes.</p>`}
-            ${r.moreFixes && r.moreFixes.length ? `<details class="more-fixes"><summary>${r.moreFixes.length} more improvements</summary><ul>${r.moreFixes.map(f => `<li><span>${esc(f.title)}</span><span>${esc(f.categoryName)}</span></li>`).join('')}</ul></details>` : ''}
-          </section>
-          <aside class="report__side">
-            <section class="sees" aria-labelledby="sees-h">
-              <h2 class="report__h report__h--sm" id="sees-h">What AI sees</h2>
-              ${sees.unclear ? `<p class="sees__quote">${esc(sees.summary)}</p>` : `<p class="sees__quote"><q>${esc(sees.purpose)}</q></p><p class="sees__src">Quoted from the page's ${esc(sees.source || 'text')}, never rewritten. Confidence: ${esc(sees.confidence)}.</p>`}
-              <dl class="sees__list">
-                <div><dt>Site name</dt><dd>${esc(sees.siteName || 'Not found')}</dd></div>
-                <div><dt>Audience</dt><dd>${esc(sees.audience || 'Not stated')}</dd></div>
-                <div><dt>Topics</dt><dd>${esc(sees.topics && sees.topics.length ? sees.topics.join(', ') : 'No clear sections')}</dd></div>
-              </dl>
-            </section>
-            ${familiarityBlock(r.familiarity, r)}
-            ${renderMark(r)}
-          </aside>
-        </div>
-        <section class="report__checks" aria-labelledby="checks-h">
-          <h2 class="report__h" id="checks-h">Every check</h2>
-          <p class="report__sub">Open a category to see what passed and what needs attention.</p>
-          <div class="acc">
-            ${cats.map(k => renderCat(r.categories[k], k)).join('')}
-            ${r.extras && r.extras.length ? `<details class="acc__row acc__row--plain"><summary><span class="acc__name">Also noted</span><span class="acc__label">Not scored</span><span class="acc__chev" aria-hidden="true"></span></summary><div class="acc__body"><ul class="checks">${r.extras.map(renderCheck).join('')}</ul></div></details>` : ''}
-          </div>
-          <p class="report__note">A diagnostic score, not a guarantee. <a href="methodology/index.html">How the score works</a></p>
-        </section>
-        <p class="report__again"><button class="btn btn--ghost" type="button" id="again-btn">${r.demo ? 'Check my site' : 'Check another site'}</button></p>
-      </div>`;
-    report.hidden = false;
-    wireFiles(r);
-    report.querySelectorAll('[data-reveal]').forEach(b => b.addEventListener('click', () => {
-      const p = document.getElementById(b.dataset.reveal), open = p.hidden;
-      p.hidden = !open; b.setAttribute('aria-expanded', String(open));
-      if (open) track('show_fix', { fix: b.dataset.reveal });
-    }));
-    report.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', async () => {
-      try { await navigator.clipboard.writeText(document.getElementById(b.dataset.copy).querySelector('.snippet').textContent); showToast('Copied'); } catch { showToast('Could not copy.'); }
-    }));
-    $('#again-btn').addEventListener('click', checkAnother);
-  }
-
-  function renderMark(r) {
-    const cal = CFG.CALENDLY_URL, li = CFG.LINKEDIN_URL;
-    if (!cal && !li) return '';
-    const ask = r.demo ? 'Questions about your own site?' : r.score >= 85 ? 'Want to keep it that way?' : 'Want help with these fixes?';
-    return `<aside class="mark results__mark" aria-labelledby="mark-h">
-      <div class="mark__bar"><span class="lbl"><b>Follow-up</b></span><span class="lbl">Mark Flournoy</span></div>
-      <div class="mark__body">
-        <img class="mark__photo" src="assets/img/mark.jpg" width="88" height="88" alt="Mark Flournoy" loading="lazy">
-        <div>
-          <span class="lbl lbl--signal">${esc(ask)}</span>
-          <h3 class="mark__name" id="mark-h">Talk it through with Mark.</h3>
-          <p>I built Aeoden after watching AI answers change the value of a click. If your card has more to fix than you'd like, I'm happy to walk through it with you.</p>
-        </div>
-      </div>
-      <div class="mark__actions">
-        ${cal ? `<a class="btn arrow" href="${esc(cal)}" target="_blank" rel="noopener" data-cta="calendly">Talk to Mark</a>` : ''}
-        ${li ? `<a class="btn btn--ghost" href="${esc(li)}" target="_blank" rel="noopener" data-cta="linkedin">Message on LinkedIn</a>` : ''}
-      </div>
-    </aside>`;
-  }
-
-  function renderFix(f, n) {
-    const id = 'fix-' + f.id;
-    return `<li class="fix">
-      <span class="fix__n" aria-hidden="true">${n}</span>
-      <div class="fix__body">
-        <h3 class="fix__title">${esc(n === 1 ? R.shareFix(current) : f.title)}</h3>
-        <p class="fix__why">${esc(f.why)}</p>
-        <p class="fix__meta">${esc(f.categoryName)} · ${esc(EFFORT_WORD[f.effort] || f.effort)}</p>
-        ${f.action ? `<button class="fix__toggle" type="button" aria-expanded="false" aria-controls="${id}" data-reveal="${id}">${esc(f.action.label)}</button>
-        <div class="fix__reveal" id="${id}" hidden>
-          ${f.action.kind === 'code' ? `<pre class="snippet"><code>${esc(f.action.content)}</code></pre>` : `<div class="snippet snippet--text">${esc(f.action.content)}</div>`}
-          <div class="fix__tools"><button class="btn btn--ghost btn--sm" type="button" data-copy="${id}">Copy</button>
-          ${/\[/.test(f.action.content) ? `<span class="snippet__note">Anything in [brackets] is a placeholder. We did not find that fact on your page, so we did not invent it.</span>` : ''}</div>
-        </div>` : ''}
-      </div>
-    </li>`;
-  }
-
-  function renderCat(c, k) {
-    const needs = c.checks.filter(k => k.status !== 'pass');
-    const passing = c.checks.filter(k => k.status === 'pass');
-    const pct = c.notEvaluated ? 0 : c.score;
-    let body;
-    if (!c.checks.length) body = `<p class="acc__empty">Not evaluated because the page could not be loaded. Fix access first, then scan again.</p>`;
-    else {
-      body = needs.length ? `<ul class="checks">${needs.map(renderCheck).join('')}</ul>` : `<p class="acc__empty">Everything in this category passes.</p>`;
-      if (passing.length) body += `<details class="acc__passing"><summary>Show ${passing.length} passing check${passing.length === 1 ? '' : 's'}</summary><ul class="checks">${passing.map(renderCheck).join('')}</ul></details>`;
-    }
-    return `<details class="acc__row" id="cat-${k || c.name.toLowerCase()}">
-      <summary>
-        <span class="acc__name">${esc(c.name)}</span>
-        <span class="acc__score">${c.notEvaluated ? '–' : c.score}</span>
-        <span class="acc__chev" aria-hidden="true"></span>
-        <span class="seg${['C', 'D', 'F'].includes(c.grade) ? ' is-weak' : ''}" aria-hidden="true">${Array.from({ length: 20 }, (_, i) => `<i${i < Math.round(pct / 5) ? ' class="on"' : ''}></i>`).join('')}</span>
-        <span class="acc__label">${esc(c.label)}${needs.length && c.checks.length ? ` · ${needs.length} to review` : ''}</span>
-        <span class="sr-only">${c.notEvaluated ? 'not evaluated' : `${c.score} out of 100`}</span>
-      </summary>
-      <div class="acc__body"><p class="acc__q">${esc(c.question)}</p>${body}</div>
-    </details>`;
-  }
-
-  const STATUS_WORD = { pass: 'Pass', warn: 'Partial', fail: 'Missing', info: 'Note' };
-  const STATUS_GLYPH = { pass: '✓', warn: '!', fail: '×', info: 'i' };
-  function renderCheck(k) {
-    return `<li class="check" data-status="${esc(k.status)}">
-      <span class="check__dot" aria-hidden="true">${STATUS_GLYPH[k.status] || ''}</span>
-      <div>
-        <div class="check__title"><span class="sr-only">${STATUS_WORD[k.status] || ''}: </span>${esc(k.title)}</div>
-        <div class="check__detail">${esc(k.detail)}${k.evidence && k.status !== 'pass' ? ` <code>${esc(k.evidence)}</code>` : ''}</div>
-      </div>
-    </li>`;
-  }
-
-  document.addEventListener('click', e => {
-    const a = e.target.closest('[data-cta]');
-    if (a) track('cta_' + a.dataset.cta, { location: a.closest('.results') ? 'results' : a.closest('.site-head') ? 'nav' : 'page', score: current ? current.score : undefined });
-  });
-
-  /* ---------------- Actions ---------------- */
-  function closeMenus(except) {
-    document.querySelectorAll('.menu').forEach(m => { if (m !== except) m.hidden = true; });
-    document.querySelectorAll('[aria-haspopup="true"]').forEach(b => { if (!except || b.getAttribute('aria-controls') !== except.id) b.setAttribute('aria-expanded', 'false'); });
-  }
-  document.addEventListener('click', e => { if (!e.target.closest('.menu-wrap')) closeMenus(); });
-  function wireMenu(btn, menu) {
-    btn.addEventListener('click', () => {
-      const open = menu.hidden;
-      closeMenus(open ? menu : null);
-      menu.hidden = !open;
-      btn.setAttribute('aria-expanded', String(open));
-      if (open) menu.querySelector('button')?.focus();
-    });
-    menu.addEventListener('keydown', e => {
-      const items = [...menu.querySelectorAll('button')];
-      const i = items.indexOf(document.activeElement);
-      if (e.key === 'Escape') { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); btn.focus(); }
-      else if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
-    });
-  }
-
-  function wireActions(r) {
-    const dlBtn = $('#dl-btn'), dlMenu = $('#dl-menu'), moreBtn = $('#more-btn'), moreMenu = $('#more-menu');
-    wireMenu(dlBtn, dlMenu); wireMenu(moreBtn, moreMenu);
-    dlMenu.querySelectorAll('[data-size]').forEach(b => b.addEventListener('click', async () => {
-      closeMenus(); dlBtn.focus(); busy(dlBtn, true);
-      try { await X.downloadPNG(r, b.dataset.size); showToast('Card downloaded'); track('export_png', { size: b.dataset.size }); }
-      catch (err) { showToast('Could not create the image. Try another browser.'); console.error(err); }
-      finally { busy(dlBtn, false); }
-    }));
-    moreMenu.addEventListener('click', async e => {
-      const b = e.target.closest('[data-act]'); if (!b) return;
-      closeMenus(); moreBtn.focus();
-      try {
-        if (b.dataset.act === 'copy-img') { await X.copyPNG(r, 'square'); showToast('Card image copied'); track('copy_image'); }
-        if (b.dataset.act === 'copy-txt') { await navigator.clipboard.writeText(R.summaryText(r)); showToast('Summary copied'); track('copy_summary'); }
-        if (b.dataset.act === 'svg') { await X.downloadSVG(r, 'square'); showToast('SVG downloaded'); track('export_svg'); }
-      } catch { showToast(b.dataset.act === 'copy-img' ? 'Your browser blocked image copying. Download instead.' : 'That did not work. Try again.'); }
-    });
-    $('#share-btn').addEventListener('click', async () => {
-      const shareUrl = r.demo ? `${CFG.SITE_URL}/#demo=${demoKey || 'quotabird'}` : `${CFG.SITE_URL}/?url=${encodeURIComponent(r.domain)}`;
-      const text = `${r.domain} scored ${r.score}/100 (${r.status}) on its AEO Card: how well AI can understand the site.`;
-      if (navigator.share) { try { await navigator.share({ title: `AEO Card — ${r.domain}`, text, url: shareUrl }); track('share', { method: 'native' }); } catch { /* cancelled */ } }
-      else { try { await navigator.clipboard.writeText(`${text}\n${shareUrl}`); showToast('Link copied'); track('share', { method: 'copy_link' }); } catch { showToast('Could not copy the link.'); } }
-    });
-  }
-
-  function checkAnother() {
-    window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
-    input.focus(); input.select();
-  }
-
   function busy(btn, on) { if (!btn) return; btn.disabled = on; btn.setAttribute('aria-busy', String(on)); }
   let toastTimer;
   function showToast(msg) {
@@ -506,6 +450,8 @@
   function prefersReducedMotion() { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
   function icon(name) {
     const paths = {
+      copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>',
+      refresh: '<path d="M20 11a8 8 0 0 0-14.9-3.5M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.9 3.5M20 20v-4h-4"/>',
       download: '<path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>',
       image: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 16l-5-5-7 7"/>',
       text: '<path d="M4 6h16M4 12h10M4 18h13"/>',

@@ -3,23 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Aeoden – Can AI understand your website? Free AEO check + AI files</title>
-<meta name="description" content="Aeoden checks how ChatGPT, Claude, Gemini and Perplexity read your website, then writes the files that help them: llms.txt, structured data, AI crawler rules and an ai-catalog.json. Free, no login, about 30 seconds.">
+<title>Aeoden – Make your website readable to AI. Free llms.txt, structured data and AI crawler rules</title>
+<meta name="description" content="Enter your URL and get the files AI reads, written from your own site: llms.txt, Organization structured data, robots.txt rules for AI crawlers, and an ai-catalog.json if you need one. Free, no login, about 30 seconds.">
 <link rel="canonical" href="https://aeoden.com/">
 <link rel="ai-catalog" href="/.well-known/ai-catalog.json" type="application/ai-catalog+json">
 <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
 <meta name="theme-color" content="#12372A">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Aeoden">
-<meta property="og:title" content="Can AI understand your website?">
-<meta property="og:description" content="See how AI reads your website, then get the files that fix it: llms.txt, structured data, AI crawler rules, ai-catalog.json. Free.">
+<meta property="og:title" content="Make your website readable to AI">
+<meta property="og:description" content="Get your llms.txt, structured data and AI crawler rules, written from your own site. Free.">
 <meta property="og:url" content="https://aeoden.com/">
 <meta property="og:image" content="https://aeoden.com/assets/img/og-card.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Can AI understand your website?">
-<meta name="twitter:description" content="See how AI reads your website, then get the files that fix it. Free.">
+<meta name="twitter:title" content="Make your website readable to AI">
+<meta name="twitter:description" content="Get the files AI reads, written from your own site. Free.">
 <meta name="twitter:image" content="https://aeoden.com/assets/img/og-card.png">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
@@ -38,7 +38,7 @@
    "name": "Aeoden",
    "url": "https://aeoden.com/",
    "logo": "https://aeoden.com/assets/img/logo.png",
-   "description": "Aeoden checks how AI systems like ChatGPT, Claude, Gemini and Perplexity read a website, scores it on an AEO Card, and generates the files that help: llms.txt, structured data, AI crawler rules and ai-catalog.json.",
+   "description": "Aeoden checks the files and signals AI systems like ChatGPT, Claude, Gemini and Perplexity use to read a website, and writes what is missing from the site's own content: llms.txt, structured data, AI crawler rules and ai-catalog.json.",
    "founder": {
     "@type": "Person",
     "name": "Mark Flournoy",
@@ -68,7 +68,7 @@
     "price": "0",
     "priceCurrency": "USD"
    },
-   "description": "Aeoden checks how AI systems like ChatGPT, Claude, Gemini and Perplexity read a website, scores it on an AEO Card, and generates the files that help: llms.txt, structured data, AI crawler rules and ai-catalog.json."
+   "description": "Aeoden checks the files and signals AI systems like ChatGPT, Claude, Gemini and Perplexity use to read a website, and writes what is missing from the site's own content: llms.txt, structured data, AI crawler rules and ai-catalog.json."
   },
   {
    "@type": "FAQPage",
@@ -78,7 +78,7 @@
      "name": "What does Aeoden do?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "It checks how well AI systems like ChatGPT, Claude, Gemini and Perplexity can read your website, gives you a score on an AEO Card, and writes the files that help: llms.txt, structured data, AI crawler rules, and an ai-catalog.json if you need one. Everything is generated from your own site."
+      "text": "It checks the files and signals AI systems like ChatGPT, Claude, Gemini and Perplexity use to read your website, marks each one Ready, Needs fix or Missing, and writes what you need: llms.txt, structured data, AI crawler rules, and an ai-catalog.json if you offer agent tools. Everything is generated from your own site."
      }
     },
     {
@@ -99,10 +99,10 @@
     },
     {
      "@type": "Question",
-     "name": "What is an AEO Card?",
+     "name": "Why no score?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "A one-card summary of how ready your website is for AI answer engines. It grades four things, whether AI can reach the page, tell what the site does, extract useful answers, and trust it enough to cite it, and shows whether AI already knows you as an entity."
+      "text": "Because a number invites arguments and doesn't tell you what to do. A file is either in place or it isn't, and if it isn't, we hand it to you. We still show what we noticed on your page and whether AI already knows you as an entity, as facts rather than a grade."
      }
     },
     {
@@ -143,25 +143,24 @@
 <main id="main">
   <section class="hero theme-forest" id="hero" aria-labelledby="hero-h">
     <div class="wrap hero__in">
-      <p class="eyebrow">Free AEO check + AI files for ChatGPT, Claude, Gemini and Perplexity</p>
-      <h1 id="hero-h">Can AI understand your website?</h1>
+      <p class="eyebrow">Free · No login · About 30 seconds</p>
+      <h1 id="hero-h">Make your website readable to AI</h1>
       <div class="hero__rule" aria-hidden="true"></div>
-      <ul class="points"><li><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></span>Scan your site</li><li><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V11"/><path d="M10 19V6"/><path d="M16 19v-5"/><path d="M3 19h18"/></svg></span>Get your score</li><li><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 14l2 2 4-4"/></svg></span>Get your AI files</li></ul>
+      <p class="hero__lede">Get your llms.txt, structured data and AI crawler rules, written from your own site.</p>
       <form class="scan-form" id="scan-form" novalidate>
         <label class="sr-only" for="url-input">Website URL</label>
         <div class="scan-form__row">
           <input id="url-input" name="url" type="url" inputmode="url" autocomplete="url" spellcheck="false" placeholder="yourwebsite.com" required aria-describedby="form-hint form-error">
-          <button class="btn btn--primary" type="submit" id="scan-submit">Check my site</button>
+          <button class="btn btn--primary" type="submit" id="scan-submit">Get my AI files</button>
         </div>
         <p class="scan-form__error" id="form-error" aria-live="polite"></p>
-        <p class="scan-form__hint" id="form-hint">Free. No login. About 30 seconds. You get a score and ready-to-install AI files.</p>
+        <p class="scan-form__hint" id="form-hint">Works for ChatGPT, Claude, Gemini and Perplexity. Nothing to install to try it.</p>
         <p class="scan-form__hint" id="demo-hint" hidden>The live scanner is not connected on this copy of the site.</p>
       </form>
     </div>
-    <div class="wrap card-stage">
-      <div id="card-slot"></div>
-      <p class="card-caption" id="card-caption">Example result. Check your own site for its score and AI files, or <a href="#demo=quotabird" data-demo="quotabird">see the full example</a>.</p>
-      <div class="card-actions" id="card-actions" hidden></div>
+    <div class="wrap panel-stage">
+      <div id="panel-slot"></div>
+      <p class="card-caption" id="panel-caption">An example. Enter your own site above to get files written for it, or <a href="#demo=quotabird" data-demo="quotabird">see the full example</a>.</p>
     </div>
   </section>
 
@@ -170,12 +169,12 @@
   <section class="sec home-only" aria-labelledby="model-h">
     <div class="wrap">
       <p class="eyebrow">How it works</p>
-      <h2 class="sec__title" id="model-h">Check it. Score it. Fix it.</h2>
+      <h2 class="sec__title" id="model-h">Check it. Get the files. Install. Check again.</h2>
       <ol class="steps">
-        <li><h3>Scan</h3><p>We read your homepage, robots.txt, sitemap and AI files the way an AI crawler does.</p></li>
-        <li><h3>Score</h3><p>Your AEO Card: access, clarity, answers and trust, plus whether AI already knows you.</p></li>
-        <li><h3>Fix</h3><p>Ready-to-install AI files, written from your own site. Copy them, or download them all.</p></li>
-        <li><h3>Share</h3><p>Download your card for LinkedIn or a client report, and rescan after you install.</p></li>
+        <li><h3>Check</h3><p>We read your homepage, robots.txt, sitemap, llms.txt and AI catalog the way an AI crawler does.</p></li>
+        <li><h3>Get the files</h3><p>Each file is marked Ready, Needs fix or Missing, and written for you from your own site.</p></li>
+        <li><h3>Install</h3><p>Copy them, or download them all with a short note on where each one goes.</p></li>
+        <li><h3>Check again</h3><p>Turn Missing into Ready, then share your AI-ready card.</p></li>
       </ol>
     </div>
   </section>
@@ -203,8 +202,8 @@
         <h2 class="sec__title" id="method-h">A small, honest tool for a noisy topic.</h2>
       </div>
       <div>
-        <p class="sec__lede">Aeoden doesn't promise rankings, citations, or secret AI tricks. It reads the public signals AI systems actually use, the page as a crawler receives it, crawler rules, structure and visible content, and turns them into one understandable card.</p>
-        <p class="mt-2"><a class="link-arrow" href="methodology/index.html">How the score works</a></p>
+        <p class="sec__lede">Aeoden doesn't promise rankings, citations, or secret AI tricks. It reads the public signals AI systems actually use, your page as a crawler receives it, your crawler rules, your structure and your files, and writes what's missing using only facts from your own site.</p>
+        <p class="mt-2"><a class="link-arrow" href="methodology/index.html">How we check and build your files</a></p>
       </div>
     </div>
   </section>
@@ -232,10 +231,10 @@
         <h2 class="sec__title" id="faq-h">Questions people ask.</h2>
       </div>
       <div class="faq">
-        <details><summary>What does Aeoden do?</summary><p>It checks how well AI systems like ChatGPT, Claude, Gemini and Perplexity can read your website, gives you a score on an AEO Card, and writes the files that help: llms.txt, structured data, AI crawler rules, and an ai-catalog.json if you need one. Everything is generated from your own site.</p></details>
+        <details><summary>What does Aeoden do?</summary><p>It checks the files and signals AI systems like ChatGPT, Claude, Gemini and Perplexity use to read your website, marks each one Ready, Needs fix or Missing, and writes what you need: llms.txt, structured data, AI crawler rules, and an ai-catalog.json if you offer agent tools. Everything is generated from your own site.</p></details>
         <details><summary>Will these files get me cited by ChatGPT?</summary><p>No file can promise that, and we won't pretend otherwise. Structured data and clear crawler rules are well-established ways to help machines read a site. llms.txt is a widely adopted convention, but no major AI provider has confirmed using it when composing answers. ai-catalog.json is a draft standard (June 2026) for sites that offer agent tools. They're small, cheap to install, and remove obstacles; they don't buy placement.</p></details>
         <details><summary>What is ai-catalog.json, and do I need one?</summary><p>It's the manifest from the Agentic Resource Discovery (ARD) draft standard, served at /.well-known/ai-catalog.json. It lists the agent resources your domain offers, such as MCP servers, AI agents and skills. If you don't offer any, you don't need one. An empty catalog is valid and simply names you as the publisher. Web pages don't belong in it; list them in llms.txt instead.</p></details>
-        <details><summary>What is an AEO Card?</summary><p>A one-card summary of how ready your website is for AI answer engines. It grades four things, whether AI can reach the page, tell what the site does, extract useful answers, and trust it enough to cite it, and shows whether AI already knows you as an entity.</p></details>
+        <details><summary>Why no score?</summary><p>Because a number invites arguments and doesn't tell you what to do. A file is either in place or it isn't, and if it isn't, we hand it to you. We still show what we noticed on your page and whether AI already knows you as an entity, as facts rather than a grade.</p></details>
         <details><summary>What does the scanner actually read?</summary><p>Your homepage HTML, response headers, robots.txt, sitemap.xml, llms.txt and /.well-known/ai-catalog.json, plus one Wikidata lookup. It follows up to five redirects and reads at most 1.5 MB. It doesn't run JavaScript, log in, or crawl other pages.</p></details>
         <details><summary>Is it free? Do you store my site?</summary><p>Free, no login. Results are cached for about ten minutes so repeat checks are fast. Nothing else is stored. Your AI files are generated during the scan and downloaded straight to your device.</p></details>
       </div>
@@ -252,7 +251,7 @@
         <a href="what-is-aeo/index.html">What is AEO</a><a href="aeo-vs-seo/index.html">AEO vs SEO</a><a href="chatgpt-search/index.html">ChatGPT search</a><a href="llms-txt/index.html">llms.txt</a><a href="methodology/index.html">Methodology</a><a href="sources/index.html">Sources</a><a href="about/index.html">About</a><a href="privacy/index.html">Privacy</a>
       </nav>
     </div>
-    <div class="site-foot__base"><span>aeoden.com · AEO diagnostics for the AI web</span><span>Diagnostic score, not a guarantee</span><span>© 2026 Aeoden</span></div>
+    <div class="site-foot__base"><span>aeoden.com · AEO diagnostics for the AI web</span><span>Diagnostic, not a guarantee</span><span>© 2026 Aeoden</span></div>
   </div>
 </footer>
 

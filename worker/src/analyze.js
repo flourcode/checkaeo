@@ -1,7 +1,7 @@
 /**
  * Aeoden analyzer
  * Pure function: takes a fetched page (html, headers, robots.txt, timing)
- * and returns a structured scan result that powers the AEO Card.
+ * and returns a structured scan result: page checks, "What AI sees", and the AI files.
  *
  * GROUNDING RULE (hard): "What AI sees" and every fix suggestion are built only from
  * text that was literally present in the fetched page. The summary is a verbatim

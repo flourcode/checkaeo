@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Methodology: how the AEO score works – Aeoden</title>
-<meta name="description" content="Exactly how Aeoden scores a page: page readiness (Access 30%, Clarity 25%, Answers 25%, Trust 20%) blended 75/25 with AI familiarity from Wikidata, every check with its points, gating rules, blocked scans, and the limitations of a heuristic scan.">
+<title>Methodology: how Aeoden checks and builds your AI files – Aeoden</title>
+<meta name="description" content="How Aeoden checks and generates llms.txt, structured data, AI crawler rules and ai-catalog.json, the page checks behind What we noticed, the Wikidata Known-to-AI lookup, blocked scans, and the limitations.">
 <link rel="canonical" href="https://aeoden.com/methodology/">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#12372A">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Aeoden">
-<meta property="og:title" content="How the AEO score works">
-<meta property="og:description" content="Exactly how Aeoden scores a page: page readiness (Access 30%, Clarity 25%, Answers 25%, Trust 20%) blended 75/25 with AI familiarity from Wikidata, every check with its points, gating rules, blocked scans, and the limitations of a heuristic scan.">
+<meta property="og:title" content="How Aeoden checks and builds your files">
+<meta property="og:description" content="How Aeoden checks and generates llms.txt, structured data, AI crawler rules and ai-catalog.json, the page checks behind What we noticed, the Wikidata Known-to-AI lookup, blocked scans, and the limitations.">
 <meta property="og:url" content="https://aeoden.com/methodology/">
 <meta property="og:image" content="https://aeoden.com/assets/img/og-card.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -22,7 +22,7 @@
 <link rel="stylesheet" href="../assets/css/main.css">
 <script>document.write(location.protocol === 'file:' ? '<script src="../assets/fonts/fonts.js"><\/script>' : '<link rel="stylesheet" href="../assets/css/fonts.css">');</script>
 <noscript><link rel="stylesheet" href="../assets/css/fonts.css"></noscript>
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Article", "headline": "How the AEO score works", "description": "Exactly how Aeoden scores a page: page readiness (Access 30%, Clarity 25%, Answers 25%, Trust 20%) blended 75/25 with AI familiarity from Wikidata, every check with its points, gating rules, blocked scans, and the limitations of a heuristic scan.", "url": "https://aeoden.com/methodology/", "datePublished": "2026-09-30", "dateModified": "2026-09-30", "author": {"@type": "Person", "name": "Mark Flournoy", "url": "https://www.linkedin.com/in/markflournoy/"}, "publisher": {"@id": "https://aeoden.com/#org"}, "isPartOf": {"@id": "https://aeoden.com/#site"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Aeoden", "item": "https://aeoden.com/"}, {"@type": "ListItem", "position": 2, "name": "How the AEO score works", "item": "https://aeoden.com/methodology/"}]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Article", "headline": "How Aeoden checks and builds your files", "description": "How Aeoden checks and generates llms.txt, structured data, AI crawler rules and ai-catalog.json, the page checks behind What we noticed, the Wikidata Known-to-AI lookup, blocked scans, and the limitations.", "url": "https://aeoden.com/methodology/", "datePublished": "2026-09-30", "dateModified": "2026-09-30", "author": {"@type": "Person", "name": "Mark Flournoy", "url": "https://www.linkedin.com/in/markflournoy/"}, "publisher": {"@id": "https://aeoden.com/#org"}, "isPartOf": {"@id": "https://aeoden.com/#site"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Aeoden", "item": "https://aeoden.com/"}, {"@type": "ListItem", "position": 2, "name": "How Aeoden checks and builds your files", "item": "https://aeoden.com/methodology/"}]}]}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -38,56 +38,23 @@
 </header>
 <main id="main" class="page">
 <div class="theme-forest page-band"><div class="wrap">
-  <header class="page-head"><span class="lbl lbl--signal">Methodology</span><h1>How the AEO score works</h1><p>Four weighted categories, every check, every point. Nothing hidden.</p></header>
+  <header class="page-head"><span class="lbl lbl--signal">Methodology</span><h1>How Aeoden checks and builds your files</h1><p>Every file rule and every page check. Nothing hidden.</p></header>
 </div></div>
 <div class="wrap">
   <div class="doc">
     <aside class="doc__rail"><span class="lbl lbl--signal">Methodology</span><span class="lbl">Updated / 2026-09-30</span></aside>
     <div class="prose">
 
-<p class="lead">Aeoden scores one page (usually your homepage) on four questions, each from 0–100, and adds one outside signal: whether AI already knows the site as an entity. Every check below is a plain heuristic. Nothing is hidden and nothing is learned from your data.</p>
+<p class="lead">Aeoden checks the files and signals AI systems use to read a website, marks each file Ready, Needs fix or Missing, and writes what's missing from the site's own content. This page documents every check and every rule. Nothing is hidden, and nothing is learned from your data.</p>
 
 <h2>What the scanner fetches</h2>
 <ul>
 <li>The page you enter, following up to five redirects, reading at most 1.5 MB, with a 12-second timeout. It identifies itself as <code>AeodenBot/1.0</code>.</li>
-<li><code>/robots.txt</code>, <code>/sitemap.xml</code> and <code>/llms.txt</code> at the final domain.</li>
+<li><code>/robots.txt</code>, <code>/sitemap.xml</code> (one level of sitemap index), <code>/llms.txt</code> and <code>/.well-known/ai-catalog.json</code> at the final domain.</li>
 <li>Response headers, including <code>X-Robots-Tag</code>.</li>
 <li>One query to <a href="https://www.wikidata.org/">Wikidata</a>, the open knowledge graph behind Wikipedia, asking which entity lists this exact domain as its official website.</li>
 </ul>
 <p>It does not run JavaScript, log in, submit forms, or crawl other pages. It only requests public http and https URLs and refuses private or internal addresses.</p>
-
-<h2>The score</h2>
-<p><strong>Page readiness = Access × 0.30 + Clarity × 0.25 + Answers × 0.25 + Trust × 0.20</strong>. This is what your page itself does to help AI read it.</p>
-<p><strong>Overall = Page readiness × 0.75 + AI familiarity × 0.25</strong>, rounded to a whole number. Both parts are shown in the full report.</p>
-<h3>AI familiarity</h3>
-<p>Language models don't learn what a company is from its homepage alone. They learn it from the wider web, and knowledge graphs like Wikidata and Wikipedia are a large part of that. A famous brand with a sparse homepage is still well understood; a new site with a perfect homepage is understood only through its page. Familiarity measures the first part:</p>
-<div class="table-wrap"><table><thead><tr><th>What we find in Wikidata</th><th>Familiarity</th></tr></thead><tbody>
-<tr><td>Entity with 50+ Wikipedia editions</td><td>100 · Widely known</td></tr>
-<tr><td>20–49 editions</td><td>85 · Well known</td></tr>
-<tr><td>5–19 editions</td><td>65 · Known</td></tr>
-<tr><td>1–4 editions</td><td>45 · Known</td></tr>
-<tr><td>Listed, no Wikipedia article</td><td>30 · Listed</td></tr>
-<tr><td>No entity lists this domain as its official website</td><td>0 · Not yet a known entity</td></tr>
-</tbody></table></div>
-<p>We match on the official-website property only, never on a name, so a site is never credited with someone else's fame. If Wikidata can't be reached during a scan, the score falls back to page readiness alone and the report says so. Familiarity isn't something to "fix" quickly; it grows with real coverage, so it never appears as a first fix.</p>
-<div class="callout"><strong>When a site blocks our scanner.</strong> Many large sites refuse unknown bots (HTTP 401, 403, 429 or 503, or a Cloudflare, Akamai, Imperva or similar challenge page). That tells us about their bot protection, not about AI: those same sites often allow or license access to AI crawlers. In that case Aeoden gives <strong>no score</strong>. It shows what it could verify instead: which AI crawlers the site's robots.txt allows, and its AI familiarity.</div>
-<p>Grades: A 90–100, B 80–89, C 70–79, D 60–69, F below 60. Status labels: Excellent (90+), Strong (80–89), Mostly clear (70–79), Needs work (60–69), Hard to understand (below 60), and Hard to reach when Access is below 40.</p>
-<div class="callout"><strong>Gating rules.</strong> If the page returns another error (for example 404 or 500), Access is capped at 30 and the other three categories are marked "not evaluated", because what we received was an error page, not your content. If the page is noindexed, blocks all crawlers, or blocks three or more answer-engine crawlers, Access is capped at 45. If it blocks one or two, Access is capped at 65.</div>
-
-<h2>Access (30%) — can AI reach this page?</h2>
-<div class="table-wrap"><table><thead><tr><th>Check</th><th>Points</th><th>What passes</th></tr></thead><tbody><tr><td>Served over HTTPS</td><td>10</td><td>Final URL is https</td></tr><tr><td>Page responds successfully</td><td>20</td><td>HTTP 200. Other 2xx/3xx earn partial credit; 4xx/5xx earn none.</td></tr><tr><td>Redirect chain is short</td><td>6</td><td>0–1 redirects; 2 earns partial</td></tr><tr><td>robots.txt is present and sane</td><td>8</td><td>Exists and does not disallow everyone. Missing earns partial (allowed, but a sitemap pointer helps).</td></tr><tr><td>AI search crawlers are allowed</td><td>12</td><td>None of OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Googlebot, Bingbot is disallowed. Training crawlers (GPTBot, ClaudeBot, Google-Extended, CCBot) are reported but not scored.</td></tr><tr><td>Page is indexable</td><td>14</td><td>No noindex in meta robots or X-Robots-Tag</td></tr><tr><td>Sitemap is discoverable</td><td>6</td><td>Listed in robots.txt or present at /sitemap.xml</td></tr><tr><td>Meaningful text in the HTML</td><td>14</td><td>150+ words of visible text in the raw HTML; 50–150 earns half</td></tr><tr><td>Responds quickly</td><td>4</td><td>HTML fetched in under 2 s; under 5 s earns half</td></tr><tr><td>Canonical URL is set</td><td>6</td><td>Present and on the same domain. Absent earns partial.</td></tr></tbody></table></div>
-<h2>Clarity (25%) — can a machine tell what this site does?</h2>
-<div class="table-wrap"><table><thead><tr><th>Check</th><th>Points</th><th>What passes</th></tr></thead><tbody><tr><td>Descriptive page title</td><td>15</td><td>Present, 15–70 characters, not generic ("Home", "Welcome")</td></tr><tr><td>Meta description explains the page</td><td>10</td><td>Present, 50–170 characters</td></tr><tr><td>Clear main heading (H1)</td><td>15</td><td>Exactly one H1 of three or more words that is not a greeting</td></tr><tr><td>Site or brand name is identifiable</td><td>10</td><td>og:site_name or Organization/WebSite schema; the title earns partial</td></tr><tr><td>Plain-English statement of what the site does</td><td>20</td><td>A declarative sentence near the top (description, H1, first H2 or first paragraphs) with concrete words. Marketing vagueness ("innovative solutions", "empower", "seamless") lowers it.</td></tr><tr><td>Audience is stated</td><td>8</td><td>A "for [audience]" phrase near the top</td></tr><tr><td>Headings outline the page</td><td>10</td><td>Two or more H2s; skipped levels reduce it</td></tr><tr><td>Semantic HTML landmarks</td><td>7</td><td>main, nav, header, footer — a quarter each</td></tr><tr><td>Descriptive navigation</td><td>5</td><td>Nav links are not "click here" or "learn more"</td></tr></tbody></table></div>
-<h2>Answers (25%) — does the page answer questions directly?</h2>
-<p>The principle behind this category is: <strong>can the page provide clean, self-contained answers?</strong> The four core signals carry 75 of the 100 points. FAQs, question-shaped headings and definition sentences are supporting signals worth 15 points combined, and when a page already explains itself directly their absence costs only a few points. A clear product homepage should be able to score well here without an FAQ or a single question heading. We do not want every homepage to become "What is X? X is a…".</p>
-<div class="table-wrap"><table><thead><tr><th>Check</th><th>Points</th><th>What passes</th></tr></thead><tbody><tr><td>Opens with a direct answer</td><td>25</td><td>First paragraph is 8–60 words and declarative</td></tr><tr><td>Self-contained paragraphs</td><td>25</td><td>Four or more paragraphs of 25–120 words that make sense on their own</td></tr><tr><td>Enough substance to answer from</td><td>15</td><td>300+ words of visible text</td></tr><tr><td>Concise sentences</td><td>10</td><td>Average sentence under 22 words</td></tr><tr><td>Scannable lists</td><td>10</td><td>Lists with three-plus items where content is naturally a sequence or set; absence earns partial</td></tr><tr><td>Question-shaped headings</td><td>6</td><td>Supporting signal. Two or more question headings; a page that explains itself directly earns half without any</td></tr><tr><td>Q&A content</td><td>5</td><td>Supporting signal. FAQ content or FAQPage schema; not inherently a problem if absent</td></tr><tr><td>Defines its key terms</td><td>4</td><td>Supporting signal. One natural "X is a …" sentence; not required</td></tr></tbody></table></div>
-<h2>Trust (20%) — is there enough context to cite it?</h2>
-<div class="table-wrap"><table><thead><tr><th>Check</th><th>Points</th><th>What passes</th></tr></thead><tbody><tr><td>About page is linked</td><td>15</td><td>A link to /about, "about us", "our story" or "team"</td></tr><tr><td>Contact path exists</td><td>15</td><td>A contact link, mailto: or tel: link</td></tr><tr><td>Organization identity is stated</td><td>15</td><td>Organization/LocalBusiness/Person schema; a copyright line and address earn partial</td></tr><tr><td>Structured data (JSON-LD)</td><td>15</td><td>Optional but rewarded: valid JSON-LD with a useful type (Organization, WebSite, Article, FAQPage, Product…)</td></tr><tr><td>Freshness signals</td><td>10</td><td>A time element, "updated" text, or dateModified. Absent earns half — optional on a homepage.</td></tr><tr><td>People behind the content</td><td>10</td><td>Author meta, schema author, or a byline. Absent earns half — optional on a homepage.</td></tr><tr><td>Links out to sources or profiles</td><td>10</td><td>Two or more outbound links, or two or more sameAs profiles</td></tr><tr><td>Privacy or terms page</td><td>10</td><td>A privacy, terms or legal link</td></tr></tbody></table></div>
-<h2>Not scored, but reported</h2>
-<p>llms.txt presence, image alt coverage, the html lang attribute, training-crawler blocks, and HTML size appear under "Also noted". They are useful context and carry zero weight, because their effect on answer engines is either unproven or unrelated to readability.</p>
-
-<h2>What AI sees</h2>
-<p>The summary on your card is our best reading of the page, chosen from the meta description, H1, first H2 and first paragraphs by scoring each candidate sentence for plain declarative structure, concrete words, mention of the site name, and position. Imperative sentences ("Get started", "Book now") and marketing adjectives are penalised. If no candidate clears the bar, the card says so: "Unclear" is a real result, and usually the most useful one.</p>
 
 <h2 id="ai-files">AI files: how we build them</h2>
 <p>Every scan also produces four files. For each one we first check what your site already publishes, then generate a version from your own content.</p>
@@ -98,24 +65,52 @@
 <tr><td><strong>ai-catalog.json</strong><br><code>/.well-known/ai-catalog.json</code><br><span class="muted">optional</span></td><td>Valid JSON; <code>specVersion</code> as "Major.Minor"; an <code>entries</code> array; each entry with <code>identifier</code>, <code>type</code> and exactly one of <code>url</code>/<code>data</code>; a <code>host</code> with <code>displayName</code>. Entries of type <code>text/html</code> are flagged: the catalog lists callable agent resources, not web pages.</td><td>A valid catalog naming you as host. Valid entries you already publish are kept, web-page entries are removed, and with no agent resources the entries list is empty, which the spec allows. A template entry is provided for when you launch an MCP server or agent.</td></tr>
 </tbody></table></div>
 <div class="callout"><strong>Nothing is invented.</strong> Generated files use only facts found on your site. Anything we couldn't find (a logo, a profile link, a summary sentence) becomes a <code>[bracketed placeholder]</code> for you to fill in.</div>
-<p><strong>What these files do and don't do.</strong> Structured data and explicit crawler rules are established ways to help machines read a site. llms.txt is a widely adopted convention, but no major AI provider has confirmed using it when composing answers. ai-catalog.json is a draft standard (Agentic Resource Discovery, announced June 2026) that only matters if you offer agent resources. None of them guarantees citations, and none is part of the score.</p>
+<p><strong>What these files do and don't do.</strong> Structured data and explicit crawler rules are established ways to help machines read a site. llms.txt is a widely adopted convention, but no major AI provider has confirmed using it when composing answers. ai-catalog.json is a draft standard (Agentic Resource Discovery, announced June 2026) that only matters if you offer agent resources. None of them guarantees citations.</p>
 
-<div class="callout"><strong>Grounding rule.</strong> The summary is always a verbatim sentence from your page, and the card names where it came from (meta description, main heading, opening text). Aeoden never rewrites, paraphrases or synthesises a description of what a business does. When confidence is not high, the summary is prefixed "Appears to be about:". Incomplete-but-accurate beats polished-but-invented.</div>
+<h2>Known to AI</h2>
+<p>Language models don't learn what a company is from its homepage alone. They learn it from the wider web, and knowledge graphs like Wikidata and Wikipedia are a large part of that. So every check also asks Wikidata which entity lists this exact domain as its official website, and how widely Wikipedia covers it. We show the result as a fact, not a grade.</p>
+<div class="table-wrap"><table><thead><tr><th>What we find in Wikidata</th><th>What we show</th></tr></thead><tbody>
+<tr><td>Entity with 50+ Wikipedia editions</td><td>Widely known</td></tr>
+<tr><td>20–49 editions</td><td>Well known</td></tr>
+<tr><td>5–19 editions</td><td>Known</td></tr>
+<tr><td>1–4 editions</td><td>Known</td></tr>
+<tr><td>Listed, no Wikipedia article</td><td>Listed</td></tr>
+<tr><td>No entity lists this domain as its official website</td><td>Not yet a known entity</td></tr>
+</tbody></table></div>
+<p>We match on the official-website property only, never on a name, so a site is never credited with someone else's fame. If Wikidata can't be reached during a check, we say so.</p>
+<div class="callout"><strong>When a site blocks our scanner.</strong> Many large sites refuse unknown bots (HTTP 401, 403, 429 or 503, or a Cloudflare, Akamai, Imperva or similar challenge page). That tells us about their bot protection, not about AI: those same sites often allow or license access to AI crawlers. In that case Aeoden can't write your files from the page. It shows what it could verify instead: which AI crawlers the site's robots.txt allows, and its AI familiarity.</div>
+<h2>What we noticed: the page checks</h2>
+<p>Beyond the files, Aeoden runs the checks below on your page, grouped into four questions. Failed or partial checks become the list under "What we noticed", ordered by weight, so the changes that matter most come first. The weights only order that list; there is no overall score.</p>
+<h3>Access: can AI reach this page?</h3>
+<div class="table-wrap"><table><thead><tr><th>Check</th><th>Points</th><th>What passes</th></tr></thead><tbody><tr><td>Served over HTTPS</td><td>10</td><td>Final URL is https</td></tr><tr><td>Page responds successfully</td><td>20</td><td>HTTP 200. Other 2xx/3xx earn partial credit; 4xx/5xx earn none.</td></tr><tr><td>Redirect chain is short</td><td>6</td><td>0–1 redirects; 2 earns partial</td></tr><tr><td>robots.txt is present and sane</td><td>8</td><td>Exists and does not disallow everyone. Missing earns partial (allowed, but a sitemap pointer helps).</td></tr><tr><td>AI search crawlers are allowed</td><td>12</td><td>None of OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Googlebot, Bingbot is disallowed. Training crawlers (GPTBot, ClaudeBot, Google-Extended, CCBot) are your choice and never count against you.</td></tr><tr><td>Page is indexable</td><td>14</td><td>No noindex in meta robots or X-Robots-Tag</td></tr><tr><td>Sitemap is discoverable</td><td>6</td><td>Listed in robots.txt or present at /sitemap.xml</td></tr><tr><td>Meaningful text in the HTML</td><td>14</td><td>150+ words of visible text in the raw HTML; 50–150 earns half</td></tr><tr><td>Responds quickly</td><td>4</td><td>HTML fetched in under 2 s; under 5 s earns half</td></tr><tr><td>Canonical URL is set</td><td>6</td><td>Present and on the same domain. Absent earns partial.</td></tr></tbody></table></div>
+<h3>Clarity: can a machine tell what this site does?</h3>
+<div class="table-wrap"><table><thead><tr><th>Check</th><th>Points</th><th>What passes</th></tr></thead><tbody><tr><td>Descriptive page title</td><td>15</td><td>Present, 15–70 characters, not generic ("Home", "Welcome")</td></tr><tr><td>Meta description explains the page</td><td>10</td><td>Present, 50–170 characters</td></tr><tr><td>Clear main heading (H1)</td><td>15</td><td>Exactly one H1 of three or more words that is not a greeting</td></tr><tr><td>Site or brand name is identifiable</td><td>10</td><td>og:site_name or Organization/WebSite schema; the title earns partial</td></tr><tr><td>Plain-English statement of what the site does</td><td>20</td><td>A declarative sentence near the top (description, H1, first H2 or first paragraphs) with concrete words. Marketing vagueness ("innovative solutions", "empower", "seamless") lowers it.</td></tr><tr><td>Audience is stated</td><td>8</td><td>A "for [audience]" phrase near the top</td></tr><tr><td>Headings outline the page</td><td>10</td><td>Two or more H2s; skipped levels reduce it</td></tr><tr><td>Semantic HTML landmarks</td><td>7</td><td>main, nav, header, footer — a quarter each</td></tr><tr><td>Descriptive navigation</td><td>5</td><td>Nav links are not "click here" or "learn more"</td></tr></tbody></table></div>
+<h3>Answers: does the page answer questions directly?</h3>
+<p>The principle behind this category is: <strong>can the page provide clean, self-contained answers?</strong> The four core signals carry 75 of the 100 points. FAQs, question-shaped headings and definition sentences are supporting signals worth 15 points combined, and when a page already explains itself directly their absence costs only a few points. A clear product homepage should pass here without an FAQ or a single question heading. We do not want every homepage to become "What is X? X is a…".</p>
+<div class="table-wrap"><table><thead><tr><th>Check</th><th>Points</th><th>What passes</th></tr></thead><tbody><tr><td>Opens with a direct answer</td><td>25</td><td>First paragraph is 8–60 words and declarative</td></tr><tr><td>Self-contained paragraphs</td><td>25</td><td>Four or more paragraphs of 25–120 words that make sense on their own</td></tr><tr><td>Enough substance to answer from</td><td>15</td><td>300+ words of visible text</td></tr><tr><td>Concise sentences</td><td>10</td><td>Average sentence under 22 words</td></tr><tr><td>Scannable lists</td><td>10</td><td>Lists with three-plus items where content is naturally a sequence or set; absence earns partial</td></tr><tr><td>Question-shaped headings</td><td>6</td><td>Supporting signal. Two or more question headings; a page that explains itself directly earns half without any</td></tr><tr><td>Q&A content</td><td>5</td><td>Supporting signal. FAQ content or FAQPage schema; not inherently a problem if absent</td></tr><tr><td>Defines its key terms</td><td>4</td><td>Supporting signal. One natural "X is a …" sentence; not required</td></tr></tbody></table></div>
+<h3>Trust: is there enough context to cite it?</h3>
+<div class="table-wrap"><table><thead><tr><th>Check</th><th>Points</th><th>What passes</th></tr></thead><tbody><tr><td>About page is linked</td><td>15</td><td>A link to /about, "about us", "our story" or "team"</td></tr><tr><td>Contact path exists</td><td>15</td><td>A contact link, mailto: or tel: link</td></tr><tr><td>Organization identity is stated</td><td>15</td><td>Organization/LocalBusiness/Person schema; a copyright line and address earn partial</td></tr><tr><td>Structured data (JSON-LD)</td><td>15</td><td>Optional but rewarded: valid JSON-LD with a useful type (Organization, WebSite, Article, FAQPage, Product…)</td></tr><tr><td>Freshness signals</td><td>10</td><td>A time element, "updated" text, or dateModified. Absent earns half — optional on a homepage.</td></tr><tr><td>People behind the content</td><td>10</td><td>Author meta, schema author, or a byline. Absent earns half — optional on a homepage.</td></tr><tr><td>Links out to sources or profiles</td><td>10</td><td>Two or more outbound links, or two or more sameAs profiles</td></tr><tr><td>Privacy or terms page</td><td>10</td><td>A privacy, terms or legal link</td></tr></tbody></table></div>
 
-<h2>Fixes</h2>
-<p>Every failed or partial check has a matching fix. The three shown first are the ones that cost the most points after weighting. Suggested text is built only from facts found on your page (site name, description, links). Anything we did not find is shown as a <code>[bracketed placeholder]</code> rather than invented.</p>
+
+<h2>What AI sees</h2>
+<p>The quote under "What AI sees" is our best reading of the page, chosen from the meta description, H1, first H2 and first paragraphs by scoring each candidate sentence for plain declarative structure, concrete words, mention of the site name, and position. Imperative sentences ("Get started", "Book now") and marketing adjectives are penalised. If no candidate clears the bar, the card says so: "Unclear" is a real result, and usually the most useful one.</p>
+
+<div class="callout"><strong>Grounding rule.</strong> The summary is always a verbatim sentence from your page, and we name where it came from (meta description, main heading, opening text). Aeoden never rewrites, paraphrases or synthesises a description of what a business does. When confidence is not high, the summary is prefixed "Appears to be about:". Incomplete-but-accurate beats polished-but-invented.</div>
+
+<h2>Suggested changes</h2>
+<p>Every failed or partial check has a matching suggestion, and the ones that matter most come first. Suggested text is built only from facts found on your page (site name, description, links). Anything we did not find is shown as a [bracketed placeholder] rather than invented.</p>
 
 <h2>Limitations, honestly</h2>
 <ul>
 <li>One page, one fetch, no JavaScript. That matches how most AI crawlers behave, but a site that renders client-side may look worse here than it does in Google.</li>
-<li>Heuristics are heuristics. A brilliant page written in an unusual structure may score lower than it deserves. Read the checks, not just the number.</li>
-<li>Nothing here predicts rankings, mentions or citations. It measures readiness: what an answer engine can and cannot get from the page.</li>
+<li>Heuristics are heuristics. A brilliant page written in an unusual structure may trip a check it doesn't deserve. Read the reasoning, not just the label.</li>
+<li>Nothing here predicts rankings, mentions or citations. It checks readiness: what an answer engine can and cannot get from your site, and gives you the files to close the gaps.</li>
 <li>Bot-protection services (challenge pages, WAF rules) will block our scanner just as they block AI crawlers. That result is informative, but the fix is on your hosting side.</li>
 </ul>
 <p>Sources and the research behind these choices are listed on the <a href="../sources/index.html">sources page</a>.</p>
 
 
-<div class="page-cta"><div><span class="lbl lbl--signal">Public AEO check</span><h2 class="mt-1">Check your own site</h2><p>Free. No login. About 30 seconds. You get an AEO Card.</p></div><a class="btn arrow" href="../index.html">Check my site</a></div>
+<div class="page-cta"><div><span class="lbl lbl--signal">Free AI files</span><h2 class="mt-1">Make your website readable to AI</h2><p>Free. No login. About 30 seconds. Get your llms.txt, structured data and AI crawler rules.</p></div><a class="btn arrow" href="../index.html">Get my AI files</a></div>
     </div>
   </div>
 </div>
@@ -129,7 +124,7 @@
         <a href="../what-is-aeo/index.html">What is AEO</a><a href="../aeo-vs-seo/index.html">AEO vs SEO</a><a href="../chatgpt-search/index.html">ChatGPT search</a><a href="../llms-txt/index.html">llms.txt</a><a href="../methodology/index.html">Methodology</a><a href="../sources/index.html">Sources</a><a href="../about/index.html">About</a><a href="../privacy/index.html">Privacy</a>
       </nav>
     </div>
-    <div class="site-foot__base"><span>aeoden.com · AEO diagnostics for the AI web</span><span>Diagnostic score, not a guarantee</span><span>© 2026 Aeoden</span></div>
+    <div class="site-foot__base"><span>aeoden.com · AEO diagnostics for the AI web</span><span>Diagnostic, not a guarantee</span><span>© 2026 Aeoden</span></div>
   </div>
 </footer>
 <script>document.addEventListener('click', function (e) { var a = e.target.closest('[data-cta]'); if (a && typeof window.gtag === 'function') window.gtag('event', 'cta_' + a.dataset.cta, { location: 'page' }); });</script>

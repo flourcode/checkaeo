@@ -1,11 +1,11 @@
 # Aeoden
 
-> Aeoden is a free AEO (Answer Engine Optimization) tool. Enter a URL and it checks how well AI systems like ChatGPT, Claude, Gemini and Perplexity can read the site, scores it on an AEO Card, and generates ready-to-install AI files written from the site's own content: llms.txt, Organization and WebSite structured data, robots.txt rules for AI crawlers, and an ai-catalog.json for sites that offer agent resources. It gives a diagnostic score, not a guarantee of rankings or citations.
+> Aeoden is a free AEO (Answer Engine Optimization) tool that makes websites readable to AI. Enter a URL and it checks the files and signals AI systems like ChatGPT, Claude, Gemini and Perplexity use, marks each Ready, Needs fix or Missing, and writes what's missing from the site's own content: llms.txt, Organization and WebSite structured data, robots.txt rules for AI crawlers, and an ai-catalog.json for sites that offer agent resources. It is a diagnostic, not a guarantee of rankings or citations.
 
 ## Key pages
 
-- [Homepage and checker](https://aeoden.com/): enter a URL, get an AEO Card and your AI files
-- [Methodology](https://aeoden.com/methodology/): every check, the 75/25 page readiness and AI familiarity blend, and how AI files are generated
+- [Homepage and checker](https://aeoden.com/): enter a URL, get your AI files
+- [Methodology](https://aeoden.com/methodology/): how each file is checked and generated, and every page check
 - [What is AEO?](https://aeoden.com/what-is-aeo/): Answer Engine Optimization explained
 - [AEO vs SEO](https://aeoden.com/aeo-vs-seo/): where the emphasis shifts
 - [ChatGPT search readiness](https://aeoden.com/chatgpt-search/): which OpenAI crawlers matter and what gets quoted
