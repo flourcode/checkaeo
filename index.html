@@ -3,22 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Aeoden – Can AI understand your website? Free AEO check</title>
-<meta name="description" content="Can AI understand your website? Aeoden is a free check that shows how ChatGPT, Claude, Gemini and Perplexity read your homepage: one score, four checks, and the one thing to fix first.">
+<title>Aeoden – Can AI understand your website? Free AEO check + AI files</title>
+<meta name="description" content="Aeoden checks how ChatGPT, Claude, Gemini and Perplexity read your website, then writes the files that help them: llms.txt, structured data, AI crawler rules and an ai-catalog.json. Free, no login, about 30 seconds.">
 <link rel="canonical" href="https://aeoden.com/">
+<link rel="ai-catalog" href="/.well-known/ai-catalog.json" type="application/ai-catalog+json">
 <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
 <meta name="theme-color" content="#12372A">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Aeoden">
 <meta property="og:title" content="Can AI understand your website?">
-<meta property="og:description" content="A free public diagnostic. One score, four checks, one thing to fix first. Diagnostic score, not a guarantee.">
+<meta property="og:description" content="See how AI reads your website, then get the files that fix it: llms.txt, structured data, AI crawler rules, ai-catalog.json. Free.">
 <meta property="og:url" content="https://aeoden.com/">
 <meta property="og:image" content="https://aeoden.com/assets/img/og-card.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Can AI understand your website?">
-<meta name="twitter:description" content="A free public diagnostic. One score, four checks, one thing to fix first.">
+<meta name="twitter:description" content="See how AI reads your website, then get the files that fix it. Free.">
 <meta name="twitter:image" content="https://aeoden.com/assets/img/og-card.png">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
@@ -29,17 +30,100 @@
 <noscript><link rel="stylesheet" href="assets/css/fonts.css"></noscript>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    { "@type": "Organization", "@id": "https://aeoden.com/#org", "name": "Aeoden", "url": "https://aeoden.com/", "logo": "https://aeoden.com/assets/img/logo.png", "description": "Aeoden is a free AEO checker that shows how ready a website is for AI answer engines.", "founder": { "@type": "Person", "name": "Mark Flournoy", "image": "https://aeoden.com/assets/img/mark.jpg", "sameAs": ["https://www.linkedin.com/in/markflournoy/"] } },
-    { "@type": "WebSite", "@id": "https://aeoden.com/#site", "name": "Aeoden", "url": "https://aeoden.com/", "publisher": { "@id": "https://aeoden.com/#org" } },
-    { "@type": "WebApplication", "name": "Aeoden", "url": "https://aeoden.com/", "applicationCategory": "DeveloperApplication", "operatingSystem": "Web", "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }, "description": "Paste a URL and get an AEO Card: a scorecard showing whether AI systems can reach, understand, extract answers from, and trust your website." },
-    { "@type": "FAQPage", "mainEntity": [
-      { "@type": "Question", "name": "What is an AEO Card?", "acceptedAnswer": { "@type": "Answer", "text": "An AEO Card is a one-page diagnostic record that shows how ready a website is for AI answer engines. It grades four things: whether answer engines can reach the page, tell what the site does, extract useful answers, and trust it enough to cite it. It ends with the one change most worth making first." } },
-      { "@type": "Question", "name": "Does a high AEO score mean ChatGPT will cite my site?", "acceptedAnswer": { "@type": "Answer", "text": "No. The score is a diagnostic of readiness, not a prediction of rankings or citations. It tells you what AI systems can and cannot understand from your page, and what to fix first." } },
-      { "@type": "Question", "name": "Is Aeoden free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The homepage check is free and needs no login. Scans read only public pages and public files like robots.txt." } }
-    ] }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://aeoden.com/#org",
+   "name": "Aeoden",
+   "url": "https://aeoden.com/",
+   "logo": "https://aeoden.com/assets/img/logo.png",
+   "description": "Aeoden checks how AI systems like ChatGPT, Claude, Gemini and Perplexity read a website, scores it on an AEO Card, and generates the files that help: llms.txt, structured data, AI crawler rules and ai-catalog.json.",
+   "founder": {
+    "@type": "Person",
+    "name": "Mark Flournoy",
+    "image": "https://aeoden.com/assets/img/mark.jpg",
+    "sameAs": [
+     "https://www.linkedin.com/in/markflournoy/"
+    ]
+   }
+  },
+  {
+   "@type": "WebSite",
+   "@id": "https://aeoden.com/#site",
+   "name": "Aeoden",
+   "url": "https://aeoden.com/",
+   "publisher": {
+    "@id": "https://aeoden.com/#org"
+   }
+  },
+  {
+   "@type": "WebApplication",
+   "name": "Aeoden",
+   "url": "https://aeoden.com/",
+   "applicationCategory": "DeveloperApplication",
+   "operatingSystem": "Web",
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+   },
+   "description": "Aeoden checks how AI systems like ChatGPT, Claude, Gemini and Perplexity read a website, scores it on an AEO Card, and generates the files that help: llms.txt, structured data, AI crawler rules and ai-catalog.json."
+  },
+  {
+   "@type": "FAQPage",
+   "mainEntity": [
+    {
+     "@type": "Question",
+     "name": "What does Aeoden do?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "It checks how well AI systems like ChatGPT, Claude, Gemini and Perplexity can read your website, gives you a score on an AEO Card, and writes the files that help: llms.txt, structured data, AI crawler rules, and an ai-catalog.json if you need one. Everything is generated from your own site."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Will these files get me cited by ChatGPT?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "No file can promise that, and we won't pretend otherwise. Structured data and clear crawler rules are well-established ways to help machines read a site. llms.txt is a widely adopted convention, but no major AI provider has confirmed using it when composing answers. ai-catalog.json is a draft standard (June 2026) for sites that offer agent tools. They're small, cheap to install, and remove obstacles; they don't buy placement."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "What is ai-catalog.json, and do I need one?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "It's the manifest from the Agentic Resource Discovery (ARD) draft standard, served at /.well-known/ai-catalog.json. It lists the agent resources your domain offers, such as MCP servers, AI agents and skills. If you don't offer any, you don't need one. An empty catalog is valid and simply names you as the publisher. Web pages don't belong in it; list them in llms.txt instead."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "What is an AEO Card?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "A one-card summary of how ready your website is for AI answer engines. It grades four things, whether AI can reach the page, tell what the site does, extract useful answers, and trust it enough to cite it, and shows whether AI already knows you as an entity."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "What does the scanner actually read?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Your homepage HTML, response headers, robots.txt, sitemap.xml, llms.txt and /.well-known/ai-catalog.json, plus one Wikidata lookup. It follows up to five redirects and reads at most 1.5 MB. It doesn't run JavaScript, log in, or crawl other pages."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Is it free? Do you store my site?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Free, no login. Results are cached for about ten minutes so repeat checks are fast. Nothing else is stored. Your AI files are generated during the scan and downloaded straight to your device."
+     }
+    }
+   ]
+  }
+ ]
 }
 </script>
 </head>
@@ -59,10 +143,10 @@
 <main id="main">
   <section class="hero theme-forest" id="hero" aria-labelledby="hero-h">
     <div class="wrap hero__in">
-      <p class="eyebrow">Free AEO check for ChatGPT, Claude, Gemini and Perplexity</p>
+      <p class="eyebrow">Free AEO check + AI files for ChatGPT, Claude, Gemini and Perplexity</p>
       <h1 id="hero-h">Can AI understand your website?</h1>
       <div class="hero__rule" aria-hidden="true"></div>
-      <ul class="points"><li><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></span>Four checks</li><li><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V11"/><path d="M10 19V6"/><path d="M16 19v-5"/><path d="M3 19h18"/></svg></span>One score</li><li><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>One thing to fix first</li></ul>
+      <ul class="points"><li><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></span>Scan your site</li><li><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V11"/><path d="M10 19V6"/><path d="M16 19v-5"/><path d="M3 19h18"/></svg></span>Get your score</li><li><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 14l2 2 4-4"/></svg></span>Get your AI files</li></ul>
       <form class="scan-form" id="scan-form" novalidate>
         <label class="sr-only" for="url-input">Website URL</label>
         <div class="scan-form__row">
@@ -70,13 +154,13 @@
           <button class="btn btn--primary" type="submit" id="scan-submit">Check my site</button>
         </div>
         <p class="scan-form__error" id="form-error" aria-live="polite"></p>
-        <p class="scan-form__hint" id="form-hint">Free. No login. About 30 seconds.</p>
+        <p class="scan-form__hint" id="form-hint">Free. No login. About 30 seconds. You get a score and ready-to-install AI files.</p>
         <p class="scan-form__hint" id="demo-hint" hidden>The live scanner is not connected on this copy of the site.</p>
       </form>
     </div>
     <div class="wrap card-stage">
       <div id="card-slot"></div>
-      <p class="card-caption" id="card-caption">Example result. Check your own site above, or <a href="#demo=quotabird" data-demo="quotabird">see the full example report</a>.</p>
+      <p class="card-caption" id="card-caption">Example result. Check your own site for its score and AI files, or <a href="#demo=quotabird" data-demo="quotabird">see the full example</a>.</p>
       <div class="card-actions" id="card-actions" hidden></div>
     </div>
   </section>
@@ -86,12 +170,28 @@
   <section class="sec home-only" aria-labelledby="model-h">
     <div class="wrap">
       <p class="eyebrow">How it works</p>
-      <h2 class="sec__title" id="model-h">Four checks. One readable result.</h2>
+      <h2 class="sec__title" id="model-h">Check it. Score it. Fix it.</h2>
       <ol class="steps">
-        <li><h3>Access</h3><p>Can AI crawlers reach the page, or are they blocked?</p></li>
-        <li><h3>Clarity</h3><p>Can they tell what the site does, and who it's for?</p></li>
-        <li><h3>Answers</h3><p>Can they lift clean, quotable answers from it?</p></li>
-        <li><h3>Trust</h3><p>Is there enough context to cite it with confidence?</p></li>
+        <li><h3>Scan</h3><p>We read your homepage, robots.txt, sitemap and AI files the way an AI crawler does.</p></li>
+        <li><h3>Score</h3><p>Your AEO Card: access, clarity, answers and trust, plus whether AI already knows you.</p></li>
+        <li><h3>Fix</h3><p>Ready-to-install AI files, written from your own site. Copy them, or download them all.</p></li>
+        <li><h3>Share</h3><p>Download your card for LinkedIn or a client report, and rescan after you install.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec home-only" aria-labelledby="files-home-h">
+    <div class="wrap split">
+      <div>
+        <p class="eyebrow">What you get</p>
+        <h2 class="sec__title" id="files-home-h">The files AI tools and agents look for.</h2>
+        <p class="sec__lede mt-2">Most AI visibility tools measure you and sell you content. Aeoden writes the machine-readable layer of your site, checks what you already have, and tells you exactly where each file goes.</p>
+      </div>
+      <ol class="filelist">
+        <li><h3>llms.txt</h3><p>A Markdown index of your site: who you are in one line, and links to the pages that matter.</p></li>
+        <li><h3>Structured data</h3><p>Organization and WebSite JSON-LD, so AI systems know exactly who runs the site.</p></li>
+        <li><h3>robots.txt rules for AI</h3><p>Answer engines allowed; training crawlers left to your choice. We keep what you've already decided.</p></li>
+        <li><h3>ai-catalog.json <span class="tag">Optional</span></h3><p>The new Agentic Resource Discovery catalog, for sites that offer an API, MCP server or AI agent. We validate yours if you have one.</p></li>
       </ol>
     </div>
   </section>
@@ -132,11 +232,12 @@
         <h2 class="sec__title" id="faq-h">Questions people ask.</h2>
       </div>
       <div class="faq">
-        <details><summary>What is an AEO Card?</summary><p>A one-card summary of how ready your website is for AI answer engines. It grades four things, whether AI can reach the page, tell what the site does, extract useful answers, and trust it enough to cite it, and names the one change most worth making first.</p></details>
-        <details><summary>Does a good score mean ChatGPT will cite me?</summary><p>No. Nobody can promise that. The score tells you whether your page is easy or hard for AI systems to reach, understand and quote. Fixing what it flags removes obstacles; it doesn't buy placement.</p></details>
-        <details><summary>What does the scanner actually read?</summary><p>Your homepage HTML, response headers, robots.txt, whether a sitemap exists, and whether an llms.txt file exists. It follows up to five redirects and reads at most 1.5 MB. It doesn't run JavaScript, log in, or crawl other pages.</p></details>
-        <details><summary>Is it free? Do you store my site?</summary><p>Free, no login. Results are cached for about ten minutes so repeat checks are fast. Nothing else is stored.</p></details>
-        <details><summary>What is AEO?</summary><p>Answer Engine Optimization: making your site easier for AI-powered answer systems to reach, understand, extract and cite. <a href="what-is-aeo/index.html">Read the longer explanation</a>.</p></details>
+        <details><summary>What does Aeoden do?</summary><p>It checks how well AI systems like ChatGPT, Claude, Gemini and Perplexity can read your website, gives you a score on an AEO Card, and writes the files that help: llms.txt, structured data, AI crawler rules, and an ai-catalog.json if you need one. Everything is generated from your own site.</p></details>
+        <details><summary>Will these files get me cited by ChatGPT?</summary><p>No file can promise that, and we won't pretend otherwise. Structured data and clear crawler rules are well-established ways to help machines read a site. llms.txt is a widely adopted convention, but no major AI provider has confirmed using it when composing answers. ai-catalog.json is a draft standard (June 2026) for sites that offer agent tools. They're small, cheap to install, and remove obstacles; they don't buy placement.</p></details>
+        <details><summary>What is ai-catalog.json, and do I need one?</summary><p>It's the manifest from the Agentic Resource Discovery (ARD) draft standard, served at /.well-known/ai-catalog.json. It lists the agent resources your domain offers, such as MCP servers, AI agents and skills. If you don't offer any, you don't need one. An empty catalog is valid and simply names you as the publisher. Web pages don't belong in it; list them in llms.txt instead.</p></details>
+        <details><summary>What is an AEO Card?</summary><p>A one-card summary of how ready your website is for AI answer engines. It grades four things, whether AI can reach the page, tell what the site does, extract useful answers, and trust it enough to cite it, and shows whether AI already knows you as an entity.</p></details>
+        <details><summary>What does the scanner actually read?</summary><p>Your homepage HTML, response headers, robots.txt, sitemap.xml, llms.txt and /.well-known/ai-catalog.json, plus one Wikidata lookup. It follows up to five redirects and reads at most 1.5 MB. It doesn't run JavaScript, log in, or crawl other pages.</p></details>
+        <details><summary>Is it free? Do you store my site?</summary><p>Free, no login. Results are cached for about ten minutes so repeat checks are fast. Nothing else is stored. Your AI files are generated during the scan and downloaded straight to your device.</p></details>
       </div>
     </div>
   </section>

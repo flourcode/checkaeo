@@ -509,6 +509,73 @@ window.CHECKAEO_DEMOS = {
    "label": "Quotabird",
    "description": "sales software company (example)",
    "sitelinks": 9
+  },
+  "aiFiles": {
+   "files": [
+    {
+     "id": "llms",
+     "name": "llms.txt",
+     "path": "/llms.txt",
+     "status": "missing",
+     "issues": [],
+     "what": "A Markdown index of your site for AI tools: who you are in one line, and links to the pages that matter.",
+     "install": "Save as llms.txt in your site's root folder so it loads at https://quotabird.example/llms.txt, served as text/plain.",
+     "generated": "# Quotabird\n\n> Quotabird is a set of free sales tools that help sales reps and managers write quotes, track follow-ups, and close faster.\n\n## Pages\n\n- [Quota calculator](https://quotabird.example/quota-calculator)\n- [Deal checker](https://quotabird.example/deal-checker)\n- [Pricing](https://quotabird.example/pricing)\n- [About](https://quotabird.example/about)\n- [Contact](https://quotabird.example/contact)\n- [How to set sales quotas](https://quotabird.example/blog/how-to-set-sales-quotas)\n- [Commission plans explained](https://quotabird.example/blog/commission-plans-explained)\n\n## Optional\n\n- [Sitemap](https://quotabird.example/sitemap.xml)\n",
+     "filename": "llms.txt",
+     "lang": "markdown"
+    },
+    {
+     "id": "jsonld",
+     "name": "Structured data",
+     "path": "<head>",
+     "status": "ok",
+     "issues": [],
+     "notes": [
+      "The Organization has no \"logo\".",
+      "No \"sameAs\" links to official profiles (LinkedIn, Wikipedia, etc.).",
+      "No WebSite entity."
+     ],
+     "hasOrg": true,
+     "what": "Organization and WebSite JSON-LD: tells AI systems and search engines exactly who runs this site.",
+     "install": "Paste into the <head> of your homepage, or your theme’s header template. Replace anything in [brackets].",
+     "generated": "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@graph\": [\n    {\n      \"@type\": \"Organization\",\n      \"@id\": \"https://quotabird.example/#organization\",\n      \"name\": \"Quotabird\",\n      \"url\": \"https://quotabird.example/\",\n      \"description\": \"Quotabird is a set of free sales tools that help sales reps and managers write quotes, track follow-ups, and close faster.\",\n      \"logo\": \"https://quotabird.example/[path-to-your-logo.png]\",\n      \"sameAs\": [\n        \"https://www.linkedin.com/company/quotabird\"\n      ]\n    },\n    {\n      \"@type\": \"WebSite\",\n      \"@id\": \"https://quotabird.example/#website\",\n      \"name\": \"Quotabird\",\n      \"url\": \"https://quotabird.example/\",\n      \"publisher\": {\n        \"@id\": \"https://quotabird.example/#organization\"\n      }\n    }\n  ]\n}\n</script>\n",
+     "filename": "organization.jsonld.html",
+     "lang": "html"
+    },
+    {
+     "id": "robots",
+     "name": "robots.txt rules",
+     "path": "/robots.txt",
+     "status": "ok",
+     "issues": [],
+     "notes": [
+      "No explicit rules for AI crawlers. They fall back to your general rules; explicit rules make your choice clear and easy to change."
+     ],
+     "blockedSearch": [],
+     "blockedTraining": [],
+     "what": "Explicit rules for AI crawlers: answer engines allowed, training crawlers your choice.",
+     "install": "Add this block to the end of your existing robots.txt. Don’t replace the file.",
+     "generated": "# --- AI crawlers (added with Aeoden) ---\n# Answer and citation crawlers: keep these allowed to appear in AI answers.\nUser-agent: OAI-SearchBot\nUser-agent: ChatGPT-User\nUser-agent: Claude-SearchBot\nUser-agent: Claude-User\nUser-agent: PerplexityBot\nUser-agent: Perplexity-User\nAllow: /\n\n# Training crawlers: your choice. Currently allowed.\nUser-agent: GPTBot\nUser-agent: ClaudeBot\nUser-agent: Google-Extended\nUser-agent: CCBot\nUser-agent: Applebot-Extended\nAllow: /\n\nSitemap: https://quotabird.example/sitemap.xml\n",
+     "filename": "robots-ai.txt",
+     "lang": "text"
+    },
+    {
+     "id": "catalog",
+     "name": "ai-catalog.json",
+     "path": "/.well-known/ai-catalog.json",
+     "status": "optional",
+     "issues": [],
+     "what": "Agentic Resource Discovery (ARD) catalog: lists the agent resources your domain offers (MCP servers, A2A agents, skills). A draft standard, announced June 2026.",
+     "install": "Save as ai-catalog.json inside a .well-known folder at your site root, so it loads at https://quotabird.example/.well-known/ai-catalog.json, served as application/ai-catalog+json or application/json.",
+     "generated": "{\n  \"specVersion\": \"1.0\",\n  \"host\": {\n    \"displayName\": \"Quotabird\",\n    \"identifier\": \"quotabird.example\"\n  },\n  \"entries\": []\n}\n",
+     "template": "{\n  \"identifier\": \"urn:air:quotabird.example:mcp:[name]\",\n  \"type\": \"application/mcp-server-card+json\",\n  \"url\": \"https://quotabird.example/[path-to-your-mcp-server-card]\"\n}",
+     "filename": "ai-catalog.json",
+     "lang": "json",
+     "optionalNote": "Optional. Only needed if you offer an API, MCP server, or AI agent. An empty catalog is valid and simply names you as the publisher."
+    }
+   ],
+   "ready": 2,
+   "total": 3
   }
  },
  "harborandoak": {
@@ -1027,6 +1094,67 @@ window.CHECKAEO_DEMOS = {
    "score": 0,
    "known": false,
    "level": "Not yet a known entity"
+  },
+  "aiFiles": {
+   "files": [
+    {
+     "id": "llms",
+     "name": "llms.txt",
+     "path": "/llms.txt",
+     "status": "fix",
+     "issues": [
+      "/llms.txt answers with a web page (probably your 404 page), not a Markdown file."
+     ],
+     "what": "A Markdown index of your site for AI tools: who you are in one line, and links to the pages that matter.",
+     "install": "Save as llms.txt in your site's root folder so it loads at https://harborandoak.example/llms.txt, served as text/plain.",
+     "generated": "# Harbor & Oak\n\n> Harbor & Oak. Est. 2014. Visit us in Portland.\n\n## Pages\n\n- [Menu](https://harborandoak.example/menu)\n- [Events](https://harborandoak.example/events)\n- [Visit](https://harborandoak.example/visit)\n",
+     "filename": "llms.txt",
+     "lang": "markdown"
+    },
+    {
+     "id": "jsonld",
+     "name": "Structured data",
+     "path": "<head>",
+     "status": "missing",
+     "issues": [],
+     "notes": [],
+     "what": "Organization and WebSite JSON-LD: tells AI systems and search engines exactly who runs this site.",
+     "install": "Paste into the <head> of your homepage, or your theme’s header template. Replace anything in [brackets].",
+     "generated": "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@graph\": [\n    {\n      \"@type\": \"Organization\",\n      \"@id\": \"https://harborandoak.example/#organization\",\n      \"name\": \"Harbor & Oak\",\n      \"url\": \"https://harborandoak.example/\",\n      \"description\": \"Harbor & Oak. Est. 2014. Visit us in Portland.\",\n      \"logo\": \"https://harborandoak.example/[path-to-your-logo.png]\",\n      \"sameAs\": [\n        \"https://www.instagram.com/harborandoak\"\n      ]\n    },\n    {\n      \"@type\": \"WebSite\",\n      \"@id\": \"https://harborandoak.example/#website\",\n      \"name\": \"Harbor & Oak\",\n      \"url\": \"https://harborandoak.example/\",\n      \"publisher\": {\n        \"@id\": \"https://harborandoak.example/#organization\"\n      }\n    }\n  ]\n}\n</script>\n",
+     "filename": "organization.jsonld.html",
+     "lang": "html"
+    },
+    {
+     "id": "robots",
+     "name": "robots.txt rules",
+     "path": "/robots.txt",
+     "status": "missing",
+     "issues": [],
+     "blockedSearch": [],
+     "blockedTraining": [],
+     "what": "Explicit rules for AI crawlers: answer engines allowed, training crawlers your choice.",
+     "install": "Save as robots.txt in your site's root so it loads at https://harborandoak.example/robots.txt.",
+     "generated": "# --- AI crawlers (added with Aeoden) ---\n# Answer and citation crawlers: keep these allowed to appear in AI answers.\nUser-agent: OAI-SearchBot\nUser-agent: ChatGPT-User\nUser-agent: Claude-SearchBot\nUser-agent: Claude-User\nUser-agent: PerplexityBot\nUser-agent: Perplexity-User\nAllow: /\n\n# Training crawlers: your choice. Currently allowed.\nUser-agent: GPTBot\nUser-agent: ClaudeBot\nUser-agent: Google-Extended\nUser-agent: CCBot\nUser-agent: Applebot-Extended\nAllow: /\n",
+     "filename": "robots-ai.txt",
+     "lang": "text"
+    },
+    {
+     "id": "catalog",
+     "name": "ai-catalog.json",
+     "path": "/.well-known/ai-catalog.json",
+     "status": "optional",
+     "issues": [],
+     "what": "Agentic Resource Discovery (ARD) catalog: lists the agent resources your domain offers (MCP servers, A2A agents, skills). A draft standard, announced June 2026.",
+     "install": "Save as ai-catalog.json inside a .well-known folder at your site root, so it loads at https://harborandoak.example/.well-known/ai-catalog.json, served as application/ai-catalog+json or application/json.",
+     "generated": "{\n  \"specVersion\": \"1.0\",\n  \"host\": {\n    \"displayName\": \"Harbor & Oak\",\n    \"identifier\": \"harborandoak.example\"\n  },\n  \"entries\": []\n}\n",
+     "template": "{\n  \"identifier\": \"urn:air:harborandoak.example:mcp:[name]\",\n  \"type\": \"application/mcp-server-card+json\",\n  \"url\": \"https://harborandoak.example/[path-to-your-mcp-server-card]\"\n}",
+     "filename": "ai-catalog.json",
+     "lang": "json",
+     "optionalNote": "Optional. Only needed if you offer an API, MCP server, or AI agent. An empty catalog is valid and simply names you as the publisher."
+    }
+   ],
+   "ready": 0,
+   "total": 3
   }
  },
  "northwind": {
@@ -1500,6 +1628,81 @@ window.CHECKAEO_DEMOS = {
    "score": 0,
    "known": false,
    "level": "Not yet a known entity"
+  },
+  "aiFiles": {
+   "files": [
+    {
+     "id": "llms",
+     "name": "llms.txt",
+     "path": "/llms.txt",
+     "status": "ok",
+     "issues": [],
+     "notes": [],
+     "links": 1,
+     "what": "A Markdown index of your site for AI tools: who you are in one line, and links to the pages that matter.",
+     "install": "Save as llms.txt in your site's root folder so it loads at https://northwind-tools.example/llms.txt, served as text/plain.",
+     "generated": "# Northwind Tools\n\n> Northwind Tools is a set of free sales tools that help sales reps and managers write quotes, track follow-ups, and close faster.\n\n## Pages\n\n- [Products](https://northwind-tools.example/products)\n- [Quote builder](https://northwind-tools.example/quote-builder)\n- [Docs](https://northwind-tools.example/docs)\n- [Pricing](https://northwind-tools.example/pricing)\n- [Getting started](https://northwind-tools.example/docs/getting-started)\n- [Api](https://northwind-tools.example/docs/api)\n\n## Optional\n\n- [Sitemap](https://northwind-tools.example/sitemap.xml)\n",
+     "filename": "llms.txt",
+     "lang": "markdown"
+    },
+    {
+     "id": "jsonld",
+     "name": "Structured data",
+     "path": "<head>",
+     "status": "ok",
+     "issues": [],
+     "notes": [],
+     "hasOrg": true,
+     "what": "Organization and WebSite JSON-LD: tells AI systems and search engines exactly who runs this site.",
+     "install": "Paste into the <head> of your homepage, or your theme’s header template. Replace anything in [brackets].",
+     "generated": "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@graph\": [\n    {\n      \"@type\": \"Organization\",\n      \"@id\": \"https://northwind-tools.example/#organization\",\n      \"name\": \"Northwind Tools\",\n      \"url\": \"https://northwind-tools.example/\",\n      \"description\": \"Northwind Tools is a set of free sales tools that help sales reps and managers write quotes, track follow-ups, and close faster.\",\n      \"logo\": \"https://northwind-tools.example/[path-to-your-logo.png]\",\n      \"sameAs\": [\n        \"https://www.linkedin.com/company/northwind-tools\",\n        \"https://github.com/northwind-tools\"\n      ]\n    },\n    {\n      \"@type\": \"WebSite\",\n      \"@id\": \"https://northwind-tools.example/#website\",\n      \"name\": \"Northwind Tools\",\n      \"url\": \"https://northwind-tools.example/\",\n      \"publisher\": {\n        \"@id\": \"https://northwind-tools.example/#organization\"\n      }\n    }\n  ]\n}\n</script>\n",
+     "filename": "organization.jsonld.html",
+     "lang": "html"
+    },
+    {
+     "id": "robots",
+     "name": "robots.txt rules",
+     "path": "/robots.txt",
+     "status": "fix",
+     "issues": [
+      "Blocks AI answer crawlers: OAI-SearchBot, PerplexityBot. Those engines can't fetch your pages to answer or cite them."
+     ],
+     "notes": [
+      "Add a \"Sitemap:\" line so crawlers find every page."
+     ],
+     "blockedSearch": [
+      "OAI-SearchBot",
+      "PerplexityBot"
+     ],
+     "blockedTraining": [],
+     "what": "Explicit rules for AI crawlers: answer engines allowed, training crawlers your choice.",
+     "install": "Add this block to the end of your existing robots.txt. Don’t replace the file.",
+     "generated": "# --- AI crawlers (added with Aeoden) ---\n# Answer and citation crawlers: keep these allowed to appear in AI answers.\nUser-agent: OAI-SearchBot\nUser-agent: ChatGPT-User\nUser-agent: Claude-SearchBot\nUser-agent: Claude-User\nUser-agent: PerplexityBot\nUser-agent: Perplexity-User\nAllow: /\n\n# Training crawlers: your choice. Currently allowed.\nUser-agent: GPTBot\nUser-agent: ClaudeBot\nUser-agent: Google-Extended\nUser-agent: CCBot\nUser-agent: Applebot-Extended\nAllow: /\n\nSitemap: https://northwind-tools.example/sitemap.xml\n",
+     "filename": "robots-ai.txt",
+     "lang": "text"
+    },
+    {
+     "id": "catalog",
+     "name": "ai-catalog.json",
+     "path": "/.well-known/ai-catalog.json",
+     "status": "fix",
+     "issues": [],
+     "notes": [
+      "2 entries point to web pages (text/html). The catalog is for callable agent resources (MCP servers, A2A agents, skills); list web pages in llms.txt instead."
+     ],
+     "entryCount": 3,
+     "htmlEntries": 2,
+     "what": "Agentic Resource Discovery (ARD) catalog: lists the agent resources your domain offers (MCP servers, A2A agents, skills). A draft standard, announced June 2026.",
+     "install": "Save as ai-catalog.json inside a .well-known folder at your site root, so it loads at https://northwind-tools.example/.well-known/ai-catalog.json, served as application/ai-catalog+json or application/json.",
+     "generated": "{\n  \"specVersion\": \"1.0\",\n  \"host\": {\n    \"displayName\": \"Northwind Tools\",\n    \"identifier\": \"northwind-tools.example\"\n  },\n  \"entries\": [\n    {\n      \"identifier\": \"urn:air:northwind-tools.example:mcp:quotes\",\n      \"type\": \"application/mcp-server-card+json\",\n      \"url\": \"https://northwind-tools.example/mcp/server-card\"\n    }\n  ]\n}\n",
+     "template": "{\n  \"identifier\": \"urn:air:northwind-tools.example:mcp:[name]\",\n  \"type\": \"application/mcp-server-card+json\",\n  \"url\": \"https://northwind-tools.example/[path-to-your-mcp-server-card]\"\n}",
+     "filename": "ai-catalog.json",
+     "lang": "json",
+     "optionalNote": null
+    }
+   ],
+   "ready": 2,
+   "total": 3
   }
  }
 };

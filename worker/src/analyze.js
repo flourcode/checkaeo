@@ -15,6 +15,8 @@
  * Each category is a set of weighted checks that sum to 100.
  */
 
+import { buildAiFiles } from './files.js';
+
 export const WEIGHTS = { access: 0.30, clarity: 0.25, answers: 0.25, trust: 0.20 };
 
 const AI_BOTS = {
@@ -133,6 +135,9 @@ export function extract(html, pageUrl) {
   const linkMatch = re => links.some(l => re.test(l.href) || re.test(l.text));
 
   const navTexts = navBlocks.flatMap(n => all(/<a\b[^>]*>([\s\S]*?)<\/a>/gi, n).map(m => stripTags(m[1]))).filter(Boolean);
+  const navLinks = navBlocks.flatMap(n => all(/<a\b[^>]*>([\s\S]*?)<\/a>/gi, n).map(m => ({ href: attr(m[0], 'href') || '', text: stripTags(m[1]) }))).filter(l => l.text && l.href);
+  const iconHref = (src.match(/<link\b[^>]*rel=["'](?:apple-touch-icon|icon)["'][^>]*>/i) || [])[0];
+  const logoHint = (ldNode('Organization|LocalBusiness')?.logo && (typeof ldNode('Organization|LocalBusiness').logo === 'string' ? ldNode('Organization|LocalBusiness').logo : ldNode('Organization|LocalBusiness').logo.url)) || (iconHref ? attr(iconHref, 'href') : null);
 
   const imgs = all(/<img\b[^>]*>/gi, bodyRaw).map(m => m[0]);
   const imgsNoAlt = imgs.filter(t => attr(t, 'alt') == null).length;
@@ -163,7 +168,7 @@ export function extract(html, pageUrl) {
   return {
     title, metas, canonical, lang, headings, h1s, jsonld, ldTypes, ldNode,
     paragraphs, listItems, listsWith3, visibleText, contentText, wordCount,
-    links, external, externalNonSocial, socialLinks, linkMatch, navTexts,
+    links, external, externalNonSocial, socialLinks, linkMatch, navTexts, navLinks, logoHint,
     imgs: imgs.length, imgsNoAlt, timeTags, dateText, authorMeta, ldAuthor, byline, copyright, address,
     semantic, siteName, host, htmlBytes: src.length, jsApp, scriptCount
   };
@@ -237,7 +242,8 @@ function catScore(checks) {
 export function analyze(input) {
   const {
     url, finalUrl = url, status = 0, headers = {}, html = '', robotsTxt = null, robotsStatus = 0,
-    redirectCount = 0, sitemapFound = null, llmsTxtFound = null, fetchMs = 0, error = null, entity = undefined
+    redirectCount = 0, sitemapFound = null, llmsTxtFound = null, fetchMs = 0, error = null, entity = undefined,
+    sitemapUrls = [], llmsTxt = null, aiCatalog = null
   } = input;
   const x = extract(html, finalUrl);
   const robots = robotsTxt != null ? parseRobots(robotsTxt) : null;
@@ -520,9 +526,21 @@ export function analyze(input) {
   /* ---------------- Fixes ---------------- */
   const fixes = (unreachable ? f => f.filter(z => z.category === 'access') : f => f)(buildFixes({ cats, x, siteName, purpose, desc, h1, audience, blockedSearch, noindex, robotsTxt, finalUrl, status, robotsAll, sitemapFound }));
 
+  /* ---------------- AI files: validate what exists, generate what's missing ---------------- */
+  let origin = '';
+  try { origin = new URL(finalUrl).origin; } catch { origin = `https://${x.host}`; }
+  const aiFiles = unreachable ? null : buildAiFiles({
+    x, origin, host: x.host || safeHost(finalUrl), siteName,
+    summary: desc || (purpose && confidence !== 'low' ? purpose : null),
+    description: desc || (purpose && confidence !== 'low' ? purpose : null),
+    robotsTxt, isBlockedFor: b => (robots ? isBlocked(robots, b, '/') : false), sitemapFound, sitemapUrls,
+    llmsTxt: llmsTxt || (llmsTxtFound ? { found: true, text: '' } : { found: false }), aiCatalog
+  });
+
   return {
     ok: true,
     url, finalUrl, domain: x.host || safeHost(finalUrl), scannedAt: new Date().toISOString(),
+    aiFiles,
     score: overall, grade: grade(overall), status: statusLabel(overall, cats.access.score),
     readiness, familiarity,
     categories: cats,

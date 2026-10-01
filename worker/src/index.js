@@ -73,12 +73,19 @@ export async function scan(url) {
 
   let host;
   try { host = new URL(page.finalUrl || url).hostname; } catch { host = ''; }
-  const [robots, sitemap, llms, entity] = await Promise.all([
+  const [robots, sitemap, llms, catalog, entity] = await Promise.all([
     probe(`${origin}/robots.txt`, true),
-    probe(`${origin}/sitemap.xml`, false),
-    probe(`${origin}/llms.txt`, false),
+    probe(`${origin}/sitemap.xml`, 400_000),
+    probe(`${origin}/llms.txt`, 300_000),
+    probe(`${origin}/.well-known/ai-catalog.json`, 300_000),
     lookupEntity(host)
   ]);
+  // Sitemap URLs (follow one level of sitemap index), used to list pages in a generated llms.txt
+  let sitemapUrls = sitemap.ok ? locs(sitemap.text) : [];
+  if (sitemap.ok && /<sitemapindex/i.test(sitemap.text) && sitemapUrls.length) {
+    const child = await probe(sitemapUrls[0], 400_000);
+    sitemapUrls = child.ok ? locs(child.text) : [];
+  }
 
   let sitemapFound = sitemap.ok;
   if (!sitemapFound && robots.ok && /^\s*sitemap\s*:/im.test(robots.text)) sitemapFound = true;
@@ -96,8 +103,17 @@ export async function scan(url) {
     llmsTxtFound: llms.ok,
     fetchMs,
     error: page.error,
-    entity
+    entity,
+    sitemapUrls: sitemapUrls.slice(0, 200),
+    llmsTxt: { found: llms.ok, servedHtml: !!llms.servedHtml, status: llms.status, type: llms.type || '', text: llms.text || '' },
+    aiCatalog: { found: catalog.ok, servedHtml: !!catalog.servedHtml, status: catalog.status, type: catalog.type || '', text: catalog.text || '' }
   });
+}
+
+function locs(xml) {
+  const out = []; const re = /<loc>\s*([^<\s]+)\s*<\/loc>/gi; let m;
+  while ((m = re.exec(xml)) && out.length < 500) out.push(m[1].replace(/&amp;/g, '&'));
+  return out;
 }
 
 /* ---------------- AI familiarity: is this site a known entity? ----------------
@@ -165,16 +181,17 @@ async function probe(url, wantBody) {
   try {
     const res = await fetch(url, { redirect: 'follow', signal: AbortSignal.timeout(6000), headers: { 'User-Agent': USER_AGENT }, cf: { cacheTtl: 0 } });
     const type = (res.headers.get('content-type') || '').toLowerCase();
-    if (!res.ok) return { ok: false, status: res.status, text: '' };
-    // Many hosts return 200 HTML for missing files; treat HTML as "not found" for txt/xml probes.
+    if (!res.ok) return { ok: false, status: res.status, text: '', type };
+    // Many hosts return 200 HTML for missing files; treat an HTML document as "not found" for txt/xml/json probes,
+    // but remember it so we can tell the owner their server answers with a web page instead of the file.
     if (type.includes('text/html')) {
       const peek = (await readCapped(res, 4000)).trimStart().slice(0, 200).toLowerCase();
-      if (peek.startsWith('<!doctype') || peek.startsWith('<html')) return { ok: false, status: 404, text: '' };
-      return { ok: true, status: 200, text: wantBody ? peek : '' };
+      if (peek.startsWith('<!doctype') || peek.startsWith('<html')) return { ok: false, status: 404, text: '', type, servedHtml: true };
+      return { ok: true, status: 200, text: wantBody ? peek : '', type };
     }
-    return { ok: true, status: res.status, text: wantBody ? await readCapped(res, 200_000) : '' };
+    return { ok: true, status: res.status, text: wantBody ? await readCapped(res, typeof wantBody === 'number' ? wantBody : 200_000) : '', type };
   } catch {
-    return { ok: false, status: 0, text: '' };
+    return { ok: false, status: 0, text: '', type: '' };
   }
 }
 

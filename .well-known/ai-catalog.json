@@ -1,0 +1,9 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Aeoden",
+    "identifier": "aeoden.com",
+    "documentationUrl": "https://aeoden.com/methodology/"
+  },
+  "entries": []
+}

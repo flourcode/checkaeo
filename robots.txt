@@ -2,19 +2,26 @@
 User-agent: *
 Allow: /
 
-# We welcome answer-engine and search crawlers explicitly.
+# --- AI crawlers ---
+# Answer and citation crawlers: welcome.
 User-agent: OAI-SearchBot
-Allow: /
 User-agent: ChatGPT-User
-Allow: /
 User-agent: Claude-SearchBot
-Allow: /
 User-agent: Claude-User
-Allow: /
 User-agent: PerplexityBot
+User-agent: Perplexity-User
 Allow: /
+
+# Training crawlers: also welcome.
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Google-Extended
+User-agent: CCBot
+User-agent: Applebot-Extended
+Allow: /
+
+# Search engines
 User-agent: Googlebot
-Allow: /
 User-agent: Bingbot
 Allow: /
 

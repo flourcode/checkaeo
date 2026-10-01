@@ -582,3 +582,42 @@ body { font-family: var(--font); font-weight: 400; }
 @media (max-width: 560px), (max-height: 800px) { .points { display: none; } }
 @media (max-height: 800px) { .hero__rule { margin-top: .6rem; } .scan-form { margin-top: .9rem; } .card-stage { margin-top: .9rem; } }
 @media (max-width: 560px) { .hero { padding-top: .6rem; } .hero__rule { margin-top: .6rem; } .scan-form { margin-top: .9rem; } .card-stage { margin-top: .8rem; } .acard__known { margin-top: .15rem; } }
+
+/* ============ Your AI files ============ */
+.files { padding-bottom: clamp(2.5rem, 6vw, 3.5rem); margin-bottom: clamp(2.5rem, 6vw, 3.5rem); border-bottom: 1px solid var(--edge); scroll-margin-top: 1rem; }
+.files__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 1rem; }
+.ftabs { display: flex; gap: .4rem; margin-top: 1.25rem; overflow-x: auto; padding-bottom: .25rem; }
+.ftab { display: inline-flex; align-items: center; gap: .55rem; padding: .55rem .9rem; border-radius: var(--pill); border: 1px solid var(--edge-2); background: var(--surface); color: var(--ink); font-weight: 600; font-size: var(--fs-sm); cursor: pointer; white-space: nowrap; }
+.ftab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: #EEF4E2; }
+.fstatus { font-size: .72rem; font-weight: 600; padding: .15rem .5rem; border-radius: var(--pill); }
+.fstatus--ok { background: #D7EEDF; color: #1F5A2E; }
+.fstatus--fix { background: #FBE8C8; color: #7A4A07; }
+.fstatus--missing { background: #F6DEDB; color: #8E2A1C; }
+.fstatus--optional { background: var(--frame); color: var(--ink-3); border: 1px solid var(--edge); }
+.ftab[aria-selected="true"] .fstatus--optional { background: transparent; color: #A9BFAC; border-color: #3D6A58; }
+.fpanel { margin-top: 1rem; background: var(--surface); border: 1px solid var(--edge); border-radius: var(--r-card); padding: clamp(1rem, 3vw, 1.5rem); }
+.fpanel__what { color: var(--ink-2); max-width: 70ch; }
+.fpanel__note { margin-top: .6rem; color: var(--ink-3); font-size: var(--fs-sm); max-width: 70ch; }
+.fpanel__issues { margin: .75rem 0 0; padding: 0; list-style: none; display: grid; gap: .35rem; }
+.fpanel__issues li { position: relative; padding-left: 1.2rem; color: var(--ink-2); font-size: var(--fs-sm); }
+.fpanel__issues li::before { content: ''; position: absolute; left: .2rem; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: var(--warn); }
+.fpanel__issues li.is-issue::before { background: var(--bad); }
+.fcode { margin-top: 1rem; border-radius: 14px; overflow: hidden; border: 1px solid #23503E; }
+.fcode__bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .5rem; padding: .5rem .6rem .5rem 1rem; background: #0F3326; color: #A9BFAC; font-size: var(--fs-xs); }
+.fcode__bar code { color: #EEF4E2; }
+.fcode__tools { display: flex; gap: .4rem; }
+.fcode__tools .btn { background: transparent; color: #EEF4E2; border-color: #3D6A58; min-height: 2.1rem; }
+.fcode__tools .btn:hover { background: rgba(238, 244, 226, .08); color: #fff; }
+.fcode__pre { margin: 0; padding: 1rem; background: #12372A; color: #E4F0D0; font-size: .8rem; line-height: 1.55; max-height: 22rem; overflow: auto; white-space: pre; }
+.fcode__pre--sm { max-height: 12rem; border-radius: 12px; margin-top: .6rem; }
+.fpanel__more { margin-top: .9rem; }
+.fpanel__more summary { cursor: pointer; color: var(--g-600); font-weight: 600; font-size: var(--fs-sm); }
+.fpanel__install { margin-top: .9rem; font-size: var(--fs-sm); color: var(--ink-2); }
+.files__honest { margin-top: 1rem; font-size: var(--fs-sm); color: var(--ink-3); }
+.files-count { font-weight: 500; opacity: .75; margin-left: .35rem; }
+/* What you get: file list on the homepage */
+.filelist { list-style: none; margin: 0; padding: 0; display: grid; gap: .75rem; }
+.filelist li { background: var(--surface); border: 1px solid var(--edge); border-radius: 18px; padding: 1rem 1.15rem; }
+.filelist h3 { font-size: var(--fs-lg); display: flex; align-items: center; gap: .6rem; }
+.filelist p { color: var(--ink-3); font-size: var(--fs-sm); margin-top: .3rem; }
+.tag { font-size: .7rem; font-weight: 600; padding: .15rem .5rem; border-radius: 999px; background: var(--frame); color: var(--ink-3); border: 1px solid var(--edge); }

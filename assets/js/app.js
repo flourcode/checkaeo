@@ -189,6 +189,7 @@
           <button type="button" role="menuitem" data-act="svg"><strong>Download SVG</strong><span>Vector, editable</span></button>
         </div>
       </div>
+      ${r.aiFiles ? `<a class="btn btn--primary btn--sm" href="#ai-files" data-cta="ai-files">Get your AI files <span class="files-count">${r.aiFiles.ready}/${r.aiFiles.total} ready</span></a>` : ''}
       <a class="actions__report" href="#report">Full report <span aria-hidden="true">↓</span></a>`;
     wireActions(r);
   }
@@ -219,10 +220,100 @@
     </section>`;
   }
 
+  /* ---------------- AI files: validate, generate, install ---------------- */
+  const FILE_STATUS = { ok: ['Ready', 'ok'], fix: ['Needs fix', 'fix'], missing: ['Missing', 'missing'], optional: ['Optional', 'optional'] };
+  function renderFiles(r) {
+    const F = r.aiFiles; if (!F) return '';
+    const tab = (f, i) => `<button class="ftab" role="tab" id="ftab-${f.id}" aria-controls="fpanel-${f.id}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}" data-file="${f.id}">
+        <span class="ftab__name">${esc(f.name)}</span><span class="fstatus fstatus--${FILE_STATUS[f.status][1]}">${FILE_STATUS[f.status][0]}</span></button>`;
+    const panel = (f, i) => `<div class="fpanel" role="tabpanel" id="fpanel-${f.id}" aria-labelledby="ftab-${f.id}" ${i === 0 ? '' : 'hidden'}>
+        <p class="fpanel__what">${esc(f.what)}</p>
+        ${f.optionalNote ? `<p class="fpanel__note">${esc(f.optionalNote)}</p>` : ''}
+        ${(f.issues || []).length || (f.notes || []).length ? `<ul class="fpanel__issues">${(f.issues || []).map(t => `<li class="is-issue">${esc(t)}</li>`).join('')}${(f.notes || []).map(t => `<li>${esc(t)}</li>`).join('')}</ul>`
+          : f.status === 'ok' ? `<p class="fpanel__note">We found a valid ${esc(f.name)} on your site. The version below is a refreshed draft built from your pages, if you want it.</p>` : ''}
+        <div class="fcode"><div class="fcode__bar"><span>${esc(f.status === 'ok' ? 'Suggested refresh' : f.id === 'robots' && f.status !== 'missing' ? 'Add to your robots.txt' : 'Ready to install')} · <code>${esc(f.path)}</code></span>
+          <span class="fcode__tools"><button class="btn btn--ghost btn--sm" type="button" data-fcopy="${f.id}">Copy</button><button class="btn btn--ghost btn--sm" type="button" data-fdl="${f.id}">Download</button></span></div>
+          <pre class="fcode__pre" tabindex="0"><code>${esc(f.generated)}</code></pre></div>
+        ${f.template ? `<details class="fpanel__more"><summary>Template entry for when you launch an MCP server or agent</summary><pre class="fcode__pre fcode__pre--sm"><code>${esc(f.template)}</code></pre></details>` : ''}
+        <p class="fpanel__install"><strong>Where it goes:</strong> ${esc(f.install)}</p>
+        ${/\[[^\]\n]+\](?!\()/.test(f.generated) ? `<p class="fpanel__note">Anything in [brackets] is a placeholder: we didn’t find that fact on your site, so we didn’t invent it.</p>` : ''}
+      </div>`;
+    return `<section class="files" id="ai-files" aria-labelledby="files-h">
+      <div class="files__head">
+        <div><h2 class="report__h" id="files-h">Your AI files</h2>
+          <p class="report__sub">Written from your own site. ${F.ready} of ${F.total} ready today; the AI catalog is optional.</p></div>
+        <button class="btn btn--primary" type="button" id="files-zip">${icon('download')} Download all (.zip)</button>
+      </div>
+      <div class="ftabs" role="tablist" aria-label="AI files">${F.files.map(tab).join('')}</div>
+      ${F.files.map(panel).join('')}
+      <p class="files__honest">These files make your site easier for AI tools and agents to read. They don’t guarantee you’ll be cited: no file can. <a href="methodology/index.html#ai-files">How we build them</a></p>
+    </section>`;
+  }
+
+  function wireFiles(r) {
+    const F = r.aiFiles; if (!F) return;
+    const byId = id => F.files.find(f => f.id === id);
+    const tabs = [...report.querySelectorAll('.ftab')];
+    const select = t => {
+      tabs.forEach(x => { const on = x === t; x.setAttribute('aria-selected', String(on)); x.tabIndex = on ? 0 : -1; document.getElementById('fpanel-' + x.dataset.file).hidden = !on; });
+      track('ai_file_tab', { file: t.dataset.file });
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => select(t));
+      t.addEventListener('keydown', e => {
+        const k = e.key; let j = null;
+        if (k === 'ArrowRight') j = (i + 1) % tabs.length; else if (k === 'ArrowLeft') j = (i - 1 + tabs.length) % tabs.length; else if (k === 'Home') j = 0; else if (k === 'End') j = tabs.length - 1;
+        if (j != null) { e.preventDefault(); tabs[j].focus(); select(tabs[j]); }
+      });
+    });
+    report.querySelectorAll('[data-fcopy]').forEach(b => b.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(byId(b.dataset.fcopy).generated); showToast('Copied'); track('ai_file_copy', { file: b.dataset.fcopy }); } catch { showToast('Could not copy.'); }
+    }));
+    report.querySelectorAll('[data-fdl]').forEach(b => b.addEventListener('click', () => {
+      const f = byId(b.dataset.fdl); saveBlob(new Blob([f.generated], { type: 'text/plain' }), f.filename); track('ai_file_download', { file: f.id });
+    }));
+    $('#files-zip')?.addEventListener('click', () => {
+      const readme = `AI files for ${r.domain}\nGenerated by Aeoden (aeoden.com) on ${new Date().toISOString().slice(0, 10)}.\n\n` +
+        F.files.map(f => `${f.filename}\n  ${f.name} — ${f.what}\n  Where it goes: ${f.install}\n`).join('\n') +
+        `\nAnything in [brackets] is a placeholder: we didn't find that fact on your site, so we didn't invent it.\n`;
+      const entries = [...F.files.map(f => ({ name: f.id === 'catalog' ? '.well-known/ai-catalog.json' : f.filename, text: f.generated })), { name: 'README.txt', text: readme }];
+      saveBlob(zipStore(entries), `${r.domain.replace(/[^a-z0-9.-]/gi, '')}-ai-files.zip`);
+      showToast('AI files downloaded'); track('ai_files_zip');
+    });
+  }
+
+  function saveBlob(blob, name) {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+
+  /* Minimal ZIP writer (stored, no compression): small text files only */
+  const CRC_TABLE = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  const crc32 = bytes => { let c = 0xFFFFFFFF; for (const b of bytes) c = CRC_TABLE[(c ^ b) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  function zipStore(files) {
+    const enc = new TextEncoder(), parts = [], central = []; let offset = 0;
+    const d = new Date(), dosTime = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1), dosDate = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+    for (const f of files) {
+      const name = enc.encode(f.name), data = enc.encode(f.text), crc = crc32(data);
+      const lh = new DataView(new ArrayBuffer(30));
+      [[0, 0x04034b50, 4], [4, 20, 2], [6, 0x0800, 2], [8, 0, 2], [10, dosTime, 2], [12, dosDate, 2], [14, crc, 4], [18, data.length, 4], [22, data.length, 4], [26, name.length, 2], [28, 0, 2]].forEach(([o, v, n]) => n === 4 ? lh.setUint32(o, v, true) : lh.setUint16(o, v, true));
+      parts.push(new Uint8Array(lh.buffer), name, data);
+      const ch = new DataView(new ArrayBuffer(46));
+      [[0, 0x02014b50, 4], [4, 20, 2], [6, 20, 2], [8, 0x0800, 2], [10, 0, 2], [12, dosTime, 2], [14, dosDate, 2], [16, crc, 4], [20, data.length, 4], [24, data.length, 4], [28, name.length, 2], [30, 0, 2], [32, 0, 2], [34, 0, 2], [36, 0, 2], [38, 0, 4], [42, offset, 4]].forEach(([o, v, n]) => n === 4 ? ch.setUint32(o, v, true) : ch.setUint16(o, v, true));
+      central.push(new Uint8Array(ch.buffer), name);
+      offset += 30 + name.length + data.length;
+    }
+    const cdSize = central.reduce((s, p) => s + p.length, 0);
+    const end = new DataView(new ArrayBuffer(22));
+    [[0, 0x06054b50, 4], [4, 0, 2], [6, 0, 2], [8, files.length, 2], [10, files.length, 2], [12, cdSize, 4], [16, offset, 4], [20, 0, 2]].forEach(([o, v, n]) => n === 4 ? end.setUint32(o, v, true) : end.setUint16(o, v, true));
+    return new Blob([...parts, ...central, new Uint8Array(end.buffer)], { type: 'application/zip' });
+  }
+
   function renderReport(r) {
     const sees = r.whatAiSees, cats = ['access', 'clarity', 'answers', 'trust'];
     report.innerHTML = `
       <div class="wrap">
+        ${renderFiles(r)}
         <div class="report__grid">
           <section aria-labelledby="fixes-h">
             <h2 class="report__h" id="fixes-h">Fix these first</h2>
@@ -256,6 +347,7 @@
         <p class="report__again"><button class="btn btn--ghost" type="button" id="again-btn">${r.demo ? 'Check my site' : 'Check another site'}</button></p>
       </div>`;
     report.hidden = false;
+    wireFiles(r);
     report.querySelectorAll('[data-reveal]').forEach(b => b.addEventListener('click', () => {
       const p = document.getElementById(b.dataset.reveal), open = p.hidden;
       p.hidden = !open; b.setAttribute('aria-expanded', String(open));

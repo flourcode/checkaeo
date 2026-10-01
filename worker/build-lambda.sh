@@ -3,7 +3,7 @@
 set -e
 cd "$(dirname "$0")"
 rm -rf lambda-build lambda.zip && mkdir lambda-build
-cp src/index.js src/analyze.js src/lambda.js lambda-build/
+cp src/index.js src/analyze.js src/files.js src/lambda.js lambda-build/
 echo '{"type":"module"}' > lambda-build/package.json
 (cd lambda-build && zip -qr ../lambda.zip .)
 rm -rf lambda-build

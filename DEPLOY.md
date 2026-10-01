@@ -71,6 +71,10 @@ Console test event:
   "body": "{\"url\":\"github.com\"}", "isBase64Encoded": false }
 ```
 
+### Aeoden's own AI files
+
+The site publishes `llms.txt`, `robots.txt` (with explicit AI crawler rules) and `/.well-known/ai-catalog.json`. The Amplify build copies the hidden `.well-known` folder into `dist/` along with everything else. Amplify serves `.json` as `application/json`, which the AI Catalog spec accepts; to use the specific `application/ai-catalog+json` media type, add a custom header for `/.well-known/ai-catalog.json` in Amplify → Hosting → Custom headers.
+
 ## 2. Configure the front end
 
 Open **`assets/js/config.js`**:
