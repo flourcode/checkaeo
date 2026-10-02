@@ -1,9 +1,12 @@
 # NamerCheck
 
-A free tool for people daydreaming about escaping their 9-to-5. It works in two steps:
+A free tool for people daydreaming about escaping their 9-to-5. It's one journey with three steps:
 
-1. **Test the side hustle idea.** Someone types a rough, one-sentence idea. Gemini 3.5 Flash-Lite returns an honest first read: a sharper version of the idea, who pays, the risks, a 7-day validation test, where to find the first 10 customers, the first two evenings of work, and 12 name ideas, with the ones whose .com looks open listed first. The page then builds a landing page prompt that uses whichever name the person checks. Each suggested name gets a real .com check.
-2. **Check the name.** Picking a name (or typing one) checks domains through RDAP, the major social handles, and a local naming-distinctiveness score.
+1. **Idea.** Someone types a rough, one-sentence idea. Gemini 3.5 Flash-Lite returns an honest first read: a sharper version of the idea, who pays, the risks, a 7-day validation test, where to find the first 10 customers, and the first two evenings of work.
+2. **Name.** Twelve name ideas for that idea, with the ones whose .com looks open listed first, plus a box to check any name. A check covers .com, .io, YouTube and TikTok, and gives a naming-distinctiveness score.
+3. **Launch kit.** The chosen name, what's open to claim right now (with register and claim links), the 7-day test, and a landing page prompt filled in with the chosen name.
+
+People who already have a name can skip step 1 ("Already have a name in mind?") and go straight to step 2. The kit then offers to add an idea later. A progress bar shows the three steps once the journey starts.
 
 There's no login, database, pricing, email capture, or build step.
 
@@ -88,7 +91,7 @@ Inside the Lambda, every check in a batch is isolated:
 - If one upstream service fails, throws, or hangs, only that item comes back `unknown`. The rest of the batch still returns.
 - The frontend also checks each item, and turns any missing or malformed result into `unknown`.
 
-A primary check holds 7 items (.com, .io and .co plus 4 platforms). A fallback check holds 12 (3 handles on 4 platforms). Both fit easily under `MAX_BATCH = 30`.
+A name check holds 4 items (.com, .io, YouTube, TikTok). A fallback check holds 6 (3 handles on 2 platforms). A name-ideas check holds up to 12 .com lookups. All fit easily under `MAX_BATCH = 30`.
 
 ## Deploy the Lambda
 
@@ -121,7 +124,6 @@ curl -s -X POST "$URL" -d '{"kind":"idea","idea":"meal prep for traveling sales 
 |---|---|
 | `ALLOWED_ORIGINS` | **Set this in production:** `ALLOWED_ORIGINS=https://YOURDOMAIN.COM`. Use a comma-separated list if you have several, such as your Amplify preview domain. The default `*` allows any origin. |
 | `YOUTUBE_API_KEY` | Uses the official YouTube Data API (`channels.list` with `forHandle`). Strongly recommended. |
-| `GITHUB_TOKEN` | A fine-grained token with no scopes. Raises GitHub's limit from 60 to 5,000 requests an hour. |
 | `GEMINI_API_KEY` | **Required for idea testing.** Shared with the Idea Sifter. Without it, idea requests return 503 and name checks still work. |
 | `NAMERCHECK_GEMINI_MODEL` | Default `gemini-3.5-flash-lite`. This is separate from the sifter's `GEMINI_MODEL`, so changing the sifter's model never changes NamerCheck's. |
 | `GEMINI_TIMEOUT_MS` | Default 24000. Keep it under the Lambda timeout. |
@@ -219,10 +221,10 @@ Example availability result:
 
 ```json
 {
-  "kind": "social", "platformId": "github", "platform": "GitHub",
+  "kind": "social", "platformId": "youtube", "platform": "YouTube",
   "handle": "quotabird", "status": "taken", "confidence": "high",
-  "url": "https://github.com/quotabird", "method": "api",
-  "note": "Used by a user on GitHub.", "checkedAt": "2026-10-02T12:00:00.000Z"
+  "url": "https://www.youtube.com/@quotabird", "method": "api",
+  "note": "A channel uses this handle.", "checkedAt": "2026-10-02T12:00:00.000Z"
 }
 ```
 
@@ -255,16 +257,9 @@ The Lambda uses RDAP. The IANA bootstrap file (`data.iana.org/rdap/dns.json`) ma
 
 - A `200` response whose `ldhName` matches the domain means **Taken**. The result includes the registration year and registrar when the registry provides them.
 - A `404` means **Likely Available**.
-- **.io and .co** run RDAP but aren't in the IANA bootstrap (it's optional for country-code TLDs). Their servers are listed in `SUPPLEMENTAL_RDAP` in `namercheck.mjs`. Before a supplemental server's "not found" counts as Likely Available, it must prove itself: one of its control domains (`nic.io`, `google.io`, `nic.co`, `google.co`), which are known to be registered, has to come back as a matching registration. This is checked every 6 hours per warm instance. If it fails, every lookup on that TLD is Unable to Verify, so a wrong or broken server can't produce false "available" results.
+- **.io** runs RDAP but isn't in the IANA bootstrap (RDAP is optional for country-code TLDs). Its server is listed in `SUPPLEMENTAL_RDAP` in `namercheck.mjs`. Before that server's "not found" counts as Likely Available, it must prove itself: one of its control domains (`nic.io`, `google.io`), which are known to be registered, has to come back as a matching registration. This is checked every 6 hours per warm instance. If it fails, every lookup on that TLD is Unable to Verify, so a wrong or broken server can't produce false "available" results.
 - A TLD with no RDAP server, a timeout, a `429`, or any other answer means **Unable to Verify**.
 - Domains in redemption or pending delete are still **Taken**, with a note saying so.
-
-### GitHub
-
-The Lambda calls `api.github.com/users/{name}`. Users and organizations share one namespace.
-
-- A `404` means **Likely Available**, because names from suspended or deleted accounts can be held.
-- A `403` or `429` is a rate limit, so the result is **Unable to Verify**.
 
 ### YouTube
 
@@ -274,15 +269,11 @@ With `YOUTUBE_API_KEY` set, the Lambda uses the Data API. Without it, the Lambda
 - A real `404` on youtube.com means **Likely Available** (low confidence).
 - A redirect to a consent page means **Unable to Verify**.
 
-### Instagram, X, Facebook, Threads, LinkedIn, Reddit
+### Instagram, X, Facebook, Threads, LinkedIn, Reddit, GitHub, Bluesky, .co
 
-Not checked. From AWS servers they always return login walls, anti-bot pages or HTTP 403, so any result would be a guess, and showing a wall of "Unable to Verify" made the tool look broken. The page links straight to the handle on Instagram, X, Facebook, Threads and LinkedIn instead, labelled as not checked.
+Not checked. From AWS servers they always return login walls, anti-bot pages or HTTP 403, so any result would be a guess, and showing a wall of "Unable to Verify" made the tool look broken. GitHub, Bluesky and .co were removed to keep the tool focused on what side hustles need, and .co's RDAP server didn't verify reliably in testing. The page links straight to the handle on Instagram, X, Facebook, Threads and LinkedIn instead, labelled as not checked.
 
 X and Reddit could come back with official API credentials (an X API bearer token, Reddit app-only OAuth). Each would be one adapter in `platforms` in `namercheck.mjs` plus a matching entry in `PLATFORMS` in `app.js`.
-
-### Bluesky
-
-The Lambda calls `com.atproto.identity.resolveHandle` on `public.api.bsky.app` for `{name}.bsky.social`. An error saying the handle couldn't be resolved means **Likely Available**.
 
 ## Idea testing with Gemini 3.5 Flash-Lite
 
@@ -319,7 +310,7 @@ If TikTok changes its pages and a helper stops matching, the result falls throug
 
 ## Expect occasional "Unable to Verify"
 
-The four checked platforms and the three registries normally answer. Rate limits and timeouts still happen, and they show as **Unable to Verify** with a **Try again** link and a direct link to look by hand. That's the honest result. Without a `GITHUB_TOKEN`, GitHub allows only 60 lookups an hour from one Lambda, so set the token.
+YouTube, TikTok, .com and .io normally answer. Rate limits and timeouts still happen, and they show as **Unable to Verify** with a **Try again** link and a direct link to look by hand. That's the honest result. Setting `YOUTUBE_API_KEY` makes the YouTube check the most reliable of the four.
 
 ## Recent checks
 
@@ -331,9 +322,9 @@ Availability results are never stored, so **Check again** always runs fresh look
 
 1. In `lambda/namercheck.mjs`, add an entry to `platforms` with `name`, `profileUrl`, `validate`, and `check`. Then add its hosts to `ALLOWED_HOST_SUFFIXES`.
 2. In `app.js`, add the matching entry to `PLATFORMS` with `name`, `url`, and `display`, using the same key.
-3. Keep `platforms + domain endings ≤ MAX_BATCH` (today 4 + 3). If you add many, raise `MAX_BATCH` in the Lambda and `CONFIG.maxBatch` in `app.js` together.
+3. Keep `platforms + domain endings ≤ MAX_BATCH` (today 2 + 2). If you add many, raise `MAX_BATCH` in the Lambda and `CONFIG.maxBatch` in `app.js` together.
 
-Domains are limited to .com, .io and .co (`CONFIG.tlds` in `app.js`), the endings people actually start with. All three are checkable through registry RDAP. To add an ending, add it to `CONFIG.tlds` and check that its registry has an RDAP server, either in the IANA bootstrap or verified in `SUPPLEMENTAL_RDAP`. Otherwise it will always show "Unable to Verify".
+Domains are limited to .com and .io (`CONFIG.tlds` in `app.js`), the two endings that answered reliably through registry RDAP. To add an ending, add it to `CONFIG.tlds` and check that its registry has an RDAP server, either in the IANA bootstrap or verified in `SUPPLEMENTAL_RDAP`. Otherwise it will always show "Unable to Verify".
 
 ## The distinctiveness score
 

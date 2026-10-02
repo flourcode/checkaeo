@@ -283,7 +283,6 @@ textarea:focus { border-color: var(--cobalt); outline: none; }
 .idea-status { margin: 0.75rem 0 0; color: var(--muted); font-weight: 500; }
 .idea-status:empty { display: none; }
 
-.idea-results { padding-bottom: 1rem; }
 
 .verdict {
   display: inline-block;
@@ -312,7 +311,7 @@ textarea:focus { border-color: var(--cobalt); outline: none; }
 .idea-title:focus { outline: none; }
 
 .assumptions { margin-top: 1rem; max-width: var(--measure); }
-.assumptions h3 { font-size: 1rem; margin: 0 0 0.3rem; }
+.assumptions h4 { font-size: 1rem; margin: 0 0 0.3rem; }
 .assumptions ul { margin: 0; padding-left: 1.2rem; color: var(--muted); }
 
 .idea-summary .fineprint { margin-top: 1.1rem; }
@@ -332,7 +331,7 @@ textarea:focus { border-color: var(--cobalt); outline: none; }
 
 .risk-list { margin: 0; padding-left: 1.2rem; max-width: var(--measure); }
 .customers { margin-top: 1.25rem; max-width: var(--measure); }
-.customers h3 { font-size: 1.05rem; margin: 0 0 0.3rem; }
+.customers h4 { font-size: 1.05rem; margin: 0 0 0.3rem; }
 .block-head .mvp-name { margin-top: 0.35rem; color: var(--ink); font-weight: 600; }
 .block-head .mvp-name:empty { display: none; }
 .risk-list li { margin: 0.35rem 0; }
@@ -377,22 +376,145 @@ textarea:focus { border-color: var(--cobalt); outline: none; }
 }
 .pick-btn:hover { background: var(--cobalt); color: var(--on-cobalt); }
 
-/* Name step -------------------------------------------------------------- */
+/* Journey: one flow, three steps ----------------------------------------- */
 
-.name-step {
-  margin-top: clamp(2.5rem, 6vw, 4rem);
-  padding-top: clamp(2rem, 5vw, 3rem);
-  border-top: 1.5px solid var(--line);
-  padding-bottom: 2rem;
+.alt-start { margin: 1.25rem 0 0; color: var(--muted); }
+.link-btn {
+  font: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--cobalt);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  cursor: pointer;
 }
-.step-title {
+.link-btn:hover { color: var(--cobalt-deep); }
+
+.journey {
+  margin: 0 0 0.5rem;
+  padding: 0.85rem 0;
+  border-top: 1.5px solid var(--line);
+  border-bottom: 1.5px solid var(--line);
+}
+.journey ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 2rem;
+}
+.journey a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 600;
+}
+.journey a:hover .journey-label { text-decoration: underline; text-underline-offset: 0.18em; }
+.journey-num, .step-badge {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  border: 2px solid var(--line);
   font-family: var(--display);
   font-weight: 800;
-  font-size: clamp(1.9rem, 4.4vw, 3rem);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  margin: 0 0 0.8rem;
+  font-size: 0.95rem;
+  color: var(--muted);
+  background: var(--surface);
+  flex: none;
 }
+.journey-state { font-weight: 500; font-size: 0.9rem; }
+.journey-state:empty { display: none; }
+.journey li[data-state="done"] .journey-num { background: var(--ok); border-color: var(--ok); color: var(--surface); }
+.journey li[data-state="current"] a { color: var(--ink); }
+.journey li[data-state="current"] .journey-num { border-color: var(--cobalt); background: var(--cobalt); color: var(--on-cobalt); }
+.journey li[data-state="skipped"] .journey-label { text-decoration: line-through; }
+
+.step {
+  margin-top: clamp(2.5rem, 6vw, 3.75rem);
+  padding-top: clamp(1.5rem, 4vw, 2.25rem);
+  border-top: 1.5px solid var(--line);
+}
+.journey + .step { border-top: 0; padding-top: 0.5rem; margin-top: 1.5rem; }
+.step-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.8rem, 4.2vw, 2.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  margin: 0 0 0.5rem;
+}
+.step-title:focus { outline: none; }
+.step-title .step-badge {
+  width: 2.4rem;
+  height: 2.4rem;
+  font-size: 1.2rem;
+  border-color: var(--cobalt);
+  background: var(--cobalt);
+  color: var(--on-cobalt);
+}
+.step-sub { margin: 0 0 1.5rem; color: var(--muted); font-size: 1.1rem; max-width: var(--measure); }
+.step-sub:empty { display: none; }
+.step > .summary { margin-top: 1.25rem; }
+.block-first { margin-top: 0.5rem; }
+#step-name .check-form { margin-top: 2rem; }
+#name-ideas-block[hidden] + .check-form { margin-top: 0.5rem; }
+.results { margin-top: 2rem; }
+
+/* Launch kit */
+.kit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+.kit-item {
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  padding: 1rem 1.15rem 1.1rem;
+}
+.kit-item h3 { font-size: 1rem; margin: 0 0 0.4rem; color: var(--muted); font-weight: 600; }
+.kit-item p { margin: 0; }
+.kit-item .hint { margin-top: 0.45rem; }
+.kit-name {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.8rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+.kit-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
+.kit-list li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.25rem 0.75rem; }
+.kit-list a { font-weight: 600; }
+.kit-list .kit-muted { color: var(--muted); }
+.kit-cta {
+  margin-top: 1.5rem;
+  padding: 1rem 1.15rem;
+  border: 1.5px dashed var(--line);
+  border-radius: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+.kit-cta p { margin: 0; max-width: 48ch; }
+
+/* Legend, folded away under the results */
+.legend { margin-top: 2rem; }
+.legend summary { cursor: pointer; font-weight: 600; color: var(--muted); }
+.legend summary:hover, .legend[open] summary { color: var(--ink); }
+.legend .legend-list { margin-top: 1rem; }
 
 /* The nameplate: the one loud element on the page ----------------------- */
 
@@ -445,7 +567,7 @@ code { font-size: 0.92em; }
 
 /* Results --------------------------------------------------------------- */
 
-.results { padding-bottom: 3rem; }
+.results { padding-bottom: 0.5rem; }
 
 .summary {
   background: var(--surface);
@@ -562,7 +684,7 @@ code { font-size: 0.92em; }
 .block { margin-top: clamp(2.25rem, 5vw, 3.25rem); }
 
 .block-head { margin-bottom: 0.75rem; max-width: var(--measure); }
-.block-head h2 {
+.block-head h2, .block-head h3 {
   font-family: var(--display);
   font-weight: 700;
   font-size: clamp(1.5rem, 3vw, 2rem);

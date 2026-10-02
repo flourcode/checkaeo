@@ -8,8 +8,8 @@ const CHECK_API_URL = "https://6cu5wlvx2mylhy7xzdefy5bsya0ccmxb.lambda-url.us-ea
 // ---------------------------------------------------------------------------
 
 const CONFIG = {
-  // The endings people actually start with, all checkable through registry RDAP.
-  tlds: ["com", "io", "co"],
+  // Only endings that reliably answer through registry RDAP.
+  tlds: ["com", "io"],
   // One batch request covers every domain and handle in a check. The Lambda caps
   // each upstream check at ~20 s, so allow a little more for the whole batch.
   requestTimeoutMs: 35000,
@@ -29,10 +29,8 @@ const CONFIG = {
 // Platforms the Lambda can actually verify from a server. The Lambda has the
 // matching checkers (lambda/namercheck.mjs). Keep the two lists in sync.
 const PLATFORMS = {
-  youtube: { name: "YouTube", url: (h) => `https://www.youtube.com/@${h}`, display: (h) => `@${h}` },
-  tiktok:  { name: "TikTok",  url: (h) => `https://www.tiktok.com/@${h}`,  display: (h) => `@${h}` },
-  github:  { name: "GitHub",  url: (h) => `https://github.com/${h}`,       display: (h) => `github.com/${h}` },
-  bluesky: { name: "Bluesky", url: (h) => `https://bsky.app/profile/${h}.bsky.social`, display: (h) => `@${h}.bsky.social` },
+  youtube: { name: "YouTube", url: (h) => `https://www.youtube.com/@${h}`, display: (h) => `@${h}`, claimUrl: "https://www.youtube.com/handle" },
+  tiktok:  { name: "TikTok",  url: (h) => `https://www.tiktok.com/@${h}`,  display: (h) => `@${h}`, claimUrl: "https://www.tiktok.com/signup" },
 };
 
 // Platforms that block automated checks from servers. We don't pretend to check
@@ -334,6 +332,9 @@ function scoreName(stem, keywordsRaw) {
     summary = "This name sits in a crowded or confusable space. Expect mix-ups and a harder time owning search results.";
   }
 
+  if (score >= 85 && findings.some((f) => f.points < 0)) {
+    summary = "Distinctive overall. The note below is minor, but worth a look.";
+  }
   if (everyday) {
     summary = "This is an everyday English word. Expect the .com and main handles to be taken, and a hard time standing out in search.";
   }
@@ -511,10 +512,7 @@ function startCheck(rawName, keywordsRaw, { updateUrl = true } = {}) {
   hideError();
   input.removeAttribute("aria-invalid");
 
-  if (ideaReport) {
-    landingName = n.brand;
-    renderLandingPrompt();
-  }
+  if (ideaReport) landingName = n.brand;
 
   const id = ++runId;
   rowMeta.clear();
@@ -533,7 +531,9 @@ function startCheck(rawName, keywordsRaw, { updateUrl = true } = {}) {
   const normNote = describeNormalization(n);
   if (normNote) variants.append(document.createTextNode(` ${normNote}`));
 
-  renderScore(scoreName(n.stem, keywordsRaw));
+  const scored = scoreName(n.stem, keywordsRaw);
+  current.score = scored;
+  renderScore(scored);
   $("#handle-label").textContent = `@${n.handle}`;
 
   // Rows
@@ -576,8 +576,11 @@ function startCheck(rawName, keywordsRaw, { updateUrl = true } = {}) {
   fbBtn.textContent = fbs.length ? `Check ${fbs.map((h) => "@" + h).join(", ")}` : "No fallback handles for this name";
 
   $("#setup-notice").hidden = apiConfigured();
+  $("#step-name").hidden = false;
+  $("#nameplate").hidden = true; // the results header shows the name now
   $("#results").hidden = false;
   updateTally();
+  updateJourney();
 
   if (updateUrl) writeUrl(n.brand, keywordsRaw);
 
@@ -678,6 +681,7 @@ function updateTally() {
   const d = tallyFor("domains");
   const s = tallyFor("primary");
   $("#tally").textContent = [tallySentence("domains", d), tallySentence("handles", s)].filter(Boolean).join(" ");
+  renderLaunchKit();
 }
 
 // ---------------------------------------------------------------------------
@@ -880,7 +884,7 @@ async function runIdea(raw) {
   if (error) return showIdeaError(error);
 
   ideaReport = report;
-  landingName = null; // a new idea starts without a chosen name
+  landingName = current ? current.n.brand : null; // keep a name already checked
   renderIdea(report, id);
 }
 
@@ -897,6 +901,7 @@ function renderIdea(r, id) {
 
   const notIdea = r.verdict === "not_a_business_idea";
   $("#idea-body").hidden = notIdea;
+  $("#name-ideas-block").hidden = true;
 
   if (!notIdea) {
     fillGrid($("#idea-fit"), [
@@ -924,10 +929,13 @@ function renderIdea(r, id) {
     fillList($("#idea-risks"), Array.isArray(r.risks) ? r.risks : []);
     $("#idea-reality").textContent = r.realityCheck || "";
     renderNameIdeas(r, id);
-    renderLandingPrompt();
   }
 
-  $("#idea-results").hidden = false;
+  $("#step-idea").hidden = false;
+  if (!notIdea) $("#step-name").hidden = false;
+  $("#name-input-label").textContent = notIdea ? "Check a name" : "Or check your own name";
+  updateJourney();
+  renderLaunchKit();
   const title = $("#idea-title");
   title.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
   title.focus({ preventScroll: true });
@@ -1050,11 +1058,113 @@ function buildLandingPrompt(r, name) {
 }
 
 function renderLandingPrompt() {
-  if (!ideaReport || ideaReport.verdict === "not_a_business_idea") return;
+  if (!hasUsableIdea()) return;
   $("#idea-mvp").textContent = buildLandingPrompt(ideaReport, landingName);
   $("#idea-mvp-name").textContent = landingName
-    ? `Using the name ${landingName}. Check another name to switch.`
-    : "Check one of the names above to fill in the product name.";
+    ? `Using the name ${landingName}. Check another name in step 2 to switch.`
+    : "Pick a name in step 2 to fill in the product name.";
+}
+
+// ---------------------------------------------------------------------------
+// One journey: 1 Idea -> 2 Name -> 3 Launch kit
+// ---------------------------------------------------------------------------
+
+let skippedIdea = false; // the person came with a name and skipped step 1
+
+const hasUsableIdea = () => Boolean(ideaReport) && ideaReport.verdict !== "not_a_business_idea";
+
+function updateJourney() {
+  const ideaDone = hasUsableIdea();
+  const nameDone = Boolean(current);
+  const states = {
+    idea: ideaDone ? "done" : skippedIdea || nameDone ? "skipped" : "current",
+    name: nameDone ? "done" : ideaDone || skippedIdea ? "current" : "todo",
+    launch: nameDone || ideaDone ? (nameDone ? "current" : "todo") : "todo",
+  };
+  const words = { done: "Done", skipped: "Skipped", current: "", todo: "" };
+  for (const [step, state] of Object.entries(states)) {
+    const li = document.querySelector(`.journey li[data-step="${step}"]`);
+    li.dataset.state = state;
+    const a = li.querySelector("a");
+    if (state === "current") a.setAttribute("aria-current", "step");
+    else a.removeAttribute("aria-current");
+    $(`#journey-${step}-state`).textContent = words[state];
+  }
+  // Step 1 links back to the idea box until there's a report to jump to.
+  document.querySelector('.journey li[data-step="idea"] a').setAttribute("href", ideaDone ? "#step-idea" : "#idea-input");
+  document.querySelector('.journey li[data-step="launch"] a').setAttribute("href", $("#step-launch").hidden ? "#step-name" : "#step-launch");
+  $("#journey").hidden = !(ideaReport || skippedIdea || nameDone);
+}
+
+// Step 3 pulls the other two together: the chosen name, what to claim right
+// now (only things actually checked as open), the 7-day test and the prompt.
+function renderLaunchKit() {
+  const hasName = Boolean(current);
+  const hasIdea = hasUsableIdea();
+  const step = $("#step-launch");
+  step.hidden = !(hasName || hasIdea);
+  if (step.hidden) return;
+
+  $("#launch-sub").textContent = hasName && hasIdea
+    ? "Everything you need to start this week, in one place."
+    : hasName
+      ? "What to claim for this name before someone else does."
+      : "Pick a name in step 2 to finish your kit.";
+
+  $("#kit-name-item").hidden = !hasName;
+  $("#kit-claim-item").hidden = !hasName;
+  if (hasName) {
+    $("#kit-name").textContent = current.n.brand;
+    const sc = current.score;
+    $("#kit-name-note").textContent = sc
+      ? sc.everyday ? "Everyday word, so expect a crowded search." : `Distinctiveness ${sc.score} / 100 (${sc.label.toLowerCase()}).`
+      : "";
+    renderClaimList();
+  }
+
+  $("#kit-test-item").hidden = !hasIdea;
+  $("#kit-prompt-block").hidden = !hasIdea;
+  $("#kit-no-idea").hidden = hasIdea || !hasName;
+  if (hasIdea) {
+    const v = ideaReport.validation || {};
+    $("#kit-test").textContent = v.sevenDayTest || "";
+    $("#kit-signal").textContent = v.successSignal ? `Keep going if: ${v.successSignal}` : "";
+    renderLandingPrompt();
+  }
+  updateJourney();
+}
+
+function renderClaimList() {
+  const ul = $("#kit-claim");
+  ul.replaceChildren();
+  let pending = 0;
+  const open = [];
+  for (const [key, meta] of rowMeta) {
+    if (meta.group !== "domains" && meta.group !== "primary") continue;
+    const r = rowResults.get(key);
+    if (!r) { pending++; continue; }
+    if (OPEN_STATUSES.has(r.status)) open.push(meta);
+  }
+  for (const meta of open) {
+    const li = el("li");
+    if (meta.type === "domain") {
+      li.append(el("span", {}, meta.domain), link(CONFIG.registrarUrl(meta.domain), "Register", `Register ${meta.domain}`));
+    } else {
+      const p = PLATFORMS[meta.platformId];
+      li.append(el("span", {}, `@${meta.handle} on ${p.name}`), link(p.claimUrl, "Claim", `Claim @${meta.handle} on ${p.name}`));
+    }
+    ul.append(li);
+  }
+  if (pending) ul.append(el("li", { className: "kit-muted" }, `Still checking ${pending} more…`));
+  else if (!open.length) ul.append(el("li", { className: "kit-muted" }, "Nothing is open for this name. Try another name in step 2."));
+}
+
+function skipToName() {
+  skippedIdea = true;
+  $("#step-name").hidden = false;
+  updateJourney();
+  $("#step-name-title").scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+  $("#name-input").focus({ preventScroll: true });
 }
 
 async function copyMvp() {
@@ -1137,6 +1247,7 @@ function init() {
   const keywords = $("#keywords-input");
 
   input.addEventListener("input", () => {
+    $("#nameplate").hidden = false;
     updatePlate();
     if (!$("#form-error").hidden) hideError();
   });
@@ -1168,6 +1279,11 @@ function init() {
     });
   }
   $("#copy-mvp").addEventListener("click", copyMvp);
+  $("#skip-to-name").addEventListener("click", skipToName);
+  $("#kit-add-idea").addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    $("#idea-input").focus({ preventScroll: true });
+  });
   $("#copy-link").addEventListener("click", copyLink);
   $("#recent-clear").addEventListener("click", () => {
     storeRecent([]);
