@@ -1,7 +1,7 @@
 "use strict";
 
 // Replace with your Lambda Function URL (or API Gateway URL).
-const CHECK_API_URL = "LAMBDA_URL";
+const CHECK_API_URL = "https://6cu5wlvx2mylhy7xzdefy5bsya0ccmxb.lambda-url.us-east-1.on.aws/";
 
 // ---------------------------------------------------------------------------
 // Configuration
