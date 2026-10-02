@@ -98,7 +98,7 @@
         <section class="block" aria-labelledby="name-ideas-title" id="name-ideas-block">
           <div class="block-head">
             <h2 id="name-ideas-title">Name ideas</h2>
-            <p>The .com for each name is checked against the registry. Pick one to check every domain and handle.</p>
+            <p>Each name's .com is checked against the registry, and names with an open .com move to the top.</p>
           </div>
           <ul class="rows name-ideas" id="name-ideas"></ul>
           <p class="hint" id="name-ideas-note"></p>
@@ -138,14 +138,6 @@
               <label class="sr-only" for="keywords-input">Competitors or niche words</label>
               <textarea id="keywords-input" rows="2" placeholder="quota, sales, pipeline, forecast, commission"></textarea>
               <p class="hint">Separate with commas. These only affect the distinctiveness score.</p>
-            </div>
-          </details>
-          <details class="option" id="tld-details">
-            <summary>Domain endings (<span id="tld-count">7</span>)</summary>
-            <div class="option-body">
-              <fieldset class="tld-picker" id="tld-picker">
-                <legend class="sr-only">Domain endings to check</legend>
-              </fieldset>
             </div>
           </details>
         </div>
@@ -191,7 +183,7 @@
       <section class="block" aria-labelledby="domains-title">
         <div class="block-head">
           <h2 id="domains-title">Domains</h2>
-          <p>Checked with each registry's RDAP service, the official source for registrations.</p>
+          <p>.com, .io and .co, checked with each registry's RDAP service, the official source for registrations.</p>
         </div>
         <ul class="rows rows-domains" id="domain-rows"></ul>
       </section>
@@ -199,9 +191,10 @@
       <section class="block" aria-labelledby="handles-title">
         <div class="block-head">
           <h2 id="handles-title">Social handles</h2>
-          <p>Exact handle <strong id="handle-label"></strong> on each platform.</p>
+          <p>Exact handle <strong id="handle-label"></strong> on the platforms we can check directly.</p>
         </div>
         <ul class="rows" id="social-rows"></ul>
+        <p class="manual-links" id="manual-links"></p>
       </section>
 
       <section class="block" aria-labelledby="fallback-title">
@@ -218,8 +211,6 @@
           <h2 id="legend-title">How to read the results</h2>
         </div>
         <dl class="legend-list">
-          <div><dt><span class="status" data-status="available"><span class="status-text">Available</span></span></dt>
-            <dd>The platform explicitly said the name is free.</dd></div>
           <div><dt><span class="status" data-status="likely_available"><span class="status-text">Likely available</span></span></dt>
             <dd>The official source has no record of it. Reserved, premium, or recently deleted names can look the same, so confirm when you register.</dd></div>
           <div><dt><span class="status" data-status="taken"><span class="status-text">Taken</span></span></dt>
@@ -240,11 +231,11 @@
         </li>
         <li>
           <h3>Domains</h3>
-          <p>Registration status through registry RDAP.</p>
+          <p>.com, .io and .co registration status through registry RDAP.</p>
         </li>
         <li>
           <h3>Social handles</h3>
-          <p>Public/API signals from major platforms. Some networks may block automated checks.</p>
+          <p>YouTube, TikTok, GitHub and Bluesky, checked directly. Instagram, X and Facebook block automated checks, so we link you straight to the handle instead.</p>
         </li>
         <li>
           <h3>Naming patterns</h3>
@@ -279,8 +270,8 @@
           <p>Because "not currently found" and "definitely available for you to claim" are not always the same thing. Registries and platforms can reserve names.</p>
         </div>
         <div class="faq-item">
-          <h3>Why can't NamerCheck verify every social network?</h3>
-          <p>Some platforms block automated checks, require authenticated APIs, rate-limit requests, or return ambiguous pages. NamerCheck reports uncertainty instead of guessing.</p>
+          <h3>Why don't you check Instagram, X or Facebook?</h3>
+          <p>They block automated checks, so any answer would be a guess. NamerCheck only checks platforms it can actually verify, and links you straight to the handle on the others so you can look in one click.</p>
         </div>
         <div class="faq-item">
           <h3>Do you store the names I check?</h3>
