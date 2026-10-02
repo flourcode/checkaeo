@@ -5,6 +5,7 @@
   <meta name="robots" content="noindex,nofollow" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Idea Sifter</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b5f46'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11' fill='none' stroke='%23dfff3f' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
   <style>
     /* ---------- Tokens: neutral layers, one accent ramp, semantic colours ---------- */
     :root{
@@ -670,10 +671,27 @@
     return results;
   }
 
+  /* ---------- Is the Lambda healthy? One check, one clear message ---------- */
+  let healthy = false;
+  async function checkLambda() {
+    if (healthy) return null;
+    let res, text = "";
+    try { res = await fetch(API_URL.replace(/\/$/, "") + "/health", { cache: "no-store" }); text = await res.text(); }
+    catch { return "Couldn't reach the Lambda at all. Most likely CORS: in the Function URL settings, set Allow origin to * and Allow headers to Content-Type."; }
+    let data = null; try { data = JSON.parse(text); } catch { /* not JSON */ }
+    if (data && data.service === "betalist-idea-sifter") { healthy = true; return null; }
+    if (data && data.service === "checkaeo-scan") return "Your Lambda is still running the old Aeoden scanner code. Upload betalist-sifter-lambda.zip again (Code → Upload from → .zip file), then set Handler to index.handler.";
+    if (res.status === 502 || /Internal Server Error/i.test(text)) return "The Lambda crashes before it can answer (HTTP 502). Almost always the handler setting: Runtime settings → Edit → Handler: index.handler, Runtime: Node.js 20.x or newer. The exact error is in CloudWatch Logs.";
+    if (res.status === 403) return "The Function URL refused the request (HTTP 403). Check its Auth type is NONE.";
+    return `The Lambda answered /health with HTTP ${res.status}: ${text.slice(0, 120)}`;
+  }
+
   /* ---------- Refresh: every enabled source, in parallel ---------- */
   async function refreshFeed() {
     const srcs = enabled();
     if (!srcs.length) { setStatus("Pick at least one source.", "warn"); return; }
+    const problem = await checkLambda();
+    if (problem) { setStatus(problem, "error"); $("refreshBtn").disabled = false; return; }
     $("refreshBtn").disabled = true; $("analyzeBtn").disabled = true;
     setStatus(`Fetching ${srcs.length} source${srcs.length === 1 ? "" : "s"}…`, "", true);
     const failed = [];
