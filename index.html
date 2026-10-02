@@ -269,6 +269,9 @@
     .hunt input{flex:1;min-width:200px;border:var(--b);border-radius:8px;padding:7px 10px;background:var(--card);font:inherit}
     .hunt select{background:var(--card);color:var(--ink);border-color:var(--ink)}
     .row.flash{outline:4px solid var(--pink);outline-offset:3px}
+    .inspired{font-family:var(--display);font-size:13px}
+    .inspired b{font-weight:600}
+    .refill{display:flex;align-items:center;gap:10px;background:var(--lime);font-weight:700}
   </style>
 </head>
 <body>
@@ -480,7 +483,7 @@
     return L.join("\n").replace(/\n{3,}/g, "\n\n").trim() + "\n";
   }
   /* ---------- Decision cards (older saved briefs are mapped into the same shape) ---------- */
-  const cleanName = n => String(n || "").split(/\s+[–—]\s+/)[0].slice(0, 60);
+  const cleanName = n => { const t = String(n || "").split(/\s+[–—]\s+/)[0]; return t.length > 56 ? t.slice(0, 54).replace(/\s+\S*$/, "") + "…" : t; };
   function card(x) {
     const m = x.monetization || {};
     const legacyPlan = !x.plan && (x.weekend_plan || x.names) ? { names: x.names || [], tagline: x.tagline || "", nugget: x.nugget || "", monetization: m, keywords: x.keywords || [], seo_angle: x.seo_angle || "", build: x.build || {}, weekend_plan: x.weekend_plan || [] } : null;
@@ -784,6 +787,13 @@
       if (state.tab === "saved") renderIdeas();
       else { b.classList.toggle("is-on", on); b.lastChild.textContent = on ? " Saved" : " Save"; $("nSaved").textContent = savedList().length || ""; }
     }));
+    root.querySelectorAll("[data-review]").forEach(b => b.addEventListener("click", e => { e.preventDefault(); fullReview(rows[Number(b.dataset.review)]); }));
+    // Opening a thin card sends it back to Gemini to fill in
+    root.querySelectorAll(".row > summary").forEach((sm, i) => sm.addEventListener("click", e => {
+      if (e.target.closest("button")) return;
+      const det = sm.parentElement, x = rows[i];
+      if (!det.open && x && isThin(x) && !refilling.has(launchKey(x))) refillCard(x).then(u => { if (u) openCard(u); });
+    }));
     root.querySelectorAll("[data-lp]").forEach(b => b.addEventListener("click", async e => {
       e.preventDefault();
       try { await navigator.clipboard.writeText(landingPrompt(rows[Number(b.dataset.lp)])); } catch { toast("Couldn't copy"); return; }
@@ -819,6 +829,7 @@
         ${icon("chev", "chev")}
       </summary>
       <div class="detail">
+        ${refilling.has(launchKey(x)) ? `<div class="tile tile--wide refill"><span class="spin" aria-hidden="true"></span> Gemini is filling in this card…</div>` : ""}
         <div class="tile tile--wide tile--reason v-${v.toLowerCase()}"><h3>Verdict</h3><p>${escapeHtml(x.reason || v)}</p></div>
         <div class="tile tile--wide"><h3>The idea</h3><p>${escapeHtml(x.idea || "—")}</p></div>
         ${x.risk ? `<div class="tile tile--wide tile--risk${/^none/i.test(x.risk) ? " is-none" : ""}"><h3>Risk</h3><p>${escapeHtml(x.risk)}</p></div>` : ""}
@@ -828,7 +839,8 @@
         <p class="src-line">From \u201c${escapeHtml(x.name)}\u201d · ${escapeHtml(KIND_LABEL[x._kind] || "Launch")} · ${escapeHtml(x._source || "")}${x._why ? ` · picked because ${escapeHtml(x._why)}` : ""}</p>
         ${x.plan ? planHtml(x.plan) : ""}
         <div class="actions">
-          ${v === "SKIP" ? "" : `<button class="btn btn--sm btn--plan" type="button" data-plan="${idx}">${x.plan ? "Re-plan this build" : "Plan this build"}</button>`}
+          ${v === "SKIP" || isThin(raw) ? `<button class="btn btn--sm btn--plan" type="button" data-review="${idx}" ${refilling.has(launchKey(x)) ? "disabled" : ""}>${refilling.has(launchKey(x)) ? "Reviewing…" : v === "SKIP" ? "Full review anyway" : "Full review"}</button>`
+            : `<button class="btn btn--sm btn--plan" type="button" data-plan="${idx}">${x.plan ? "Re-plan this build" : "Plan this build"}</button>`}
           <button class="btn btn--sm btn--quiet${isSaved(x) ? " is-on" : ""}" type="button" data-save="${idx}">${icon("star")}${isSaved(x) ? " Saved" : " Save"}</button>
           <button class="btn btn--sm btn--quiet" type="button" data-copy="${idx}">${icon("copy")} Copy brief</button>
           ${x.plan ? `<button class="btn btn--sm btn--quiet" type="button" data-lp="${idx}">${icon("copy")} Copy landing-page prompt</button>` : ""}
@@ -938,9 +950,47 @@
     el.open = true;
     (toPlan && el.querySelector(".planbox") || el).scrollIntoView({ behavior: "smooth", block: "start" });
     el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1400);
+    const idea = state.ideas.find(i => launchKey(i) === k);
+    if (idea && isThin(idea)) refillCard(idea).then(u => { if (u) openCard(u); });
   }
 
-  // Card + plan in one go, for any post
+  // A card is thin when Gemini left the essentials blank (often a SKIP)
+  const isThin = raw => { const x = card(raw); return !x.idea || !x.buyer || !x.pain || !x.keywords.length; };
+  const refilling = new Set();
+
+  // Send one card back to Gemini in full review mode: every field filled, nearest buildable version if needed
+  async function refillCard(raw, quiet = false) {
+    const x = card(raw), k = launchKey(x);
+    if (refilling.has(k)) return false;
+    refilling.add(k); renderIdeas();
+    const src = state.items.find(i => launchKey(i) === k);
+    if (!quiet) { setStatus.t0 = null; setStatus(`Asking Gemini for a full review of ${x.app_name || x.from}…`, "", true); }
+    try {
+      const res = await postJson(API_URL, { action: "analyze_betalist", briefs_only: true, full_review: true,
+        items: [{ name: x.name, description: (src && src.description) || x._desc || x.idea || x.name, source_url: x.source_url, kind: x._kind || "launch", source: x._source || "" }] });
+      const fresh = extractIdeas(res)[0];
+      if (!fresh) throw new Error("Gemini returned nothing for this card.");
+      const keep = { name: x.name, source_url: x.source_url, _kind: raw._kind, _source: raw._source, _why: raw._why, _desc: raw._desc || (src && src.description) || "" };
+      const updated = { ...fresh, ...keep };
+      if (card(raw).plan && card(updated).idea === card(raw).idea) updated.plan = card(raw).plan;   // keep a plan that still matches
+      const i = state.ideas.findIndex(it => launchKey(it) === k);
+      if (i >= 0) state.ideas[i] = updated; else state.ideas.push(updated);
+      if (state.analyzedAt) store.set(KEYS.last, { at: state.analyzedAt, ideas: state.ideas, patterns: state.patterns, topPick: state.topPick, meta: state.meta });
+      const saved = savedList(), hit = saved.find(sv => launchKey(sv.brief) === k);
+      if (hit) { hit.brief = { ...hit.brief, ...updated }; hit.key = savedKey(updated); store.set(KEYS.shortlist, saved); }
+      if (!quiet) clearStatus();
+      return updated;
+    } catch (err) {
+      setStatus(`Couldn't get a full review: ${friendly(err)}`, "error");
+      return false;
+    } finally {
+      refilling.delete(k);
+      state.topPick = pickTop(state.ideas);
+      renderInsights(); renderIdeas(); renderLaunches();
+    }
+  }
+
+  // Full review for any post: card it if needed, refill thin or skipped cards, then always write the plan
   async function fullReview(item) {
     const k = launchKey(item);
     let idea = state.ideas.find(i => launchKey(i) === k);
@@ -949,7 +999,12 @@
       idea = state.ideas.find(i => launchKey(i) === k);
       if (!idea) return;                       // the card failed; cardItems already said why
     }
-    if (idea.verdict === "SKIP") { openCard(idea); toast(`Gemini says skip: ${card(idea).reason || "doesn't fit"}`.slice(0, 110)); return; }
+    if (isThin(idea) || idea.verdict === "SKIP") {
+      const updated = await refillCard(idea);
+      if (!updated) return;
+      idea = updated;
+    }
+    if (!card(idea).idea) { openCard(idea); setStatus("Gemini couldn't find any weekend-sized version of this one, even on a full review.", "warn"); return; }
     if (card(idea).plan) { openCard(idea, true); return; }
     await planIdea(idea, null);
   }
