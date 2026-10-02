@@ -268,6 +268,7 @@
     .hunt__row{display:flex;flex-wrap:wrap;gap:8px}
     .hunt input{flex:1;min-width:200px;border:var(--b);border-radius:8px;padding:7px 10px;background:var(--card);font:inherit}
     .hunt select{background:var(--card);color:var(--ink);border-color:var(--ink)}
+    .row.flash{outline:4px solid var(--pink);outline-offset:3px}
   </style>
 </head>
 <body>
@@ -571,7 +572,8 @@
   function renderLaunches() {
     renderStepper();
     const root = $("launches");
-    const carded = cardedKeys(), passed = passedMap();
+    const carded = cardedKeys(), passed = passedMap(), busy = state.carding;
+    const planned = new Set(state.ideas.filter(i => card(i).plan).map(launchKey));
     const ranked = state.items.some(x => rankOf(x));
     const visible = state.items.filter(x => {
       const r = rankOf(x), k = launchKey(x);
@@ -610,7 +612,9 @@
           </div>
           <div class="ll__actions">
             ${isPas ? `<button class="btn btn--sm" type="button" data-unpass-item="${escapeHtml(k)}">Restore</button>`
-              : isCarded ? `<span class="chip chip--planned">CARDED</span>` : `<button class="btn btn--sm btn--primary" type="button" data-card-item="${escapeHtml(k)}">Card it</button>`}
+              : planned.has(k) ? `<button class="btn btn--sm btn--primary" type="button" data-open-item="${escapeHtml(k)}" data-to-plan="1">Open plan</button>`
+              : isCarded ? `<button class="btn btn--sm" type="button" data-open-item="${escapeHtml(k)}">Open card</button><button class="btn btn--sm btn--primary" type="button" data-review-item="${escapeHtml(k)}" ${busy ? "disabled" : ""}>Full review</button>`
+              : `<button class="btn btn--sm" type="button" data-card-item="${escapeHtml(k)}" ${busy ? "disabled" : ""} title="Quick decision card">Card this</button><button class="btn btn--sm btn--primary" type="button" data-review-item="${escapeHtml(k)}" ${busy ? "disabled" : ""} title="Decision card plus the full weekend plan">Full review</button>`}
             ${isPas ? "" : `<button class="btn btn--sm btn--pass" type="button" data-pass-item="${escapeHtml(k)}">Pass</button>`}
             ${x.source_url ? `<a class="btn btn--sm btn--quiet" href="${escapeHtml(normalizeUrl(x.source_url))}" target="_blank" rel="noopener" aria-label="Open ${escapeHtml(x.name)}">${icon("ext")}</a>` : ""}
           </div>
@@ -619,7 +623,13 @@
     const byKey = k => state.items.find(x => launchKey(x) === k);
     $("huntForm").addEventListener("submit", e => { e.preventDefault(); huntTopic($("huntKw").value, $("huntMode").value); });
     root.querySelectorAll("[data-filter]").forEach(b => b.addEventListener("click", () => { state.filter = b.dataset.filter; state.inboxAll = false; renderLaunches(); }));
-    root.querySelectorAll("[data-card-item]").forEach(b => b.addEventListener("click", () => { const x = byKey(b.dataset.cardItem); if (x) cardItems([{ item: x, why: (rankOf(x) || {}).angle || "" }]); }));
+    root.querySelectorAll("[data-card-item]").forEach(b => b.addEventListener("click", async () => {
+      const x = byKey(b.dataset.cardItem); if (!x) return;
+      await cardItems([{ item: x, why: (rankOf(x) || {}).angle || "" }]);
+      if (state.ideas.some(i => launchKey(i) === launchKey(x))) openCard(x);
+    }));
+    root.querySelectorAll("[data-review-item]").forEach(b => b.addEventListener("click", () => { const x = byKey(b.dataset.reviewItem) || state.ideas.find(i => launchKey(i) === b.dataset.reviewItem); if (x) fullReview(x); }));
+    root.querySelectorAll("[data-open-item]").forEach(b => b.addEventListener("click", () => { const x = state.ideas.find(i => launchKey(i) === b.dataset.openItem); if (x) openCard(x, !!b.dataset.toPlan); }));
     root.querySelectorAll("[data-pass-item]").forEach(b => b.addEventListener("click", () => { const x = byKey(b.dataset.passItem); if (x) { setPassed(x, true); toast("Passed. It won't come back."); renderLaunches(); renderIdeas(); } }));
     root.querySelectorAll("[data-unpass-item]").forEach(b => b.addEventListener("click", () => { const x = byKey(b.dataset.unpassItem); if (x) { setPassed(x, false); toast("Restored"); renderLaunches(); renderIdeas(); } }));
     const more = $("inboxMore");
@@ -793,7 +803,7 @@
     const top = x.keywords.slice().sort((a, c) => rank[lvl(a.demand)] - rank[lvl(c.demand)])[0];
     const isNew = state.newKeys.has(launchKey(x));
     const title = x.app_name || x.from;
-    return `<details class="row row--${v.toLowerCase()}" data-name="${escapeHtml(x.name)}" ${open ? "open" : ""}>
+    return `<details class="row row--${v.toLowerCase()}" data-name="${escapeHtml(x.name)}" data-key="${escapeHtml(launchKey(x))}" ${open ? "open" : ""}>
       <summary>
         <span class="pill v-${v.toLowerCase()}">${v}</span>
         <div class="cell-main">
@@ -889,8 +899,9 @@
   async function planIdea(raw, btn) {
     const x = card(raw);
     const t0 = Date.now();
-    btn.disabled = true;
-    const tick = () => { btn.textContent = `Planning… ${Math.round((Date.now() - t0) / 1000)}s`; };
+    if (btn) btn.disabled = true;
+    const tick = () => { if (btn) btn.textContent = `Planning… ${Math.round((Date.now() - t0) / 1000)}s`; };
+    if (!btn) { setStatus.t0 = null; setStatus(`Writing the full weekend plan for ${x.app_name || x.from}…`, "", true); }
     tick(); const iv = setInterval(tick, 1000);
     try {
       const res = await postJson(API_URL, { action: "plan",
@@ -904,16 +915,43 @@
       if (state.analyzedAt) store.set(KEYS.last, { at: state.analyzedAt, ideas: state.ideas, patterns: state.patterns, topPick: state.topPick, meta: state.meta });
       const saved = savedList(), hit = saved.find(sv => sv.key === key);
       if (hit) { hit.brief = { ...hit.brief, plan: res.plan }; store.set(KEYS.shortlist, saved); }
-      renderInsights(); renderIdeas();
-      const el = document.querySelector(`[data-name="${CSS.escape(x.name)}"]`);
-      if (el) { el.open = true; el.querySelector(".planbox")?.scrollIntoView({ behavior: "smooth", block: "nearest" }); }
+      renderInsights(); renderIdeas(); renderLaunches();
+      if (!btn) clearStatus();
+      openCard(x, true);
       toast("Plan ready");
     } catch (err) {
-      clearInterval(iv); btn.disabled = false; btn.textContent = "Plan this build";
-      toast(friendly(err).slice(0, 90));
+      clearInterval(iv);
+      if (btn) { btn.disabled = false; btn.textContent = "Plan this build"; }
+      if (!btn) setStatus(`Couldn't write the plan: ${friendly(err)}`, "error"); else toast(friendly(err).slice(0, 90));
       return;
     }
     clearInterval(iv);
+  }
+
+  // Jump to a card (switching tabs if needed) and open it; optionally scroll to its plan
+  function openCard(x, toPlan = false) {
+    const k = launchKey(x);
+    const tab = state.ideas.some(i => launchKey(i) === k && (i.verdict === "SKIP" || isPassed(i))) ? "passed" : "best";
+    if (state.tab !== tab) setTab(tab);
+    const el = [...document.querySelectorAll("#results .row")].find(r => r.dataset.key === k);
+    if (!el) return;
+    el.open = true;
+    (toPlan && el.querySelector(".planbox") || el).scrollIntoView({ behavior: "smooth", block: "start" });
+    el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1400);
+  }
+
+  // Card + plan in one go, for any post
+  async function fullReview(item) {
+    const k = launchKey(item);
+    let idea = state.ideas.find(i => launchKey(i) === k);
+    if (!idea) {
+      await cardItems([{ item, why: (rankOf(item) || {}).angle || "" }]);
+      idea = state.ideas.find(i => launchKey(i) === k);
+      if (!idea) return;                       // the card failed; cardItems already said why
+    }
+    if (idea.verdict === "SKIP") { openCard(idea); toast(`Gemini says skip: ${card(idea).reason || "doesn't fit"}`.slice(0, 110)); return; }
+    if (card(idea).plan) { openCard(idea, true); return; }
+    await planIdea(idea, null);
   }
 
   function moreCardsHtml() {
@@ -1130,7 +1168,6 @@
   const last = store.get(KEYS.last, null);
   if (last && Array.isArray(last.ideas)) {
     state.ideas = last.ideas; state.patterns = last.patterns || []; state.topPick = last.topPick || null; state.analyzedAt = last.at || null; state.meta = last.meta || null;
-    $("launchBox").open = false;
   }
   const settings = store.get(KEYS.settings, {});
   for (const id of ["perSource", "briefCount"]) {
