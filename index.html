@@ -255,6 +255,19 @@
     .ll__actions a{grid-row:auto !important;grid-column:auto !important}
     .more-cards{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:6px 2px}
     @media (max-width:560px){.ll{grid-template-columns:40px minmax(0,1fr) !important}.ll__actions{grid-column:1/-1;justify-content:flex-start}}
+    /* Risk, plan footer, hunt */
+    .tile--risk{background:var(--orange)}
+    .tile--risk.is-none{background:var(--paper)}
+    .planfoot{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;border-top:2px dashed rgba(17,17,17,.3);padding-top:10px}
+    @media (max-width:860px){.planfoot{grid-template-columns:1fr}}
+    .planfoot h4{margin:0 0 4px;font:700 11px var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3)}
+    .planfoot ul{margin:0;padding-left:18px}
+    .planfoot p{margin:0;font-weight:700;color:var(--ink)}
+    .hunt{padding:12px 16px;border-bottom:var(--b);background:var(--sky)}
+    .hunt label{display:block;margin-bottom:6px;color:var(--ink)}
+    .hunt__row{display:flex;flex-wrap:wrap;gap:8px}
+    .hunt input{flex:1;min-width:200px;border:var(--b);border-radius:8px;padding:7px 10px;background:var(--card);font:inherit}
+    .hunt select{background:var(--card);color:var(--ink);border-color:var(--ink)}
   </style>
 </head>
 <body>
@@ -326,17 +339,31 @@
       url: "https://www.reddit.com/search.rss?q=%22is%20there%20a%20tool%22%20OR%20%22I%20wish%20there%20was%22%20OR%20%22alternative%20to%22%20OR%20%22looking%20for%20a%20tool%22&sort=new&limit=100" },
     { id: "rideas", group: "Ideas", kind: "idea", label: "r/AppIdeas", reddit: true, hint: "Apps people wish existed", url: "https://www.reddit.com/r/AppIdeas/new.rss?limit=50" }
   ];
+  // Complaint phrases for hunting a topic (adapted from GrumpyLinks)
+  const HUNT_MODES = {
+    any: { label: "Any complaint", phrases: ["hate", "frustrated", "sick of", "tired of", "nightmare", "doesn't work", "waste of time"] },
+    missing: { label: "Missing features", phrases: ["missing", "doesn't have", "why no", "still no", "I wish", "feature request", "basic feature"] },
+    switch: { label: "Ready to switch", phrases: ["alternative to", "switching from", "moving away from", "replacement for", "fed up with", "something better than"] },
+    billing: { label: "Billing pain", phrases: ["overcharged", "hidden fees", "too expensive", "price increase", "cancel subscription", "refund"] },
+    manual: { label: "Manual work", phrases: ["manually", "spreadsheet", "workaround", "takes forever", "copy paste", "by hand"] }
+  };
   const BATCH = 4, PARALLEL = 3;  // decision cards per Gemini call (short cards stay reliable on Flash-Lite), calls at once
 
   const state = { items: [], ideas: [], patterns: [], topPick: null, analyzedAt: null, meta: null, newKeys: new Set(), tab: "best", inboxAll: false, failed: [], filter: "all", carding: false };
 
   /* ---------- Memory: this browser only ---------- */
-  const KEYS = { seen: "sifter.seen", shortlist: "sifter.shortlist", patterns: "sifter.patterns", last: "sifter.last", sources: "sifter.sources", settings: "sifter.settings", rank: "sifter.rank", passed: "sifter.passed" };
+  const KEYS = { seen: "sifter.seen", shortlist: "sifter.shortlist", patterns: "sifter.patterns", last: "sifter.last", sources: "sifter.sources", settings: "sifter.settings", rank: "sifter.rank", passed: "sifter.passed", hunt: "sifter.hunt" };
   const store = {
     get(k, fallback) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; } catch { return fallback; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* memory is a nice-to-have */ } }
   };
-  const launchKey = x => (x.source_url || x.name || "").toLowerCase().replace(/[?#].*$/, "").replace(/\/$/, "");
+  // Identity of a post: its link minus tracking junk (utm_*, ref…). Real parameters like HN's ?id= are kept.
+  const launchKey = x => {
+    const raw = String(x.source_url || x.name || "").toLowerCase().replace(/#.*$/, "");
+    const [base, query = ""] = raw.split("?");
+    const keep = query.split("&").filter(kv => kv && !/^(utm_[a-z_]+|ref|ref_src|source|campaign|fbclid|gclid)=/.test(kv));
+    return base.replace(/\/$/, "") + (keep.length ? "?" + keep.join("&") : "");
+  };
   const fmtDate = iso => { try { return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" }); } catch { return ""; } };
   const enabled = () => { const saved = store.get(KEYS.sources, null); return SOURCES.filter(s => saved ? saved.includes(s.id) : true); };
 
@@ -430,6 +457,7 @@
       `**Buyer:** ${x.buyer}`,
       `**Pain:** ${x.pain}`,
       `**Hard part:** ${x.hard_part}`,
+      x.risk ? `**Risk:** ${x.risk}` : "",
       `**Search (Gemini's guess):** ${x.keywords.map(k => `${k.keyword} (${k.demand})`).join(" · ")}`,
       `**Source:** ${x.name}${x._source ? ` · ${x._source}` : ""}${x.source_url ? ` · ${x.source_url}` : ""}`
     ];
@@ -445,6 +473,8 @@
       L.push("", "### Build", `- ${b.input || "?"} → ${b.output || "?"}`, `- Lambda: ${b.lambda || "None needed"}`);
       if ((b.files || []).length) L.push(`- Files: ${b.files.join(", ")}`);
       if ((p.weekend_plan || []).length) L.push("", "### Weekend plan", ...p.weekend_plan.map(st => `- [ ] ${st.when ? `**${st.when}:** ` : ""}${st.task}`));
+      if ((p.risks || []).length) L.push("", "### Risks", ...p.risks.map(r => `- ${r}`));
+      if (p.first_week_signal) L.push("", `**First-week signal:** ${p.first_week_signal}`);
     }
     return L.join("\n").replace(/\n{3,}/g, "\n\n").trim() + "\n";
   }
@@ -455,7 +485,7 @@
     const legacyPlan = !x.plan && (x.weekend_plan || x.names) ? { names: x.names || [], tagline: x.tagline || "", nugget: x.nugget || "", monetization: m, keywords: x.keywords || [], seo_angle: x.seo_angle || "", build: x.build || {}, weekend_plan: x.weekend_plan || [] } : null;
     return { ...x,
       idea: x.idea || x.alternative || "", buyer: x.buyer || x.target_demo || "", pain: x.pain || x.why_they_pay || "",
-      price: x.price || m.price || "", reason: x.reason || x.skip_reason || "", hard_part: x.hard_part || "",
+      price: x.price || m.price || "", risk: x.risk || "", reason: x.reason || x.skip_reason || "", hard_part: x.hard_part || "",
       keywords: (x.keywords || []).slice(0, 2), plan: x.plan || legacyPlan,
       app_name: x.app_name || (x.plan && x.plan.names && x.plan.names[0]) || (x.names && x.names[0]) || "", from: cleanName(x.name) };
   }
@@ -478,7 +508,9 @@
   }
   function toItem(e, src) {
     let name = e.title, text = textOf(e.html), source = src.label;
-    if (src.id === "showhn") {
+    if (src.id === "hunt" && /^New comment by/i.test(name)) {
+      name = text.slice(0, 90) + (text.length > 90 ? "…" : "");
+    } else if (src.id === "showhn") {
       name = name.replace(/^Show HN:\s*/i, "");
       text = text.replace(/Article URL:\s*\S+/gi, "").replace(/Comments URL:\s*\S+/gi, "").replace(/Points:\s*\d+/gi, "").replace(/# Comments:\s*\d+/gi, "").trim();
       const m = name.match(/^(.{2,60}?)\s+[–—-]\s+(.+)$/);
@@ -547,16 +579,25 @@
       if (passed[k]) return false;
       if (state.filter === "top") return r && r.score >= 7;
       if (["launch", "pain", "idea"].includes(state.filter)) return x.kind === state.filter;
+      if (state.filter === "hunt") return x.sourceId === "hunt";
       return true;
     }).sort((a, b) => ((rankOf(b) || { score: -1 }).score - (rankOf(a) || { score: -1 }).score));
     const fresh = state.items.filter(x => state.newKeys.has(launchKey(x))).length;
     const bySrc = new Set(state.items.map(x => x.sourceId)).size;
     $("launchCount").textContent = state.items.length ? `${state.items.length} posts from ${bySrc} source${bySrc === 1 ? "" : "s"}${fresh ? ` · ${fresh} new in the last day` : ""}${ranked ? " · ranked by Gemini" : ""}` : "Nothing loaded";
     $("analyzeBtn").disabled = state.items.length === 0;
-    const count = f => state.items.filter(x => { const r = rankOf(x), k = launchKey(x); if (f === "passed") return !!passed[k]; if (passed[k]) return false; if (f === "top") return r && r.score >= 7; if (f === "all") return true; return x.kind === f; }).length;
-    const F = [["all", "All"], ["top", "Top (7+)"], ["pain", "Pain points"], ["idea", "Ideas"], ["launch", "Launches"], ["passed", "Passed"]];
+    const count = f => state.items.filter(x => { const r = rankOf(x), k = launchKey(x); if (f === "passed") return !!passed[k]; if (passed[k]) return false; if (f === "top") return r && r.score >= 7; if (f === "all") return true; if (f === "hunt") return x.sourceId === "hunt"; return x.kind === f; }).length;
+    const F = [["all", "All"], ["top", "Top (7+)"], ["pain", "Pain points"], ["idea", "Ideas"], ["launch", "Launches"], ...(state.items.some(x => x.sourceId === "hunt") ? [["hunt", "Hunted"]] : []), ["passed", "Passed"]];
     const show = state.inboxAll ? visible : visible.slice(0, 50);
-    root.innerHTML = `<div class="filters">${F.map(([k, l]) => `<button type="button" class="fchip${state.filter === k ? " on" : ""}" data-filter="${k}">${l} <span>${count(k)}</span></button>`).join("")}</div>`
+    const lh = store.get(KEYS.hunt, null) || {};
+    root.innerHTML = `<form class="hunt" id="huntForm">
+        <label for="huntKw"><b>Hunt a topic</b> <span class="note">find complaints about a product, tool or chore</span></label>
+        <div class="hunt__row">
+          <input id="huntKw" type="text" placeholder="e.g. QuickBooks, invoicing, Shopify shipping" value="${escapeHtml(lh.kw || "")}" autocomplete="off">
+          <select id="huntMode" aria-label="What kind of complaint">${Object.entries(HUNT_MODES).map(([k, v]) => `<option value="${k}"${lh.mode === k ? " selected" : ""}>${v.label}</option>`).join("")}</select>
+          <button class="btn btn--sm btn--primary" id="huntBtn" type="submit">Hunt</button>
+        </div>
+      </form><div class="filters">${F.map(([k, l]) => `<button type="button" class="fchip${state.filter === k ? " on" : ""}" data-filter="${k}">${l} <span>${count(k)}</span></button>`).join("")}</div>`
       + (show.length ? show.map(x => {
         const r = rankOf(x), k = launchKey(x), isCarded = carded.has(k), isPas = !!passed[k];
         return `<div class="ll${r && r.score < 4 ? " ll--low" : ""}">
@@ -576,6 +617,7 @@
         </div>`; }).join("") : `<p class="note" style="padding:16px">Nothing here.</p>`)
       + (visible.length > show.length ? `<button class="more" id="inboxMore" type="button">Show all ${visible.length}</button>` : "");
     const byKey = k => state.items.find(x => launchKey(x) === k);
+    $("huntForm").addEventListener("submit", e => { e.preventDefault(); huntTopic($("huntKw").value, $("huntMode").value); });
     root.querySelectorAll("[data-filter]").forEach(b => b.addEventListener("click", () => { state.filter = b.dataset.filter; state.inboxAll = false; renderLaunches(); }));
     root.querySelectorAll("[data-card-item]").forEach(b => b.addEventListener("click", () => { const x = byKey(b.dataset.cardItem); if (x) cardItems([{ item: x, why: (rankOf(x) || {}).angle || "" }]); }));
     root.querySelectorAll("[data-pass-item]").forEach(b => b.addEventListener("click", () => { const x = byKey(b.dataset.passItem); if (x) { setPassed(x, true); toast("Passed. It won't come back."); renderLaunches(); renderIdeas(); } }));
@@ -709,7 +751,14 @@
       return;
     }
     const pickName = state.topPick && state.topPick.name;
-    root.innerHTML = rows.map((x, i) => row(x, state.tab === "best" && x.name === pickName, i)).join("") + (state.tab === "best" ? moreCardsHtml() : "");
+    root.innerHTML = (state.tab === "saved" ? `<div class="more-cards"><button class="btn btn--sm" type="button" id="dlSaved">${icon("copy")} Download all ${rows.length} saved (.md)</button></div>` : "")
+      + rows.map((x, i) => row(x, state.tab === "best" && x.name === pickName, i)).join("") + (state.tab === "best" ? moreCardsHtml() : "");
+    const dl = $("dlSaved");
+    if (dl) dl.addEventListener("click", () => {
+      const md = `# Idea Sifter: saved builds (${new Date().toISOString().slice(0, 10)})\n\n` + rows.map(briefMarkdown).join("\n---\n\n");
+      const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([md], { type: "text/markdown" })); a.download = `idea-sifter-saved-${new Date().toISOString().slice(0, 10)}.md`;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000); toast("Downloaded");
+    });
     wireMore();
     root.querySelectorAll("[data-pass]").forEach(b => b.addEventListener("click", e => {
       e.preventDefault(); e.stopPropagation();
@@ -724,6 +773,11 @@
       toast(on ? "Saved" : "Removed from saved");
       if (state.tab === "saved") renderIdeas();
       else { b.classList.toggle("is-on", on); b.lastChild.textContent = on ? " Saved" : " Save"; $("nSaved").textContent = savedList().length || ""; }
+    }));
+    root.querySelectorAll("[data-lp]").forEach(b => b.addEventListener("click", async e => {
+      e.preventDefault();
+      try { await navigator.clipboard.writeText(landingPrompt(rows[Number(b.dataset.lp)])); } catch { toast("Couldn't copy"); return; }
+      const html = b.innerHTML; b.innerHTML = `${icon("check")} Copied: paste into Claude or Gemini`; setTimeout(() => (b.innerHTML = html), 2000);
     }));
     root.querySelectorAll("[data-plan]").forEach(b => b.addEventListener("click", e => { e.preventDefault(); planIdea(rows[Number(b.dataset.plan)], b); }));
     root.querySelectorAll("[data-copy]").forEach(b => b.addEventListener("click", async e => {
@@ -757,6 +811,7 @@
       <div class="detail">
         <div class="tile tile--wide tile--reason v-${v.toLowerCase()}"><h3>Verdict</h3><p>${escapeHtml(x.reason || v)}</p></div>
         <div class="tile tile--wide"><h3>The idea</h3><p>${escapeHtml(x.idea || "—")}</p></div>
+        ${x.risk ? `<div class="tile tile--wide tile--risk${/^none/i.test(x.risk) ? " is-none" : ""}"><h3>Risk</h3><p>${escapeHtml(x.risk)}</p></div>` : ""}
         <div class="tile"><h3>Buyer</h3><p>${escapeHtml(x.buyer || "—")}</p><p class="note">Pays because: ${escapeHtml(x.pain || "—")}</p></div>
         <div class="tile"><h3>Demand (Gemini's guess)</h3>${x.keywords.length ? `<ul class="kwl">${x.keywords.map(k => `<li><span class="k">${escapeHtml(k.keyword)}</span><span class="pill lvl-${lvl(k.demand)}">${escapeHtml(lvl(k.demand).toUpperCase())}</span><a href="https://trends.google.com/trends/explore?q=${encodeURIComponent(k.keyword)}" target="_blank" rel="noopener" title="Google Trends">${icon("trend")}</a><a href="https://www.google.com/search?q=${encodeURIComponent(k.keyword)}" target="_blank" rel="noopener" title="Search Google">${icon("search")}</a></li>`).join("")}</ul>` : "<p>—</p>"}</div>
         <div class="tile"><h3>Hard part</h3><p>${escapeHtml(x.hard_part || "—")}</p><h3 style="margin-top:10px">Price</h3><p class="big">${escapeHtml(x.price || "—")}</p></div>
@@ -766,6 +821,7 @@
           ${v === "SKIP" ? "" : `<button class="btn btn--sm btn--plan" type="button" data-plan="${idx}">${x.plan ? "Re-plan this build" : "Plan this build"}</button>`}
           <button class="btn btn--sm btn--quiet${isSaved(x) ? " is-on" : ""}" type="button" data-save="${idx}">${icon("star")}${isSaved(x) ? " Saved" : " Save"}</button>
           <button class="btn btn--sm btn--quiet" type="button" data-copy="${idx}">${icon("copy")} Copy brief</button>
+          ${x.plan ? `<button class="btn btn--sm btn--quiet" type="button" data-lp="${idx}">${icon("copy")} Copy landing-page prompt</button>` : ""}
           ${x.source_url ? `<a class="btn btn--sm btn--quiet" href="${escapeHtml(normalizeUrl(x.source_url))}" target="_blank" rel="noopener">${icon("ext")} Original</a>` : ""}
         </div>
       </div>
@@ -796,8 +852,39 @@
         <td class="kw__l"><a href="https://trends.google.com/trends/explore?q=${encodeURIComponent(k.keyword)}" target="_blank" rel="noopener" title="Google Trends">${icon("trend")}</a><a href="https://www.google.com/search?q=${encodeURIComponent(k.keyword)}" target="_blank" rel="noopener" title="Search Google">${icon("search")}</a></td>
       </tr>`).join("")}</tbody></table>${p.seo_angle ? `<p class="note">SEO angle: ${escapeHtml(p.seo_angle)}</p>` : ""}</div>` : "<div></div>"}
       ${(p.weekend_plan || []).length ? `<ol class="steps">${p.weekend_plan.map(st => `<li><span class="when">${escapeHtml(st.when || "Step")}</span><span>${escapeHtml(st.task)}</span></li>`).join("")}</ol>` : ""}
+      ${(p.risks || []).length || p.first_week_signal ? `<div class="planfoot">
+        ${(p.risks || []).length ? `<div><h4>Risks</h4><ul>${p.risks.map(r => `<li>${escapeHtml(r)}</li>`).join("")}</ul></div>` : ""}
+        ${p.first_week_signal ? `<div><h4>First-week signal</h4><p>${escapeHtml(p.first_week_signal)}</p></div>` : ""}
+      </div>` : ""}
     </div>`;
   }
+  /* ---------- Landing-page prompt to paste into an AI tool ---------- */
+  function landingPrompt(raw) {
+    const x = card(raw), p = x.plan || {}, m = p.monetization || {}, b = p.build || {};
+    const name = x.app_name || (p.names || [])[0] || x.from;
+    return [
+      `Build a single-file landing page with a working tool for "${name}".`,
+      ``,
+      `Product: ${x.idea}`,
+      p.tagline ? `Headline: ${p.tagline}` : ``,
+      `For: ${x.buyer}`,
+      `Their pain: ${x.pain}`,
+      `What they put in: ${b.input || "?"}`,
+      `What they get: ${b.output || "?"}`,
+      `Price: ${[m.price || x.price, m.model].filter(Boolean).join(" · ")}. Payment: ${m.how || "a Lemon Squeezy checkout link"} (use the placeholder PAYMENT_LINK_URL).`,
+      ``,
+      `Constraints (follow exactly):`,
+      `- One index.html with inline CSS and vanilla JavaScript. No frameworks, no npm, no build step. It will be hosted as a static file on AWS Amplify.`,
+      `- If it needs an AI or server call, POST JSON to the placeholder LAMBDA_URL; never put API keys in the page.`,
+      `- No login, no database. Anything remembered goes in localStorage.`,
+      `- Paid features are unlocked only by a license key that the Lambda checks, never by a localStorage flag alone.`,
+      ``,
+      `Page sections: hero with the headline and one call to action; the tool itself (free version) right below the fold; 3 short benefit points written for ${x.buyer}; pricing with one plan (${m.price || x.price}); a 4-question FAQ; footer.`,
+      `Style: clean, fast, mobile-first, accessible (labels, focus states, good contrast). Plain-English copy, no hype.`,
+      (p.keywords || []).length ? `Use these phrases naturally in the copy for search: ${p.keywords.map(k => k.keyword).join(", ")}.` : ``
+    ].filter((l, i, a) => l !== "" || a[i - 1] !== "").join("\n");
+  }
+
   /* ---------- Plan this build: the full weekend plan for one card ---------- */
   async function planIdea(raw, btn) {
     const x = card(raw);
@@ -904,9 +991,12 @@
         return [];
       }
     }), 4);
+    // Keep your recent hunt results alongside the feeds
+    const hunt = store.get(KEYS.hunt, null);
+    const hunted = hunt && Date.now() - Date.parse(hunt.at) < 2 * 864e5 ? hunt.items : [];
     // De-duplicate across sources by link, then by name
     const seenUrl = new Set(), seenName = new Set(), items = [];
-    for (const x of lists.flat()) {
+    for (const x of [...hunted, ...lists.flat()]) {
       const u = launchKey(x), n = nameKey(x.name);
       if ((u && seenUrl.has(u)) || (n && seenName.has(n))) continue;
       if (u) seenUrl.add(u); if (n) seenName.add(n); items.push(x);
@@ -926,6 +1016,37 @@
   }
 
   /* ---------- Find weekend builds: sift everything, then brief the best ---------- */
+  /* ---------- Hunt a topic: go looking for complaints instead of waiting for feeds ---------- */
+  async function huntTopic(kw, mode) {
+    kw = kw.trim().replace(/"/g, "");
+    if (!kw) { toast("Type a topic first"); return; }
+    const M = HUNT_MODES[mode] || HUNT_MODES.any;
+    const label = `Hunt: ${kw}`;
+    const q = `"${kw}" (${M.phrases.map(p => `"${p}"`).join(" OR ")})`;
+    const feeds = [
+      { id: "hunt", label, kind: "pain", reddit: true, url: `https://www.reddit.com/search.rss?q=${encodeURIComponent(q)}&sort=new&limit=50` },
+      { id: "hunt", label, kind: "pain", url: `https://hnrss.org/newcomments?q=${encodeURIComponent(kw)}&count=40` },
+      { id: "hunt", label, kind: "pain", url: `https://hnrss.org/newest?q=${encodeURIComponent(kw)}&count=20` }
+    ];
+    $("huntBtn").disabled = true;
+    setStatus.t0 = null; setStatus(`Hunting for ${M.label.toLowerCase()} about “${kw}”…`, "", true);
+    const failed = [];
+    const lists = await pool(feeds.map(src => async () => {
+      try { const payload = await postJson(API_URL, { action: "fetch_feed", url: src.url }); return parseEntries(extractXml(payload)).map(e => toItem(e, src)).filter(x => x.name); }
+      catch (err) { failed.push(src.reddit ? "Reddit" : "Hacker News"); return []; }
+    }), 3);
+    const known = new Set(state.items.map(launchKey));
+    const found = lists.flat().filter(x => { const k = launchKey(x); if (known.has(k)) return false; known.add(k); return true; }).map(x => ({ ...x, source: label, sourceId: "hunt" }));
+    store.set(KEYS.hunt, { kw, mode, at: new Date().toISOString(), items: found.slice(0, 80) });
+    state.items = [...found, ...state.items.filter(x => x.sourceId !== "hunt")];
+    state.filter = "hunt"; state.inboxAll = false;
+    $("launchBox").open = true;
+    renderLaunches(); renderIdeas();
+    $("huntBtn").disabled = false;
+    if (!found.length) setStatus(`Nothing new about “${kw}”${failed.length ? ` (couldn't reach ${failed.join(" and ")})` : ""}. Try a broader word or another mode.`, "warn");
+    else setStatus(`Added ${found.length} posts about “${kw}”${failed.length ? ` (couldn't reach ${failed.join(" and ")})` : ""}. Hit Find weekend builds to rank them with everything else.`, failed.length ? "warn" : "");
+  }
+
   /* ---------- Find weekend builds: rank every post, then card the best ---------- */
   async function analyze() {
     const all = state.items.filter(x => !isPassed(x));
