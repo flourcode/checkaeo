@@ -3,13 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>NamerCheck — Check Domain & Social Username Availability</title>
-  <meta
-    name="description"
-    content="Check a startup or SaaS name across domains and major social platforms, then spot naming collisions before you commit. Free, fast, and no login."
-  >
-  <meta property="og:title" content="NamerCheck — Check Domain & Social Username Availability">
-  <meta property="og:description" content="Check a startup or SaaS name across domains and major social platforms, then spot naming collisions before you commit. Free, fast, and no login.">
+  <title>NamerCheck — Is my side hustle idea any good?</title>
+  <meta name="description" content="Type a side hustle idea, get a straight answer in seconds: a verdict, what people search for, and brandable names with an open .com. Free, no login.">
+  <meta property="og:title" content="NamerCheck — Is my side hustle idea any good?">
+  <meta property="og:description" content="A 10-second gut check for side hustle ideas: a verdict, related searches, and names with an open .com.">
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#2A44C4">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232A44C4'/%3E%3Ctext x='32' y='45' font-family='Arial,sans-serif' font-weight='800' font-size='36' text-anchor='middle' fill='white'%3EN%3C/text%3E%3C/svg%3E">
@@ -19,320 +16,66 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <a class="skip-link" href="#idea-input">Skip to the idea tester</a>
-
   <header class="site-header">
     <a class="wordmark" href="./">NamerCheck</a>
-    <p class="header-note">Free. No sign-up.</p>
+    <p class="header-note">Free. No sign-up. Nothing saved.</p>
   </header>
 
   <main>
-    <section class="hero" aria-labelledby="hero-title">
-      <div class="hero-copy">
-        <h1 id="hero-title">Daydreaming about leaving your 9-to-5? Test the side hustle first.</h1>
-        <p class="lede">Type a rough idea. Get an honest first read and a 7-day test, pick a name whose .com and handles are still open, and leave with a launch kit.</p>
-      </div>
+    <h1>Got a side hustle idea? Get a straight answer.</h1>
+    <p class="lede">Type it in. In about ten seconds you get a verdict, what people search for, and names with an open .com.</p>
 
-      <form id="idea-form" class="idea-form" novalidate>
-        <div class="plate">
-          <label class="plate-label" for="idea-input">Your side hustle idea</label>
-          <textarea id="idea-input" class="plate-input plate-input-idea" rows="2" maxlength="1000"
-                    placeholder="meal prep for traveling sales reps" aria-describedby="idea-hint idea-error"></textarea>
-          <div class="plate-foot">
-            <button type="submit" id="idea-btn" class="plate-btn">Test my idea</button>
-            <p class="plate-hint" id="idea-hint">A sentence is plenty. Rough or half-baked is fine; we'll sharpen it.</p>
-          </div>
-          <p class="plate-status" id="idea-status" role="status" aria-live="polite"></p>
-        </div>
-        <div class="examples">
-          <span class="examples-label" id="examples-label">Or try:</span>
-          <ul class="example-list" aria-labelledby="examples-label">
-            <li><button type="button" class="example-btn">meal prep for traveling sales reps</button></li>
-            <li><button type="button" class="example-btn">bookkeeping for tattoo studios</button></li>
-            <li><button type="button" class="example-btn">weekend pottery classes for corporate teams</button></li>
-          </ul>
-        </div>
-        <p class="form-error" id="idea-error" role="alert" hidden></p>
-      </form>
-      <p class="alt-start">Already have a name in mind? <button type="button" class="link-btn" id="skip-to-name">Skip to step 2 and check it</button></p>
-    </section>
-
-    <nav class="journey" id="journey" aria-label="Your progress" hidden>
-      <ol>
-        <li data-step="idea"><a href="#step-idea"><span class="journey-num" aria-hidden="true">1</span><span class="journey-label">Idea</span><span class="journey-state" id="journey-idea-state"></span></a></li>
-        <li data-step="name"><a href="#step-name"><span class="journey-num" aria-hidden="true">2</span><span class="journey-label">Name</span><span class="journey-state" id="journey-name-state"></span></a></li>
-        <li data-step="launch"><a href="#step-launch"><span class="journey-num" aria-hidden="true">3</span><span class="journey-label">Launch kit</span><span class="journey-state" id="journey-launch-state"></span></a></li>
-      </ol>
-    </nav>
-
-    <!-- Step 1: the idea -->
-    <section class="step" id="step-idea" hidden aria-labelledby="step-idea-title">
-      <h2 class="step-title" id="step-idea-title"><span class="step-badge" aria-hidden="true">1</span>Your idea, honestly</h2>
-      <div class="summary idea-summary">
-        <p class="you-wrote" id="idea-you-wrote"></p>
-        <p class="verdict" id="idea-verdict"></p>
-        <h3 class="idea-title" id="idea-title" tabindex="-1"></h3>
-        <p class="interpretation" id="idea-verdict-reason"></p>
-        <div class="alternatives" id="idea-alternatives-wrap" hidden>
-          <h4 id="idea-alternatives-title">Other angles to try</h4>
-          <ul class="example-list alt-list" id="idea-alternatives" aria-labelledby="idea-alternatives-title"></ul>
-        </div>
-        <div class="assumptions" id="idea-assumptions-wrap" hidden>
-          <h4>What I assumed</h4>
-          <ul id="idea-assumptions"></ul>
-        </div>
-        <p class="fineprint">Written by AI (Gemini 3.5 Flash-Lite). It's an opinion to sharpen your thinking, not market research. The 7-day test is how you find out for real.</p>
-      </div>
-
-      <div class="idea-body" id="idea-body">
-        <section class="block" aria-labelledby="idea-fit-title">
-          <div class="block-head"><h3 id="idea-fit-title">The idea, sharpened</h3></div>
-          <dl class="plan-grid" id="idea-fit"></dl>
-        </section>
-
-        <section class="block" aria-labelledby="idea-test-title">
-          <div class="block-head">
-            <h3 id="idea-test-title">Your 7-day test</h3>
-            <p>Prove or disprove demand before you spend real money or quit anything.</p>
-          </div>
-          <dl class="plan-grid" id="idea-test"></dl>
-          <div class="customers" id="idea-customers-wrap" hidden>
-            <h4>Where to find your first 10 customers</h4>
-            <ul class="risk-list" id="idea-customers"></ul>
-          </div>
-        </section>
-
-        <section class="block" aria-labelledby="idea-evenings-title">
-          <div class="block-head"><h3 id="idea-evenings-title">Your first two evenings</h3></div>
-          <dl class="plan-grid plan-two" id="idea-evenings"></dl>
-        </section>
-
-        <section class="block" aria-labelledby="idea-risks-title">
-          <div class="block-head"><h3 id="idea-risks-title">Biggest risks</h3></div>
-          <ul class="risk-list" id="idea-risks"></ul>
-          <p class="reality" id="idea-reality"></p>
-        </section>
-      </div>
-    </section>
-
-    <!-- Step 2: the name -->
-    <section class="step" id="step-name" hidden aria-labelledby="step-name-title">
-      <h2 class="step-title" id="step-name-title" tabindex="-1"><span class="step-badge" aria-hidden="true">2</span>Pick a name</h2>
-      <p class="step-sub">Check your name before you fall in love with it.</p>
-
-      <section class="block block-first" aria-labelledby="name-ideas-title" id="name-ideas-block" hidden>
-        <div class="block-head">
-          <h3 id="name-ideas-title">Names for this idea</h3>
-          <p>Each name's .com is checked against the registry, and names with an open .com move to the top.</p>
-        </div>
-        <ul class="rows name-ideas" id="name-ideas"></ul>
-        <p class="hint" id="name-ideas-note"></p>
-      </section>
-
-      <form id="check-form" class="check-form" novalidate>
-        <div class="plate">
-          <label class="plate-label" for="name-input" id="name-input-label">Check a name</label>
-          <input id="name-input" class="plate-input plate-input-name" name="name" type="text" inputmode="text" autocomplete="off"
-                 autocapitalize="off" spellcheck="false" maxlength="60" placeholder="QuotaBird" required aria-describedby="form-error plate-variants">
-          <dl class="plate-variants" id="plate-variants">
-            <div><dt>Domain stem</dt><dd id="plate-stem">quotabird</dd></div>
-            <div><dt>Primary handle</dt><dd id="plate-handle">@quotabird</dd></div>
-          </dl>
-          <p class="plate-note" id="plate-note" hidden></p>
-          <div class="plate-foot">
-            <button type="submit" id="check-btn" class="plate-btn">Check this name</button>
-          </div>
-        </div>
-        <p class="form-error" id="form-error" role="alert" hidden></p>
-        <div class="options">
-          <details class="option" id="keywords-details">
-            <summary>Competitors or niche words — optional</summary>
-            <div class="option-body">
-              <label class="sr-only" for="keywords-input">Competitors or niche words</label>
-              <textarea id="keywords-input" rows="2" placeholder="quota, sales, pipeline, forecast, commission"></textarea>
-              <p class="hint">Separate with commas. These only affect the distinctiveness score. Testing an idea fills them in for you.</p>
-            </div>
-          </details>
-        </div>
-      </form>
-
-
-      <div class="setup-notice" id="setup-notice" role="status" hidden>
-        <p><strong>The checking service isn't connected.</strong> Domains and handles show as unable to verify until <code>CHECK_API_URL</code> in <code>app.js</code> points at the Lambda. Use the links to check manually.</p>
-      </div>
-
-      <div class="results" id="results" hidden>
-        <div class="summary">
-          <div class="summary-head">
-            <div>
-              <h3 class="result-name" id="result-name" tabindex="-1"></h3>
-              <p class="result-variants" id="result-variants"></p>
-            </div>
-            <div class="score" aria-live="polite">
-              <p class="score-num"><span id="score-value">0</span><span class="score-max"> / 100</span></p>
-              <p class="score-label" id="score-label"></p>
-            </div>
-          </div>
-          <p class="interpretation" id="interpretation"></p>
-          <ul class="findings" id="findings"></ul>
-          <p class="tally" id="tally" aria-live="polite"></p>
-          <div class="summary-foot">
-            <button type="button" class="quiet-btn" id="copy-link">Copy link to this check</button>
-            <p class="fineprint">This score measures naming distinctiveness. It isn't a trademark search or legal clearance. Before you commit, search
-              <a href="https://tmsearch.uspto.gov/" target="_blank" rel="noopener">USPTO</a> and
-              <a href="https://branddb.wipo.int/" target="_blank" rel="noopener">WIPO</a>.</p>
-          </div>
-        </div>
-
-        <section class="block" aria-labelledby="domains-title">
-          <div class="block-head">
-            <h3 id="domains-title">Domains</h3>
-            <p>.com and .io, checked with each registry's RDAP service, the official source for registrations.</p>
-          </div>
-          <ul class="rows rows-domains" id="domain-rows"></ul>
-        </section>
-
-        <section class="block" aria-labelledby="handles-title">
-          <div class="block-head">
-            <h3 id="handles-title">Social handles</h3>
-            <p>Exact handle <strong id="handle-label"></strong> on YouTube and TikTok.</p>
-          </div>
-          <ul class="rows" id="social-rows"></ul>
-          <p class="manual-links" id="manual-links"></p>
-        </section>
-
-        <section class="block" aria-labelledby="fallback-title">
-          <div class="block-head">
-            <h3 id="fallback-title">Fallback handles</h3>
-            <p>Common alternatives if the exact handle is gone. These are not your exact name.</p>
-          </div>
-          <button type="button" class="secondary-btn" id="fallback-btn">Check fallback handles</button>
-          <div class="fallback-groups" id="fallback-groups"></div>
-        </section>
-
-        <details class="legend">
-          <summary>How to read the results</summary>
-          <dl class="legend-list">
-            <div><dt><span class="status" data-status="likely_available"><span class="status-text">Likely available</span></span></dt>
-              <dd>The official source has no record of it. Reserved, premium, or recently deleted names can look the same, so confirm when you register.</dd></div>
-            <div><dt><span class="status" data-status="taken"><span class="status-text">Taken</span></span></dt>
-              <dd>We found a registration, account, or a suspended account holding the name.</dd></div>
-            <div><dt><span class="status" data-status="unknown"><span class="status-text">Unable to verify</span></span></dt>
-              <dd>The check was rate-limited, timed out, or got an unclear answer. We never guess, so open the link and look yourself.</dd></div>
-          </dl>
-        </details>
-      </div>
-    </section>
-
-    <!-- Step 3: the launch kit -->
-    <section class="step" id="step-launch" hidden aria-labelledby="step-launch-title">
-      <h2 class="step-title" id="step-launch-title"><span class="step-badge" aria-hidden="true">3</span>Your launch kit</h2>
-      <p class="step-sub" id="launch-sub"></p>
-
-      <div class="kit">
-        <div class="kit-item" id="kit-name-item" hidden>
-          <h3>Name</h3>
-          <p class="kit-name" id="kit-name"></p>
-          <p class="hint" id="kit-name-note"></p>
-        </div>
-        <div class="kit-item" id="kit-claim-item" hidden>
-          <h3>Claim these now</h3>
-          <ul class="kit-list" id="kit-claim"></ul>
-        </div>
-        <div class="kit-item" id="kit-test-item" hidden>
-          <h3>Run this test</h3>
-          <p id="kit-test"></p>
-          <p class="hint" id="kit-signal"></p>
+    <form id="idea-form" novalidate>
+      <div class="plate">
+        <label class="plate-label" for="idea-input">Your idea</label>
+        <textarea id="idea-input" class="plate-input" rows="1" maxlength="500"
+                  placeholder="meal prep for traveling sales reps" aria-describedby="idea-hint idea-error"></textarea>
+        <div class="plate-foot">
+          <button type="submit" id="idea-btn" class="plate-btn">Check it</button>
+          <p class="plate-hint" id="idea-hint">Rough is fine. One line is plenty.</p>
         </div>
       </div>
+      <p class="form-error" id="idea-error" role="alert" hidden></p>
+    </form>
 
-      <section class="block" aria-labelledby="idea-mvp-title" id="kit-prompt-block" hidden>
-        <div class="block-head">
-          <h3 id="idea-mvp-title">Landing page prompt</h3>
-          <p>Paste this into any AI chat to build a one-page site for your 7-day test.</p>
-          <p class="mvp-name" id="idea-mvp-name" aria-live="polite"></p>
-        </div>
-        <pre class="copy-box" id="idea-mvp" tabindex="0"></pre>
-        <button type="button" class="quiet-btn" id="copy-mvp">Copy prompt</button>
-      </section>
-
-      <div class="kit-cta" id="kit-no-idea" hidden>
-        <p>Add your idea to get a 7-day test, first customers and a landing page prompt for this name.</p>
-        <button type="button" class="secondary-btn" id="kit-add-idea">Test an idea</button>
-      </div>
-    </section>
-
-    <section class="info" aria-labelledby="checks-title">
-      <h2 id="checks-title">What NamerCheck checks</h2>
-      <p class="info-intro">NamerCheck is a free side hustle idea tester, SaaS name checker and app name availability checker. It works as a domain and social handle checker in one pass, so you can check startup name availability before you buy anything or print a logo.</p>
-      <ul class="info-grid">
-        <li>
-          <h3>Your idea</h3>
-          <p>An AI first read from Gemini 3.5 Flash-Lite: who pays, the risks, and a 7-day test you can run around your job.</p>
-        </li>
-        <li>
-          <h3>Domains</h3>
-          <p>.com and .io registration status through registry RDAP.</p>
-        </li>
-        <li>
-          <h3>Social handles</h3>
-          <p>YouTube and TikTok, checked directly. Instagram, X and Facebook block automated checks, so we link you straight to the handle instead.</p>
-        </li>
-        <li>
-          <h3>Naming patterns</h3>
-          <p>A local heuristic looking for crowded SaaS words, common prefixes/suffixes, spelling similarity, and phonetic similarity.</p>
-        </li>
+    <div class="examples" id="examples">
+      <span class="chips-label" id="examples-label">Or try:</span>
+      <ul class="chips" aria-labelledby="examples-label">
+        <li><button type="button" class="chip">meal prep for traveling sales reps</button></li>
+        <li><button type="button" class="chip">bookkeeping for tattoo studios</button></li>
+        <li><button type="button" class="chip">dog walking app for apartment buildings</button></li>
       </ul>
-    </section>
+    </div>
 
-    <section class="info" aria-labelledby="score-title">
-      <h2 id="score-title">What the score means</h2>
-      <p class="info-text">The 0–100 score is a naming-distinctiveness heuristic. It rewards names that avoid crowded startup patterns and don't look or sound like well-known products or the competitors you list. It is not a trademark score, not legal clearance, not a guarantee that the name is unique in search, and not a guarantee that the name can be registered.</p>
-      <p class="info-text">Working out how to name a micro SaaS? Shortlist a few names, run each one through this social media username checker and domain check, and drop any that are taken on .com or on the platforms your buyers actually use.</p>
-    </section>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
 
-    <section class="info faq" aria-labelledby="faq-title">
-      <h2 id="faq-title">Questions</h2>
-      <div class="faq-list">
-        <div class="faq-item">
-          <h3>Is the idea feedback real validation?</h3>
-          <p>No. It's an AI's first read, meant to sharpen a rough idea and point out risks. Real validation is people paying or signing up, which is what the 7-day test is for.</p>
-        </div>
-        <div class="faq-item">
-          <h3>What happens to the idea I type?</h3>
-          <p>It's sent to Google's Gemini API to write your report. NamerCheck doesn't save it, and it isn't added to your recent checks. Google's API terms apply to what Google receives.</p>
-        </div>
-        <div class="faq-item">
-          <h3>Is NamerCheck telling me the name is legally safe?</h3>
-          <p>No. It checks technical signals like registration, visible usernames, and naming similarity. Trademark and legal clearance are separate work.</p>
-        </div>
-        <div class="faq-item">
-          <h3>Why does a result sometimes say "Likely Available"?</h3>
-          <p>Because "not currently found" and "definitely available for you to claim" are not always the same thing. Registries and platforms can reserve names.</p>
-        </div>
-        <div class="faq-item">
-          <h3>Why don't you check Instagram, X or Facebook?</h3>
-          <p>They block automated checks, so any answer would be a guess. NamerCheck only checks platforms it can actually verify, and links you straight to the handle on the others so you can look in one click.</p>
-        </div>
-        <div class="faq-item">
-          <h3>Do you store the names I check?</h3>
-          <p>There is no server-side name database. Recent checks are stored locally in your browser and can be cleared at any time.</p>
-        </div>
+    <section class="result" id="result" hidden aria-labelledby="verdict">
+      <p class="you-wrote" id="you-wrote"></p>
+      <h2 class="verdict" id="verdict" tabindex="-1"></h2>
+      <p class="reason" id="reason"></p>
+
+      <dl class="facts" id="facts"></dl>
+
+      <div class="part" id="names-part">
+        <h3>Names with an open .com</h3>
+        <ul class="names" id="names"></ul>
+        <p class="note" id="names-note"></p>
       </div>
-    </section>
 
-    <section class="recent" id="recent" aria-labelledby="recent-heading" hidden>
-      <div class="recent-head">
-        <h2 id="recent-heading" tabindex="-1">Recent checks</h2>
-        <button type="button" class="quiet-btn" id="recent-clear">Clear history</button>
+      <div class="part" id="keywords-part">
+        <h3>See what's already out there</h3>
+        <ul class="chips" id="keywords"></ul>
       </div>
-      <ul class="recent-list" id="recent-list"></ul>
-      <p class="hint">Saved only in this browser. Checking again always runs fresh lookups.</p>
+
+      <div class="part" id="alts-part">
+        <h3 id="alts-title">Try one of these instead</h3>
+        <ul class="chips chips-stack" id="alts" aria-labelledby="alts-title"></ul>
+      </div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <p>NamerCheck is free, with no account, tracking pixels, or upsell. Results reflect the moment you checked and can change.</p>
+    <p>The verdict is an AI's quick read (Gemini 3.5 Flash-Lite), not market research. Names are checked live at the .com registry; "open" means the registry has no record, but premium or reserved names can look the same, so confirm when you register. Not legal or trademark advice. Nothing you type is saved.</p>
   </footer>
 
   <script src="app.js" defer></script>
