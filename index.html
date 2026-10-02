@@ -114,7 +114,7 @@
     /* Decision rows: each one a card */
     .list{display:grid;gap:14px}
     .row{background:var(--card);border:var(--b);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
-    .row > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:76px minmax(0,2.2fr) minmax(0,1.3fr) 108px 110px 64px 18px;gap:14px;align-items:center;padding:14px 16px}
+    .row > summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:76px minmax(0,2.2fr) minmax(0,1.3fr) 108px 110px 64px 74px 18px;gap:14px;align-items:center;padding:14px 16px}
     .row > summary::-webkit-details-marker{display:none}
     .row > summary:hover{background:#fff8e3}
     .row[open] > summary{border-bottom:var(--b)}
@@ -133,7 +133,7 @@
     .chev{transition:transform .15s}
     .row[open] .chev{transform:rotate(90deg)}
     @media (max-width:860px){
-      .row > summary{grid-template-columns:70px minmax(0,1fr) 48px 18px;gap:10px}
+      .row > summary{grid-template-columns:70px minmax(0,1fr) 44px 64px 18px;gap:8px}
       .cell-for,.cell-money,.cell-demand{display:none}
     }
 
@@ -237,6 +237,24 @@
     .pick__from{margin:-2px 0 8px;font:12px var(--mono);color:var(--ink-2)}
     .row > summary > *{min-width:0}
     .cell-val{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;line-height:1.3}
+    /* All posts: ranked, filterable, actionable */
+    .filters{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;border-bottom:var(--b);background:var(--paper)}
+    .fchip{border:2px solid var(--ink);border-radius:999px;background:var(--card);padding:3px 10px;font:700 12px var(--mono);cursor:pointer}
+    .fchip span{opacity:.6;margin-left:2px}
+    .fchip.on{background:var(--ink);color:var(--lime)}
+    .ll{grid-template-columns:44px minmax(0,1fr) auto !important;align-items:start}
+    .ll--low{opacity:.6}
+    .score{width:40px;height:40px;display:grid;place-items:center;border:var(--b);border-radius:8px;font:700 18px var(--mono);color:var(--ink)}
+    .s-hi{background:var(--lime)} .s-mid{background:var(--sky)} .s-lo{background:var(--grey)} .s-none{background:var(--card);color:var(--ink-3)}
+    .ll__main p{margin:0}
+    .angle{font-weight:700;color:var(--ink);margin-bottom:2px !important}
+    .ll__title{font-size:13px;color:var(--ink-2)}
+    .ll__text{font-size:13px;color:var(--ink-3)}
+    .ll__actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .btn--pass{background:var(--grey)}
+    .ll__actions a{grid-row:auto !important;grid-column:auto !important}
+    .more-cards{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:6px 2px}
+    @media (max-width:560px){.ll{grid-template-columns:40px minmax(0,1fr) !important}.ll__actions{grid-column:1/-1;justify-content:flex-start}}
   </style>
 </head>
 <body>
@@ -275,7 +293,7 @@
     <div class="tabs" role="tablist" aria-label="Filter builds">
       <button class="tab" role="tab" data-tab="best" aria-selected="true">Best<span class="n" id="nBest"></span></button>
       <button class="tab" role="tab" data-tab="saved" aria-selected="false">Saved<span class="n" id="nSaved"></span></button>
-      <button class="tab" role="tab" data-tab="skip" aria-selected="false">Skipped<span class="n" id="nSkip"></span></button>
+      <button class="tab" role="tab" data-tab="passed" aria-selected="false">Passed<span class="n" id="nSkip"></span></button>
     </div>
     <span class="meta" id="resultMeta"></span>
   </div>
@@ -283,7 +301,7 @@
 
   <div style="height:18px"></div>
   <details class="launches" id="launchBox" open>
-    <summary><h2>Inbox</h2><span class="meta" id="launchCount">Loading…</span><svg class="i chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
+    <summary><h2>All posts</h2><span class="meta" id="launchCount">Loading…</span><svg class="i chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></summary>
     <div id="launches"></div>
   </details>
 </div>
@@ -310,10 +328,10 @@
   ];
   const BATCH = 4, PARALLEL = 3;  // decision cards per Gemini call (short cards stay reliable on Flash-Lite), calls at once
 
-  const state = { items: [], ideas: [], patterns: [], topPick: null, analyzedAt: null, meta: null, newKeys: new Set(), tab: "best", inboxAll: false, failed: [] };
+  const state = { items: [], ideas: [], patterns: [], topPick: null, analyzedAt: null, meta: null, newKeys: new Set(), tab: "best", inboxAll: false, failed: [], filter: "all", carding: false };
 
   /* ---------- Memory: this browser only ---------- */
-  const KEYS = { seen: "sifter.seen", shortlist: "sifter.shortlist", patterns: "sifter.patterns", last: "sifter.last", sources: "sifter.sources", settings: "sifter.settings" };
+  const KEYS = { seen: "sifter.seen", shortlist: "sifter.shortlist", patterns: "sifter.patterns", last: "sifter.last", sources: "sifter.sources", settings: "sifter.settings", rank: "sifter.rank", passed: "sifter.passed" };
   const store = {
     get(k, fallback) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; } catch { return fallback; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* memory is a nice-to-have */ } }
@@ -520,18 +538,48 @@
   /* ---------- Inbox ---------- */
   function renderLaunches() {
     renderStepper();
-    const root = $("launches"), items = state.items;
-    const fresh = items.filter(x => state.newKeys.has(launchKey(x))).length;
-    const bySrc = new Set(items.map(x => x.sourceId)).size;
-    $("launchCount").textContent = items.length ? `${items.length} posts from ${bySrc} source${bySrc === 1 ? "" : "s"}${fresh ? ` · ${fresh} new in the last day` : ""}` : "Nothing loaded";
-    $("analyzeBtn").disabled = items.length === 0;
-    const show = state.inboxAll ? items : items.slice(0, 40);
-    root.innerHTML = show.map(x => `
-      <div class="ll">
-        <div><strong>${escapeHtml(x.name)}</strong>${state.newKeys.has(launchKey(x)) ? ' <span class="pill new">NEW</span>' : ""}<div class="meta2">${kindChip(x.kind)}<span class="chip">${escapeHtml(x.source)}</span></div></div>
-        <span>${escapeHtml(x.description.slice(0, 220))}${x.description.length > 220 ? "…" : ""}</span>
-        ${x.source_url ? `<a href="${escapeHtml(normalizeUrl(x.source_url))}" target="_blank" rel="noopener" aria-label="Open ${escapeHtml(x.name)}">${icon("ext")}</a>` : "<span></span>"}
-      </div>`).join("") + (items.length > show.length ? `<button class="more" id="inboxMore" type="button">Show all ${items.length}</button>` : "");
+    const root = $("launches");
+    const carded = cardedKeys(), passed = passedMap();
+    const ranked = state.items.some(x => rankOf(x));
+    const visible = state.items.filter(x => {
+      const r = rankOf(x), k = launchKey(x);
+      if (state.filter === "passed") return !!passed[k];
+      if (passed[k]) return false;
+      if (state.filter === "top") return r && r.score >= 7;
+      if (["launch", "pain", "idea"].includes(state.filter)) return x.kind === state.filter;
+      return true;
+    }).sort((a, b) => ((rankOf(b) || { score: -1 }).score - (rankOf(a) || { score: -1 }).score));
+    const fresh = state.items.filter(x => state.newKeys.has(launchKey(x))).length;
+    const bySrc = new Set(state.items.map(x => x.sourceId)).size;
+    $("launchCount").textContent = state.items.length ? `${state.items.length} posts from ${bySrc} source${bySrc === 1 ? "" : "s"}${fresh ? ` · ${fresh} new in the last day` : ""}${ranked ? " · ranked by Gemini" : ""}` : "Nothing loaded";
+    $("analyzeBtn").disabled = state.items.length === 0;
+    const count = f => state.items.filter(x => { const r = rankOf(x), k = launchKey(x); if (f === "passed") return !!passed[k]; if (passed[k]) return false; if (f === "top") return r && r.score >= 7; if (f === "all") return true; return x.kind === f; }).length;
+    const F = [["all", "All"], ["top", "Top (7+)"], ["pain", "Pain points"], ["idea", "Ideas"], ["launch", "Launches"], ["passed", "Passed"]];
+    const show = state.inboxAll ? visible : visible.slice(0, 50);
+    root.innerHTML = `<div class="filters">${F.map(([k, l]) => `<button type="button" class="fchip${state.filter === k ? " on" : ""}" data-filter="${k}">${l} <span>${count(k)}</span></button>`).join("")}</div>`
+      + (show.length ? show.map(x => {
+        const r = rankOf(x), k = launchKey(x), isCarded = carded.has(k), isPas = !!passed[k];
+        return `<div class="ll${r && r.score < 4 ? " ll--low" : ""}">
+          <div class="score ${r ? (r.score >= 7 ? "s-hi" : r.score >= 4 ? "s-mid" : "s-lo") : "s-none"}" title="Gemini's score (0-10)">${r ? r.score : "–"}</div>
+          <div class="ll__main">
+            ${r && r.angle ? `<p class="angle">${escapeHtml(r.angle)}</p>` : ""}
+            <p class="ll__title"><strong>${escapeHtml(x.name)}</strong>${state.newKeys.has(k) ? ' <span class="pill new">NEW</span>' : ""}</p>
+            <p class="ll__text">${escapeHtml(x.description.slice(0, 200))}${x.description.length > 200 ? "…" : ""}</p>
+            <div class="meta2">${kindChip(x.kind)}<span class="chip">${escapeHtml(x.source)}</span></div>
+          </div>
+          <div class="ll__actions">
+            ${isPas ? `<button class="btn btn--sm" type="button" data-unpass-item="${escapeHtml(k)}">Restore</button>`
+              : isCarded ? `<span class="chip chip--planned">CARDED</span>` : `<button class="btn btn--sm btn--primary" type="button" data-card-item="${escapeHtml(k)}">Card it</button>`}
+            ${isPas ? "" : `<button class="btn btn--sm btn--pass" type="button" data-pass-item="${escapeHtml(k)}">Pass</button>`}
+            ${x.source_url ? `<a class="btn btn--sm btn--quiet" href="${escapeHtml(normalizeUrl(x.source_url))}" target="_blank" rel="noopener" aria-label="Open ${escapeHtml(x.name)}">${icon("ext")}</a>` : ""}
+          </div>
+        </div>`; }).join("") : `<p class="note" style="padding:16px">Nothing here.</p>`)
+      + (visible.length > show.length ? `<button class="more" id="inboxMore" type="button">Show all ${visible.length}</button>` : "");
+    const byKey = k => state.items.find(x => launchKey(x) === k);
+    root.querySelectorAll("[data-filter]").forEach(b => b.addEventListener("click", () => { state.filter = b.dataset.filter; state.inboxAll = false; renderLaunches(); }));
+    root.querySelectorAll("[data-card-item]").forEach(b => b.addEventListener("click", () => { const x = byKey(b.dataset.cardItem); if (x) cardItems([{ item: x, why: (rankOf(x) || {}).angle || "" }]); }));
+    root.querySelectorAll("[data-pass-item]").forEach(b => b.addEventListener("click", () => { const x = byKey(b.dataset.passItem); if (x) { setPassed(x, true); toast("Passed. It won't come back."); renderLaunches(); renderIdeas(); } }));
+    root.querySelectorAll("[data-unpass-item]").forEach(b => b.addEventListener("click", () => { const x = byKey(b.dataset.unpassItem); if (x) { setPassed(x, false); toast("Restored"); renderLaunches(); renderIdeas(); } }));
     const more = $("inboxMore");
     if (more) more.addEventListener("click", () => { state.inboxAll = true; renderLaunches(); });
   }
@@ -593,7 +641,7 @@
     if (loading) { step = 1; msg = "Collecting fresh posts from your sources…"; }
     else if (!items && !ideas) { step = 1; msg = "No posts yet. Check Settings for your sources, then Refresh."; cta = ["Refresh", "refresh"]; }
     else if (!ideas || fromOld) { step = 2; msg = `${items} posts ready${fromOld ? " (your cards below are from " + fmtDate(state.analyzedAt) + ")" : ""}. Sift them for the ${$("briefCount").value} best weekend builds.`; cta = ["Find weekend builds", "analyze"]; }
-    else if (!planned.length) { step = 3; msg = "Read the cards. When one feels right, open it and hit Plan this build."; cta = state.topPick ? ["Open the top pick", "pick"] : null; }
+    else if (!planned.length) { step = 3; const more = uncarded().length; msg = `Read the cards; Pass the duds. ${more ? `${more} more good posts are ranked below in All posts. ` : ""}When one feels right, hit Plan this build.`; cta = state.topPick ? ["Open the top pick", "pick"] : null; }
     else { step = 4; const p = card(planned[0]); msg = `Plan ready for ${p.app_name || p.from}. Copy the brief and build it this weekend.`; cta = ["Open the plan", "plan"]; }
     const names = ["Collect", "Sift", "Decide", "Plan"];
     $("stepper").innerHTML = `<ol>${names.map((n, i) => `<li class="${i + 1 < step ? "done" : i + 1 === step ? "now" : ""}"><span>${i + 1}</span>${n}</li>`).join("")}</ol>
@@ -613,6 +661,23 @@
     });
   }
 
+  /* ---------- Ranking (every post) and passing ---------- */
+  const rankOf = x => store.get(KEYS.rank, {})[launchKey(x)] || null;
+  const passedMap = () => store.get(KEYS.passed, {});
+  const isPassed = x => !!passedMap()[launchKey(x)];
+  function setPassed(x, on) {
+    const m = passedMap(), k = launchKey(x);
+    if (on) m[k] = new Date().toISOString(); else delete m[k];
+    store.set(KEYS.passed, Object.fromEntries(Object.entries(m).slice(-3000)));
+  }
+  const cardedKeys = () => new Set(state.ideas.map(launchKey));
+  // Posts not yet carded or passed, best score first
+  function uncarded() {
+    const carded = cardedKeys();
+    return state.items.filter(x => !carded.has(launchKey(x)) && !isPassed(x) && rankOf(x) && rankOf(x).score >= 4)
+      .sort((a, b) => rankOf(b).score - rankOf(a).score);
+  }
+
   /* ---------- Saved ---------- */
   const savedKey = x => launchKey(x) + "|" + (card(x).idea || "").toLowerCase().slice(0, 80);
   const savedList = () => store.get(KEYS.shortlist, []);
@@ -629,21 +694,30 @@
   function rowsFor(tab) {
     if (tab === "saved") return savedList().map(s => ({ ...s.brief, _savedAt: s.savedAt }));
     const sorted = state.ideas.slice().sort((a, b) => (ORDER[a.verdict] ?? 1) - (ORDER[b.verdict] ?? 1) || (b.stack_fit || 0) - (a.stack_fit || 0));
-    return tab === "skip" ? sorted.filter(x => x.verdict === "SKIP") : sorted.filter(x => x.verdict !== "SKIP");
+    return tab === "passed" ? sorted.filter(x => x.verdict === "SKIP" || isPassed(x)) : sorted.filter(x => x.verdict !== "SKIP" && !isPassed(x));
   }
   function renderIdeas() {
     renderStepper();
-    const best = state.ideas.filter(x => x.verdict !== "SKIP").length, skip = state.ideas.length - best, saved = savedList().length;
+    const best = rowsFor("best").length, skip = rowsFor("passed").length, saved = savedList().length;
     $("nBest").textContent = best || ""; $("nSkip").textContent = skip || ""; $("nSaved").textContent = saved || "";
-    $("resultMeta").textContent = state.analyzedAt && state.tab !== "saved" ? `${state.meta ? `${state.meta.considered} posts sifted → ${state.meta.picked} carded · ` : ""}${fmtDate(state.analyzedAt)}` : "";
+    $("resultMeta").textContent = state.analyzedAt && state.tab !== "saved" ? `${state.meta ? `${state.meta.considered} posts ranked → ${state.ideas.length} carded · ` : ""}${fmtDate(state.analyzedAt)}` : "";
     const rows = rowsFor(state.tab);
     const root = $("results");
     if (!rows.length) {
-      root.innerHTML = `<p class="empty">${state.tab === "saved" ? "Nothing saved yet. Star a build to keep it here." : state.tab === "skip" ? "Nothing skipped." : state.ideas.length ? "Everything was skipped this run." : "No builds yet. Hit <strong>Find weekend builds</strong> to sift the inbox below."}</p>`;
+      root.innerHTML = `<p class="empty">${state.tab === "saved" ? "Nothing saved yet. Star a build to keep it here." : state.tab === "passed" ? "Nothing passed or skipped." : state.ideas.length ? "Nothing left here. Card more from All posts below." : "No builds yet. Hit <strong>Find weekend builds</strong> to sift the inbox below."}</p>${state.tab === "best" ? moreCardsHtml() : ""}`;
+      wireMore();
       return;
     }
     const pickName = state.topPick && state.topPick.name;
-    root.innerHTML = rows.map((x, i) => row(x, state.tab === "best" && x.name === pickName, i)).join("");
+    root.innerHTML = rows.map((x, i) => row(x, state.tab === "best" && x.name === pickName, i)).join("") + (state.tab === "best" ? moreCardsHtml() : "");
+    wireMore();
+    root.querySelectorAll("[data-pass]").forEach(b => b.addEventListener("click", e => {
+      e.preventDefault(); e.stopPropagation();
+      const x = rows[Number(b.dataset.pass)], on = !isPassed(x);
+      setPassed(x, on);
+      toast(on ? "Passed. It won't come back." : "Restored");
+      renderIdeas(); renderLaunches(); renderInsights();
+    }));
     root.querySelectorAll("[data-save]").forEach(b => b.addEventListener("click", e => {
       e.preventDefault();
       const on = toggleSaved(rows[Number(b.dataset.save)]);
@@ -677,6 +751,7 @@
         <div class="cell-money">${v === "SKIP" ? "" : `<span class="cell-label">Price</span><span class="cell-val">${escapeHtml(x.price || "?")}</span>`}</div>
         <div class="cell-demand">${top ? `<span class="cell-label">Top search</span><span class="pill lvl-${lvl(top.demand)}">${escapeHtml(lvl(top.demand).toUpperCase())}</span>` : ""}</div>
         <div class="fit" title="Stack fit">${fit}<span class="fit__bar"><i style="width:${fit}%"></i></span></div>
+        ${state.tab === "saved" ? "<span></span>" : `<button class="btn btn--sm btn--pass" type="button" data-pass="${idx}" title="${isPassed(x) ? "Bring it back" : "Not for me: hide it and never show it again"}">${isPassed(x) ? "Restore" : "Pass"}</button>`}
         ${icon("chev", "chev")}
       </summary>
       <div class="detail">
@@ -752,6 +827,21 @@
       return;
     }
     clearInterval(iv);
+  }
+
+  function moreCardsHtml() {
+    const left = uncarded();
+    if (!state.analyzedAt || !left.length) return "";
+    const n = Math.min(Number($("briefCount").value), left.length);
+    return `<div class="more-cards"><button class="btn btn--primary" type="button" id="moreCards" ${state.carding ? "disabled" : ""}>Card the next ${n}</button>
+      <span class="note">${left.length} more post${left.length === 1 ? "" : "s"} scored 4+ · or browse All posts below and card any of them</span></div>`;
+  }
+  function wireMore() {
+    const b = $("moreCards");
+    if (b) b.addEventListener("click", () => {
+      const n = Number($("briefCount").value);
+      cardItems(uncarded().slice(0, n).map(x => ({ item: x, why: (rankOf(x) || {}).angle || "" })));
+    });
   }
 
   function setTab(t) {
@@ -836,71 +926,80 @@
   }
 
   /* ---------- Find weekend builds: sift everything, then brief the best ---------- */
+  /* ---------- Find weekend builds: rank every post, then card the best ---------- */
   async function analyze() {
-    const all = state.items;
-    if (!all.length) return;
+    const all = state.items.filter(x => !isPassed(x));
+    if (!all.length) { setStatus("Every post is passed. Refresh for new ones.", "warn"); return; }
     const keep = Number($("briefCount").value);
     $("analyzeBtn").disabled = true; $("refreshBtn").disabled = true;
     setStatus.t0 = null;
     try {
-      // Stage 1: one fast pass over every post
-      setStatus(`Sifting ${all.length} posts for the best ${keep}…`, "", true);
+      setStatus(`Ranking ${all.length} posts…`, "", true);
       const history = [...new Set(store.get(KEYS.patterns, []).map(p => p.problem))].slice(0, 30);
       const tri = await postJson(API_URL, { action: "triage", keep, history,
         items: all.map((x, id) => ({ id, kind: x.kind, source: x.source, name: x.name, text: x.description.slice(0, 280) })) });
-      const picks = (tri.picks || []).filter(p => all[p.id]);
-      if (!picks.length) { setStatus(`Sifted ${all.length} posts and nothing looked weekend-sized. Try more sources or a later refresh.`, "warn"); return; }
-      state.ideas = []; state.patterns = tri.patterns || []; state.topPick = null; state.analyzedAt = new Date().toISOString();
-      state.meta = { considered: tri.considered || all.length, picked: picks.length };
-      setTab("best"); renderInsights();
-      $("launchBox").open = false;
-
-      // Stage 2: full briefs for the picks, a few batches at a time
-      const chosen = picks.map(p => ({ item: all[p.id], why: p.why }));
-      const batches = []; for (let i = 0; i < chosen.length; i += BATCH) batches.push(chosen.slice(i, i + BATCH));
-      let done = 0, failedBatches = 0;
-      const progress = () => setStatus(`${all.length} posts sifted → writing ${chosen.length} decision cards · ${done} of ${batches.length} batches done`, "", true, done / batches.length);
-      progress();
-      const reasons = [];
-      const sendBatch = batch => postJson(API_URL, { action: "analyze_betalist", briefs_only: true,
-        items: batch.map(({ item }) => ({ name: item.name, description: item.description, source_url: item.source_url, date: item.date, kind: item.kind, source: item.source })) });
-      const addIdeas = (batch, res) => {
-        extractIdeas(res).forEach(idea => {
-          const src = batch.find(b => b.item.name.toLowerCase() === String(idea.name || "").toLowerCase()) || (batch.length === 1 ? batch[0] : null);
-          if (!src || state.ideas.some(x => x.name === idea.name)) return;
-          state.ideas.push({ ...idea, _kind: src.item.kind, _source: src.item.source, _why: src.why || "", _desc: src.item.description.slice(0, 1500), source_url: idea.source_url || src.item.source_url || "" });
-        });
-        state.topPick = pickTop(state.ideas);
-        renderInsights(); renderIdeas();
-      };
-      const missing = batch => batch.filter(b => !state.ideas.some(x => x.name.toLowerCase() === b.item.name.toLowerCase()));
-      await pool(batches.map(batch => async () => {
-        try { addIdeas(batch, await sendBatch(batch)); }
-        catch (err) { reasons.push(err.message); }
-        // Anything the batch didn't return gets one more try, one item per call (short replies are more reliable)
-        const left = missing(batch);
-        if (left.length) {
-          await new Promise(r => setTimeout(r, 1500));
-          for (const one of left) {
-            try { addIdeas([one], await sendBatch([one])); }
-            catch (err) { reasons.push(err.message); failedBatches++; }
-          }
-        }
-        done++; progress();
-      }), PARALLEL);
-
-      rememberPatterns(state.patterns, state.analyzedAt);
-      store.set(KEYS.last, { at: state.analyzedAt, ideas: state.ideas, patterns: state.patterns, topPick: state.topPick, meta: state.meta });
-      const builds = state.ideas.filter(x => x.verdict === "BUILD").length;
-      const why = [...new Set(reasons.slice(-failedBatches))].slice(0, 2).join(" / ");
-      setStatus(`${state.meta.considered} posts sifted → ${state.ideas.length} cards · ${builds} worth building${failedBatches ? ` · ${failedBatches} card${failedBatches === 1 ? "" : "s"} still failed after a retry${why ? ` (${why})` : ""}` : ""}.`, failedBatches ? "warn" : "");
-      if (!failedBatches) setTimeout(() => { if ($("status").textContent.includes("worth building")) clearStatus(); }, 8000);
+      // Remember every post's score and angle (survives reloads)
+      const rank = store.get(KEYS.rank, {}), at = new Date().toISOString();
+      (tri.ranked || []).forEach(r => { const x = all[r.id]; if (x) rank[launchKey(x)] = { score: r.score, angle: r.angle || "", at }; });
+      store.set(KEYS.rank, Object.fromEntries(Object.entries(rank).sort((a, b) => String(b[1].at).localeCompare(String(a[1].at))).slice(0, 3000)));
+      state.ideas = []; state.patterns = tri.patterns || []; state.topPick = null; state.analyzedAt = at;
+      state.meta = { considered: tri.considered || all.length };
+      setTab("best"); renderInsights(); renderLaunches();
+      const picks = uncarded().slice(0, keep);
+      if (!picks.length) { setStatus(`Ranked ${all.length} posts and nothing scored 4+. Browse All posts below, or refresh later.`, "warn"); return; }
+      await cardItems(picks.map(x => ({ item: x, why: (rankOf(x) || {}).angle || "" })), true);
     } catch (err) {
       setStatus(friendly(err), "error");
     } finally {
       $("analyzeBtn").disabled = state.items.length === 0;
       $("refreshBtn").disabled = false;
     }
+  }
+
+  // Decision cards for any list of posts: first run, "Card the next N", or "Card it" on one post
+  async function cardItems(chosen, fromSift = false) {
+    if (!chosen.length || state.carding) return;
+    state.carding = true; renderIdeas();
+    if (!fromSift) setStatus.t0 = null;
+    const batches = []; for (let i = 0; i < chosen.length; i += BATCH) batches.push(chosen.slice(i, i + BATCH));
+    let done = 0, failed = 0;
+    const reasons = [];
+    const progress = () => setStatus(`Writing ${chosen.length} decision card${chosen.length === 1 ? "" : "s"} · ${done} of ${batches.length} batch${batches.length === 1 ? "" : "es"} done`, "", true, done / batches.length);
+    progress();
+    const sendBatch = batch => postJson(API_URL, { action: "analyze_betalist", briefs_only: true,
+      items: batch.map(({ item }) => ({ name: item.name, description: item.description, source_url: item.source_url, date: item.date, kind: item.kind, source: item.source })) });
+    const addIdeas = (batch, res) => {
+      extractIdeas(res).forEach(idea => {
+        const src = batch.find(b => b.item.name.toLowerCase() === String(idea.name || "").toLowerCase()) || (batch.length === 1 ? batch[0] : null);
+        if (!src || state.ideas.some(x => launchKey(x) === launchKey(src.item))) return;
+        state.ideas.push({ ...idea, name: src.item.name, _kind: src.item.kind, _source: src.item.source, _why: src.why || "", _desc: src.item.description.slice(0, 1500), source_url: src.item.source_url || idea.source_url || "" });
+      });
+      state.topPick = pickTop(state.ideas);
+      renderInsights(); renderIdeas(); renderLaunches();
+    };
+    const missing = batch => batch.filter(b => !state.ideas.some(x => launchKey(x) === launchKey(b.item)));
+    await pool(batches.map(batch => async () => {
+      try { addIdeas(batch, await sendBatch(batch)); }
+      catch (err) { reasons.push(err.message); }
+      const left = missing(batch);
+      if (left.length) {
+        await new Promise(r => setTimeout(r, 1500));
+        for (const one of left) {
+          try { addIdeas([one], await sendBatch([one])); }
+          catch (err) { reasons.push(err.message); failed++; }
+        }
+      }
+      done++; progress();
+    }), PARALLEL);
+    state.carding = false;
+    if (fromSift) rememberPatterns(state.patterns, state.analyzedAt);
+    state.meta = { ...(state.meta || {}), picked: state.ideas.length };
+    store.set(KEYS.last, { at: state.analyzedAt, ideas: state.ideas, patterns: state.patterns, topPick: state.topPick, meta: state.meta });
+    renderIdeas(); renderLaunches();
+    const builds = state.ideas.filter(x => x.verdict === "BUILD" && !isPassed(x)).length;
+    const why = [...new Set(reasons.slice(-failed))].slice(0, 2).join(" / ");
+    setStatus(`${state.ideas.length} cards · ${builds} worth building · ${uncarded().length} more posts scored 4+ to wade through${failed ? ` · ${failed} card${failed === 1 ? "" : "s"} failed after a retry${why ? ` (${why})` : ""}` : ""}.`, failed ? "warn" : "");
+    if (!failed) setTimeout(() => { if ($("status").textContent.includes("worth building")) clearStatus(); }, 8000);
   }
 
   $("refreshBtn").addEventListener("click", refreshFeed);
