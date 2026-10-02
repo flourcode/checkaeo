@@ -34,12 +34,15 @@
       </div>
 
       <form id="idea-form" class="idea-form" novalidate>
-        <label class="field-label" for="idea-input">Your side hustle idea</label>
-        <textarea id="idea-input" rows="3" maxlength="1000" placeholder="e.g. meal prep for traveling sales reps"
-                  aria-describedby="idea-hint idea-error"></textarea>
-        <div class="idea-actions">
-          <button type="submit" id="idea-btn" class="primary-btn">Test my idea</button>
-          <p class="hint" id="idea-hint">A sentence is plenty. Rough is fine.</p>
+        <div class="plate">
+          <label class="plate-label" for="idea-input">Your side hustle idea</label>
+          <textarea id="idea-input" class="plate-input plate-input-idea" rows="2" maxlength="1000"
+                    placeholder="meal prep for traveling sales reps" aria-describedby="idea-hint idea-error"></textarea>
+          <div class="plate-foot">
+            <button type="submit" id="idea-btn" class="plate-btn">Test my idea</button>
+            <p class="plate-hint" id="idea-hint">A sentence is plenty. Rough or half-baked is fine; we'll sharpen it.</p>
+          </div>
+          <p class="plate-status" id="idea-status" role="status" aria-live="polite"></p>
         </div>
         <div class="examples">
           <span class="examples-label" id="examples-label">Or try:</span>
@@ -50,7 +53,6 @@
           </ul>
         </div>
         <p class="form-error" id="idea-error" role="alert" hidden></p>
-        <p class="idea-status" id="idea-status" role="status" aria-live="polite"></p>
       </form>
       <p class="alt-start">Already have a name in mind? <button type="button" class="link-btn" id="skip-to-name">Skip to step 2 and check it</button></p>
     </section>
@@ -67,9 +69,14 @@
     <section class="step" id="step-idea" hidden aria-labelledby="step-idea-title">
       <h2 class="step-title" id="step-idea-title"><span class="step-badge" aria-hidden="true">1</span>Your idea, honestly</h2>
       <div class="summary idea-summary">
+        <p class="you-wrote" id="idea-you-wrote"></p>
         <p class="verdict" id="idea-verdict"></p>
         <h3 class="idea-title" id="idea-title" tabindex="-1"></h3>
         <p class="interpretation" id="idea-verdict-reason"></p>
+        <div class="alternatives" id="idea-alternatives-wrap" hidden>
+          <h4 id="idea-alternatives-title">Other angles to try</h4>
+          <ul class="example-list alt-list" id="idea-alternatives" aria-labelledby="idea-alternatives-title"></ul>
+        </div>
         <div class="assumptions" id="idea-assumptions-wrap" hidden>
           <h4>What I assumed</h4>
           <ul id="idea-assumptions"></ul>
@@ -123,11 +130,18 @@
       </section>
 
       <form id="check-form" class="check-form" novalidate>
-        <label class="field-label" for="name-input" id="name-input-label">Check a name</label>
-        <div class="input-row">
-          <input id="name-input" name="name" type="text" inputmode="text" autocomplete="off" autocapitalize="off"
-                 spellcheck="false" maxlength="60" placeholder="QuotaBird" required aria-describedby="form-error">
-          <button type="submit" id="check-btn" class="primary-btn">Check this name</button>
+        <div class="plate">
+          <label class="plate-label" for="name-input" id="name-input-label">Check a name</label>
+          <input id="name-input" class="plate-input plate-input-name" name="name" type="text" inputmode="text" autocomplete="off"
+                 autocapitalize="off" spellcheck="false" maxlength="60" placeholder="QuotaBird" required aria-describedby="form-error plate-variants">
+          <dl class="plate-variants" id="plate-variants">
+            <div><dt>Domain stem</dt><dd id="plate-stem">quotabird</dd></div>
+            <div><dt>Primary handle</dt><dd id="plate-handle">@quotabird</dd></div>
+          </dl>
+          <p class="plate-note" id="plate-note" hidden></p>
+          <div class="plate-foot">
+            <button type="submit" id="check-btn" class="plate-btn">Check this name</button>
+          </div>
         </div>
         <p class="form-error" id="form-error" role="alert" hidden></p>
         <div class="options">
@@ -142,14 +156,6 @@
         </div>
       </form>
 
-      <div class="nameplate" id="nameplate" aria-hidden="true">
-        <p class="plate-name is-placeholder" id="plate-name">QuotaBird</p>
-        <dl class="plate-variants">
-          <div><dt>Domain stem</dt><dd id="plate-stem">quotabird</dd></div>
-          <div><dt>Primary handle</dt><dd id="plate-handle">@quotabird</dd></div>
-        </dl>
-        <p class="plate-note" id="plate-note" hidden></p>
-      </div>
 
       <div class="setup-notice" id="setup-notice" role="status" hidden>
         <p><strong>The checking service isn't connected.</strong> Domains and handles show as unable to verify until <code>CHECK_API_URL</code> in <code>app.js</code> points at the Lambda. Use the links to check manually.</p>

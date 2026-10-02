@@ -142,25 +142,6 @@ h1 {
   margin-bottom: 0.45rem;
 }
 
-.input-row {
-  display: flex;
-  gap: 0.6rem;
-}
-
-#name-input {
-  flex: 1 1 auto;
-  min-width: 0;
-  font: inherit;
-  font-size: 1.2rem;
-  padding: 0.85rem 1rem;
-  border: 2px solid var(--line);
-  border-radius: 10px;
-  background: var(--surface);
-  color: var(--ink);
-}
-#name-input:focus { border-color: var(--cobalt); outline: none; box-shadow: 0 0 0 3px var(--cobalt-soft); }
-#name-input[aria-invalid="true"] { border-color: var(--bad); }
-
 .primary-btn {
   font: inherit;
   font-weight: 700;
@@ -242,22 +223,6 @@ textarea:focus { border-color: var(--cobalt); outline: none; }
 /* Idea step -------------------------------------------------------------- */
 
 .idea-form { max-width: 46rem; }
-#idea-input {
-  font-size: 1.15rem;
-  line-height: 1.5;
-  min-height: 5.5rem;
-  padding: 0.85rem 1rem;
-}
-#idea-input[aria-invalid="true"] { border-color: var(--bad); }
-.idea-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.6rem 1rem;
-  margin-top: 0.7rem;
-}
-.idea-actions .hint { margin: 0; }
-.primary-btn[aria-busy="true"] { opacity: 0.75; cursor: progress; }
 
 .examples {
   display: flex;
@@ -280,8 +245,6 @@ textarea:focus { border-color: var(--cobalt); outline: none; }
 }
 .example-btn:hover { border-color: var(--cobalt); }
 
-.idea-status { margin: 0.75rem 0 0; color: var(--muted); font-weight: 500; }
-.idea-status:empty { display: none; }
 
 
 .verdict {
@@ -516,42 +479,103 @@ textarea:focus { border-color: var(--cobalt); outline: none; }
 .legend summary:hover, .legend[open] summary { color: var(--ink); }
 .legend .legend-list { margin-top: 1rem; }
 
-/* The nameplate: the one loud element on the page ----------------------- */
+/* The plate: one loud element, used for both the idea and the name ------- */
+/* Both inputs live inside the same cobalt plate and are typed in big display
+   type, so step 1 and step 2 read as parts of one tool. */
 
-.nameplate {
-  margin-top: 2.25rem;
+.idea-form, .check-form { max-width: none; }
+
+.plate {
   background: var(--cobalt);
   color: var(--on-cobalt);
   border-radius: 22px;
-  padding: clamp(1.5rem, 4vw, 2.75rem) clamp(1.25rem, 4vw, 3rem);
-  overflow: hidden;
+  padding: clamp(1.25rem, 3.5vw, 2.25rem) clamp(1.25rem, 4vw, 2.75rem);
 }
 
-.plate-name {
+.plate-label {
+  display: block;
+  font-weight: 600;
+  font-size: 1rem;
+  opacity: 0.85;
+  margin-bottom: 0.4rem;
+}
+
+.plate-input {
+  display: block;
+  width: 100%;
   margin: 0;
+  padding: 0.1em 0 0.15em;
+  background: transparent;
+  color: inherit;
+  border: 0;
+  border-bottom: 2px solid rgb(255 255 255 / 0.35);
+  border-radius: 0;
   font-family: var(--display);
   font-weight: 800;
-  font-size: clamp(2.8rem, 11vw, 7.75rem);
-  line-height: 0.95;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   font-variation-settings: "opsz" 96;
-  overflow-wrap: anywhere;
-  min-height: 1em;
+  caret-color: currentColor;
+  resize: none;
+  overflow: hidden;
 }
-.plate-name.is-placeholder { opacity: 0.45; }
+.plate-input::placeholder { color: rgb(255 255 255 / 0.42); }
+.plate-input:focus { outline: none; border-bottom-color: #fff; }
+.plate-input:focus-visible { outline: none; }
+.plate-input[aria-invalid="true"] { border-bottom-color: #FFB4AB; }
+
+.plate-input-idea {
+  font-size: clamp(1.7rem, 4.6vw, 3rem);
+  line-height: 1.12;
+  min-height: 2.4em;
+}
+.plate-input-name {
+  font-size: clamp(2.6rem, 10vw, 6.5rem);
+  line-height: 1;
+}
+
+.plate-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1.25rem;
+  margin-top: 1.1rem;
+}
+.plate-btn {
+  font: inherit;
+  font-weight: 700;
+  font-size: 1.05rem;
+  padding: 0.8rem 1.35rem;
+  border: 0;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--cobalt-deep);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.plate-btn:hover { background: var(--cobalt-soft); }
+.plate-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.plate-btn:disabled { opacity: 0.75; cursor: progress; }
+.plate-hint { margin: 0; opacity: 0.85; font-size: 0.95rem; }
+.plate-status { margin: 0.8rem 0 0; font-weight: 600; }
+.plate-status:empty { display: none; }
 
 .plate-variants {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem 2.5rem;
-  margin: 1.5rem 0 0;
-  padding-top: 1rem;
-  border-top: 1.5px solid rgb(255 255 255 / 0.28);
+  margin: 1rem 0 0;
 }
 .plate-variants dt { font-size: 0.9rem; opacity: 0.8; }
 .plate-variants dd { margin: 0; font-weight: 700; font-size: 1.2rem; overflow-wrap: anywhere; }
-
 .plate-note { margin: 0.8rem 0 0; font-size: 0.95rem; opacity: 0.9; }
+
+/* What they wrote, and other angles (step 1) */
+.you-wrote { margin: 0 0 0.9rem; color: var(--muted); }
+.you-wrote q { color: var(--ink); font-style: italic; }
+.alternatives { margin-top: 1.25rem; max-width: var(--measure); }
+.alternatives h4 { font-size: 1rem; margin: 0 0 0.5rem; }
+.alt-list { flex-direction: column; align-items: flex-start; }
+.alt-list .example-btn { text-align: left; border-radius: 12px; line-height: 1.4; padding: 0.5rem 0.85rem; }
 
 /* Setup notice ---------------------------------------------------------- */
 
@@ -883,8 +907,7 @@ code { font-size: 0.92em; }
 /* Small screens --------------------------------------------------------- */
 
 @media (max-width: 559px) {
-  .input-row { flex-direction: column; }
-  .primary-btn { width: 100%; }
+  .plate-btn { width: 100%; }
   .score { text-align: left; }
   .summary-head { align-items: flex-start; }
 }

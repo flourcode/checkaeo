@@ -577,7 +577,6 @@ function startCheck(rawName, keywordsRaw, { updateUrl = true } = {}) {
 
   $("#setup-notice").hidden = apiConfigured();
   $("#step-name").hidden = false;
-  $("#nameplate").hidden = true; // the results header shows the name now
   $("#results").hidden = false;
   updateTally();
   updateJourney();
@@ -790,10 +789,11 @@ const VERDICT_LABEL = {
   promising: "Promising",
   needs_sharpening: "Needs sharpening",
   tough_road: "Tough road",
-  not_a_business_idea: "Not a business idea yet",
+  cant_help: "Can't help with this one",
 };
 
 let ideaRun = 0;
+let lastIdeaText = "";
 let ideaReport = null;
 let landingName = null; // the name the person checked after testing the idea; fills the landing page prompt
 let autoKeywords = ""; // keywords we filled in from the idea, so we don't overwrite the user's own
@@ -869,6 +869,7 @@ async function runIdea(raw) {
   }
 
   const id = ++ideaRun;
+  lastIdeaText = idea;
   setIdeaBusy(true);
   const status = $("#idea-status");
   status.textContent = "Reading your idea. This usually takes 5 to 15 seconds.";
@@ -899,7 +900,25 @@ function renderIdea(r, id) {
   fillList($("#idea-assumptions"), assumptions);
   $("#idea-assumptions-wrap").hidden = assumptions.length === 0;
 
-  const notIdea = r.verdict === "not_a_business_idea";
+  const notIdea = r.verdict === "cant_help";
+
+  // Show what they typed above what we turned it into, so a reshape is visible
+  const wrote = $("#idea-you-wrote");
+  wrote.replaceChildren();
+  if (lastIdeaText) wrote.append(document.createTextNode("You wrote "), el("q", {}, lastIdeaText));
+
+  // Other angles: one click re-runs the test with that idea
+  const alts = Array.isArray(r.alternatives) ? r.alternatives.filter(Boolean) : [];
+  const altList = $("#idea-alternatives");
+  altList.replaceChildren(...alts.map((text) => {
+    const li = el("li");
+    const btn = el("button", { type: "button", className: "example-btn" }, text);
+    btn.addEventListener("click", () => tryIdea(text));
+    li.append(btn);
+    return li;
+  }));
+  $("#idea-alternatives-title").textContent = notIdea ? "Ideas we can help with" : "Other angles to try";
+  $("#idea-alternatives-wrap").hidden = alts.length === 0;
   $("#idea-body").hidden = notIdea;
   $("#name-ideas-block").hidden = true;
 
@@ -1071,13 +1090,13 @@ function renderLandingPrompt() {
 
 let skippedIdea = false; // the person came with a name and skipped step 1
 
-const hasUsableIdea = () => Boolean(ideaReport) && ideaReport.verdict !== "not_a_business_idea";
+const hasUsableIdea = () => Boolean(ideaReport) && ideaReport.verdict !== "cant_help";
 
 function updateJourney() {
   const ideaDone = hasUsableIdea();
   const nameDone = Boolean(current);
   const states = {
-    idea: ideaDone ? "done" : skippedIdea || nameDone ? "skipped" : "current",
+    idea: ideaDone ? "done" : ideaReport ? "current" : skippedIdea || nameDone ? "skipped" : "current",
     name: nameDone ? "done" : ideaDone || skippedIdea ? "current" : "todo",
     launch: nameDone || ideaDone ? (nameDone ? "current" : "todo") : "todo",
   };
@@ -1091,7 +1110,7 @@ function updateJourney() {
     $(`#journey-${step}-state`).textContent = words[state];
   }
   // Step 1 links back to the idea box until there's a report to jump to.
-  document.querySelector('.journey li[data-step="idea"] a').setAttribute("href", ideaDone ? "#step-idea" : "#idea-input");
+  document.querySelector('.journey li[data-step="idea"] a').setAttribute("href", ideaReport ? "#step-idea" : "#idea-input");
   document.querySelector('.journey li[data-step="launch"] a').setAttribute("href", $("#step-launch").hidden ? "#step-name" : "#step-launch");
   $("#journey").hidden = !(ideaReport || skippedIdea || nameDone);
 }
@@ -1179,7 +1198,7 @@ async function copyMvp() {
 }
 
 // ---------------------------------------------------------------------------
-// Form, nameplate preview, URL state
+// Form, name plate, URL state
 // ---------------------------------------------------------------------------
 
 function showError(msg) {
@@ -1195,24 +1214,32 @@ function hideError() {
 }
 
 function updatePlate() {
-  const raw = $("#name-input").value;
-  const n = normalizeName(raw);
-  const plate = $("#plate-name");
+  const n = normalizeName($("#name-input").value);
   if (!n.brand) {
-    plate.textContent = "QuotaBird";
-    plate.classList.add("is-placeholder");
     $("#plate-stem").textContent = "quotabird";
     $("#plate-handle").textContent = "@quotabird";
     $("#plate-note").hidden = true;
     return;
   }
-  plate.classList.remove("is-placeholder");
-  plate.textContent = n.brand;
   $("#plate-stem").textContent = n.stem || "(needs letters or numbers)";
   $("#plate-handle").textContent = n.stem ? `@${n.handle}` : "(needs letters or numbers)";
   const note = describeNormalization(n);
   $("#plate-note").textContent = note;
   $("#plate-note").hidden = !note;
+}
+
+// Put an idea in the box and test it (examples and "other angles" use this).
+function tryIdea(text) {
+  const input = $("#idea-input");
+  input.value = text;
+  autosize(input);
+  runIdea(text);
+}
+
+// The idea box grows with what's typed, like the plate it sits in.
+function autosize(textarea) {
+  textarea.style.height = "auto";
+  textarea.style.height = `${textarea.scrollHeight}px`;
 }
 
 function writeUrl(brand, keywords) {
@@ -1247,7 +1274,6 @@ function init() {
   const keywords = $("#keywords-input");
 
   input.addEventListener("input", () => {
-    $("#nameplate").hidden = false;
     updatePlate();
     if (!$("#form-error").hidden) hideError();
   });
@@ -1272,12 +1298,10 @@ function init() {
     if (!$("#idea-error").hidden) $("#idea-error").hidden = true;
     ideaInput.removeAttribute("aria-invalid");
   });
-  for (const btn of document.querySelectorAll(".example-btn")) {
-    btn.addEventListener("click", () => {
-      ideaInput.value = btn.textContent;
-      runIdea(btn.textContent);
-    });
+  for (const btn of document.querySelectorAll(".examples .example-btn")) {
+    btn.addEventListener("click", () => tryIdea(btn.textContent));
   }
+  ideaInput.addEventListener("input", () => autosize(ideaInput));
   $("#copy-mvp").addEventListener("click", copyMvp);
   $("#skip-to-name").addEventListener("click", skipToName);
   $("#kit-add-idea").addEventListener("click", () => {

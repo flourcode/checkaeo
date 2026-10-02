@@ -2,8 +2,8 @@
 
 A free tool for people daydreaming about escaping their 9-to-5. It's one journey with three steps:
 
-1. **Idea.** Someone types a rough, one-sentence idea. Gemini 3.5 Flash-Lite returns an honest first read: a sharper version of the idea, who pays, the risks, a 7-day validation test, where to find the first 10 customers, and the first two evenings of work.
-2. **Name.** Twelve name ideas for that idea, with the ones whose .com looks open listed first, plus a box to check any name. A check covers .com, .io, YouTube and TikTok, and gives a naming-distinctiveness score.
+1. **Idea.** Someone types a rough, one-sentence idea into the big blue plate. Gemini 3.5 Flash-Lite returns an honest first read: a sharper version of the idea, who pays, the risks, a 7-day validation test, where to find the first 10 customers, and the first two evenings of work.
+2. **Name.** Twelve name ideas for that idea, with the ones whose .com looks open listed first, plus the same big blue plate to type and check any name. A check covers .com, .io, YouTube and TikTok, and gives a naming-distinctiveness score.
 3. **Launch kit.** The chosen name, what's open to claim right now (with register and claim links), the 7-day test, and a landing page prompt filled in with the chosen name.
 
 People who already have a name can skip step 1 ("Already have a name in mind?") and go straight to step 2. The kit then offers to add an idea later. A progress bar shows the three steps once the journey starts.
@@ -190,8 +190,9 @@ Idea report:
 
 The response is `{ "idea": { ...report... }, "model": "gemini-3.5-flash-lite" }`. The report has these fields:
 
-- `verdict`: one of `promising`, `needs_sharpening`, `tough_road`, `not_a_business_idea`
+- `verdict`: one of `promising`, `needs_sharpening`, `tough_road`, `cant_help`
 - `verdictReason`, `sharpenedIdea`
+- `alternatives` (array of 3): other angles on the same interest; the page shows them as one-click "Other angles to try"
 - `assumptions` (array)
 - `targetCustomer`, `painPoint`, `valueProposition`, `revenueModel`, `existingAlternatives`, `fitsAround9to5`
 - `risks` (array)
@@ -288,7 +289,7 @@ This replaces the old Side Hustle Slingshot (`mvp_launch_plan`) endpoint and kee
 - **Sharper angle.** The system prompt makes the model shrink broad or crowded ideas to one buyer, one job, one input and one result ("a checker instead of a platform"). `sharpenedIdea` is that narrower version, not a restatement.
 - **First customers.** `firstCustomers` says where the first 10 buyers can be reached and how to approach them. It describes kinds of places, and names a community only if it's certain the community exists.
 - **Thin prompts work.** When the idea is vague, the model picks the most plausible specific version and lists its assumptions on the page, instead of guessing silently.
-- **Honest output.** The system prompt tells the model to be blunt and not invent statistics or company names. Off-topic or harmful input gets the verdict `not_a_business_idea` with no plan.
+- **Honest output that keeps people moving.** The system prompt tells the model to be blunt and not invent statistics or company names. It never stops at a thin, vague or weak idea. Instead it reshapes the idea into the nearest workable side hustle that keeps the person's interest (for example, "make my own crypto coin" becomes something crypto people would pay for), marks it `tough_road`, explains why plainly, and fills in the full plan. Barely-an-idea input such as a single word is interpreted, with the assumptions listed. Only clearly illegal or harmful ideas get `cant_help`, which comes with three legitimate nearby ideas to click instead. The page always shows "You wrote …" above the sharpened version, so a reshape is visible. Older `not_a_business_idea` answers are treated as `tough_road`.
 - **Safer rendering.** The old card injected AI text with `innerHTML`. Everything is now rendered with `textContent`.
 - **New fields.** The report adds `nicheWords`, which feed the distinctiveness score for the suggested names, and `nameIdeas`.
 
