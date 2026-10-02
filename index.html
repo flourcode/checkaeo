@@ -477,12 +477,18 @@
       L.push("", "### Build", `- ${b.input || "?"} → ${b.output || "?"}`, `- Lambda: ${b.lambda || "None needed"}`);
       if ((b.files || []).length) L.push(`- Files: ${b.files.join(", ")}`);
       if ((p.weekend_plan || []).length) L.push("", "### Weekend plan", ...p.weekend_plan.map(st => `- [ ] ${st.when ? `**${st.when}:** ` : ""}${st.task}`));
-      if ((p.risks || []).length) L.push("", "### Risks", ...p.risks.map(r => `- ${r}`));
+      if ((p.risks || []).length) L.push("", "### Risks", ...p.risks.map(riskLine).filter(Boolean).map(r => `- ${r}`));
       if (p.first_week_signal) L.push("", `**First-week signal:** ${p.first_week_signal}`);
     }
     return L.join("\n").replace(/\n{3,}/g, "\n\n").trim() + "\n";
   }
   /* ---------- Decision cards (older saved briefs are mapped into the same shape) ---------- */
+  const riskLine = r => {
+    let o = r;
+    if (typeof r === "string" && r.trim().startsWith("{")) { try { o = JSON.parse(r); } catch { return r; } }
+    if (o && typeof o === "object") { const what = o.risk || o.issue || "", fix = o.mitigation || o.fix || ""; return what ? (fix ? `${what} Fix: ${fix}` : what) : ""; }
+    return String(r || "");
+  };
   const cleanName = n => { const t = String(n || "").split(/\s+[–—]\s+/)[0]; return t.length > 56 ? t.slice(0, 54).replace(/\s+\S*$/, "") + "…" : t; };
   function card(x) {
     const m = x.monetization || {};
@@ -875,7 +881,7 @@
       </tr>`).join("")}</tbody></table>${p.seo_angle ? `<p class="note">SEO angle: ${escapeHtml(p.seo_angle)}</p>` : ""}</div>` : "<div></div>"}
       ${(p.weekend_plan || []).length ? `<ol class="steps">${p.weekend_plan.map(st => `<li><span class="when">${escapeHtml(st.when || "Step")}</span><span>${escapeHtml(st.task)}</span></li>`).join("")}</ol>` : ""}
       ${(p.risks || []).length || p.first_week_signal ? `<div class="planfoot">
-        ${(p.risks || []).length ? `<div><h4>Risks</h4><ul>${p.risks.map(r => `<li>${escapeHtml(r)}</li>`).join("")}</ul></div>` : ""}
+        ${(p.risks || []).length ? `<div><h4>Risks</h4><ul>${p.risks.map(riskLine).filter(Boolean).map(r => `<li>${escapeHtml(r)}</li>`).join("")}</ul></div>` : ""}
         ${p.first_week_signal ? `<div><h4>First-week signal</h4><p>${escapeHtml(p.first_week_signal)}</p></div>` : ""}
       </div>` : ""}
     </div>`;
