@@ -214,6 +214,29 @@
       .ll a{grid-row:1/3;grid-column:2}
       .from{display:none}
     }
+    /* Step guide */
+    .stepper{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin:0 0 20px;padding:12px 14px;background:var(--card);border:var(--b);border-radius:var(--r);box-shadow:var(--sh)}
+    .stepper ol{list-style:none;display:flex;gap:6px;margin:0;padding:0;flex-wrap:wrap}
+    .stepper li{display:flex;align-items:center;gap:6px;font:700 12px var(--mono);text-transform:uppercase;padding:4px 10px 4px 4px;border:2px solid var(--ink);border-radius:999px;background:var(--paper);color:var(--ink-3)}
+    .stepper li span{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;border:2px solid var(--ink);background:var(--card);color:var(--ink);font-size:11px}
+    .stepper li.done{background:var(--grey);color:var(--ink)}
+    .stepper li.done span{background:var(--ink);color:var(--lime)}
+    .stepper li.now{background:var(--lime);color:var(--ink)}
+    .stepper p{margin:0;flex:1;min-width:220px;font-weight:600;color:var(--ink)}
+    /* Settings drawer */
+    .sources{display:block}
+    .setrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding-bottom:12px;margin-bottom:12px;border-bottom:2px dashed rgba(17,17,17,.3)}
+    .sources .count{color:var(--ink);font-weight:700}
+    .sources select{background:var(--card);color:var(--ink);border-color:var(--ink)}
+    .srcgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 24px}
+    @media (max-width:760px){.srcgrid{grid-template-columns:1fr}}
+    /* Card titles: your app's name first, the source second */
+    .inspired{display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;margin-top:3px;font:12px var(--mono);color:var(--ink-3)}
+    .inspired b{color:var(--ink)}
+    .chip--planned{background:var(--lime)}
+    .pick__from{margin:-2px 0 8px;font:12px var(--mono);color:var(--ink-2)}
+    .row > summary > *{min-width:0}
+    .cell-val{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;line-height:1.3}
   </style>
 </head>
 <body>
@@ -222,19 +245,26 @@
     <div class="bar__in">
       <div class="brand"><h1>Idea Sifter</h1><span>launches · pain points · ideas → weekend builds</span></div>
       <div class="tools">
-        <button class="btn srcbtn" id="sourcesBtn" type="button" aria-expanded="false" aria-controls="sourcesPanel">Sources <span class="n" id="srcCount"></span></button>
-        <label class="count" for="perSource">Posts/source
-          <select id="perSource"><option>10</option><option selected>20</option><option>40</option></select>
-        </label>
-        <label class="count" for="briefCount">Cards
-          <select id="briefCount"><option>5</option><option selected>8</option><option>10</option><option>15</option><option>20</option></select>
-        </label>
+        <button class="btn srcbtn" id="sourcesBtn" type="button" aria-expanded="false" aria-controls="sourcesPanel">Settings <span class="n" id="srcCount"></span></button>
         <button class="btn" id="refreshBtn" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.5 6.3M3 12A9 9 0 0 1 18.5 5.7"/><path d="M21 4v5h-5M3 20v-5h5"/></svg>Refresh</button>
         <button class="btn btn--primary" id="analyzeBtn" type="button" disabled>Find weekend builds</button>
       </div>
     </div>
-    <div class="sources" id="sourcesPanel" hidden></div>
+    <div class="sources" id="sourcesPanel" hidden>
+      <div class="setrow">
+        <label class="count" for="perSource">Posts per source
+          <select id="perSource"><option>10</option><option selected>20</option><option>40</option></select>
+        </label>
+        <label class="count" for="briefCount">Cards per run
+          <select id="briefCount"><option>5</option><option selected>8</option><option>10</option><option>15</option><option>20</option></select>
+        </label>
+        <span class="note">Fewer cards = better quality on Flash-Lite.</span>
+      </div>
+      <div class="srcgrid" id="sourcesList"></div>
+    </div>
   </header>
+
+  <nav class="stepper" id="stepper" aria-label="Where you are"></nav>
 
   <div id="status" class="status" role="status" aria-live="polite"></div>
 
@@ -401,13 +431,15 @@
     return L.join("\n").replace(/\n{3,}/g, "\n\n").trim() + "\n";
   }
   /* ---------- Decision cards (older saved briefs are mapped into the same shape) ---------- */
+  const cleanName = n => String(n || "").split(/\s+[–—]\s+/)[0].slice(0, 60);
   function card(x) {
     const m = x.monetization || {};
     const legacyPlan = !x.plan && (x.weekend_plan || x.names) ? { names: x.names || [], tagline: x.tagline || "", nugget: x.nugget || "", monetization: m, keywords: x.keywords || [], seo_angle: x.seo_angle || "", build: x.build || {}, weekend_plan: x.weekend_plan || [] } : null;
     return { ...x,
       idea: x.idea || x.alternative || "", buyer: x.buyer || x.target_demo || "", pain: x.pain || x.why_they_pay || "",
       price: x.price || m.price || "", reason: x.reason || x.skip_reason || "", hard_part: x.hard_part || "",
-      keywords: (x.keywords || []).slice(0, 2), plan: x.plan || legacyPlan };
+      keywords: (x.keywords || []).slice(0, 2), plan: x.plan || legacyPlan,
+      app_name: x.app_name || (x.plan && x.plan.names && x.plan.names[0]) || (x.names && x.names[0]) || "", from: cleanName(x.name) };
   }
 
   /* ---------- Feeds: one parser for Atom and RSS, plus each source's quirks ---------- */
@@ -436,7 +468,11 @@
     } else if (src.reddit) {
       text = text.replace(/submitted by\s+\/u\/\S+.*$/i, "").replace(/\[link\]|\[comments\]/gi, "").trim();
       if (e.category) source = e.category.startsWith("r/") ? e.category : "r/" + e.category;
-    } else if (src.id === "producthunt") {
+    } else {
+      const t = name.match(/^(.{2,60}?)\s+[–—]\s+(.+)$/);       // "QRBliss – Create brand-matched…" → name + tagline
+      if (t && !src.reddit) { name = t[1]; text = (t[2] + (text ? ". " + text : "")).trim(); }
+    }
+    if (src.id === "producthunt") {
       text = text.replace(/Discussion\s*\|\s*Link\s*$/i, "").trim();
     }
     return { name: name.slice(0, 160), description: text.slice(0, 1500), source_url: e.url, date: e.date, kind: src.kind, source, sourceId: src.id };
@@ -465,13 +501,13 @@
     const on = new Set(enabled().map(s => s.id));
     const daysLeft = Math.ceil((REDDIT_END - Date.now()) / 864e5);
     const redditOn = SOURCES.some(s => s.reddit && on.has(s.id));
-    $("srcCount").textContent = `${on.size}/${SOURCES.length}`;
+    $("srcCount").textContent = `${on.size} sources`;
     const groups = ["Launches", "Pain points", "Ideas"];
-    $("sourcesPanel").innerHTML = groups.map(g => `<div><h3>${g}</h3>${SOURCES.filter(s => s.group === g).map(s => `
+    $("sourcesList").innerHTML = groups.map(g => `<div><h3>${g}</h3>${SOURCES.filter(s => s.group === g).map(s => `
       <label class="src"><input type="checkbox" data-src="${s.id}" ${on.has(s.id) ? "checked" : ""}><strong>${escapeHtml(s.label)}</strong>${s.hint ? `<span>${escapeHtml(s.hint)}</span>` : ""}</label>`).join("")}</div>`).join("")
       + (redditOn ? `<p class="reddit-note">${daysLeft > 0 ? `Reddit ends public RSS on Nov 13: <strong>${daysLeft} day${daysLeft === 1 ? "" : "s"} left</strong>. The other sources keep working after that.` : `Reddit RSS has ended. Untick the Reddit sources.`}</p>` : "");
-    $("sourcesPanel").querySelectorAll("[data-src]").forEach(cb => cb.addEventListener("change", () => {
-      store.set(KEYS.sources, [...$("sourcesPanel").querySelectorAll("[data-src]:checked")].map(x => x.dataset.src));
+    $("sourcesList").querySelectorAll("[data-src]").forEach(cb => cb.addEventListener("change", () => {
+      store.set(KEYS.sources, [...$("sourcesList").querySelectorAll("[data-src]:checked")].map(x => x.dataset.src));
       renderSources();
     }));
   }
@@ -483,6 +519,7 @@
 
   /* ---------- Inbox ---------- */
   function renderLaunches() {
+    renderStepper();
     const root = $("launches"), items = state.items;
     const fresh = items.filter(x => state.newKeys.has(launchKey(x))).length;
     const bySrc = new Set(items.map(x => x.sourceId)).size;
@@ -516,10 +553,11 @@
     root.innerHTML = `
       ${pick && pickIdea ? `<div class="panel panel--pick">
         <span class="eyebrow">Build this week</span>
-        <span class="pick__name">${escapeHtml((card(pickIdea).plan && card(pickIdea).plan.names && card(pickIdea).plan.names[0]) || pickIdea.name)}</span>
+        <span class="pick__name">${escapeHtml(card(pickIdea).app_name || card(pickIdea).from)}</span>
+        <p class="pick__from">inspired by ${escapeHtml(card(pickIdea).from)} · ${escapeHtml(pickIdea._source || "")}</p>
         <p class="pick__idea">${escapeHtml(card(pickIdea).idea)}</p>
         <p class="pick__why">${escapeHtml(pick.why || "")}</p>
-        <button class="btn btn--sm" type="button" id="jumpPick">Open the brief</button>
+        <button class="btn btn--sm" type="button" id="jumpPick">${card(pickIdea).plan ? "Open the plan" : "Open the card"}</button>
       </div>` : ""}
       <div class="panel">
         <span class="eyebrow">Patterns across ${state.meta ? state.meta.considered + " posts" : "this run"}</span>
@@ -545,6 +583,36 @@
     store.set(KEYS.patterns, hist.slice(0, 300));
   }
 
+  /* ---------- Step guide ---------- */
+  let loading = false;
+  function renderStepper() {
+    const items = state.items.length, ideas = state.ideas.length;
+    const planned = state.ideas.filter(i => card(i).plan);
+    const fromOld = ideas && state.analyzedAt && new Date(state.analyzedAt).toDateString() !== new Date().toDateString();
+    let step, msg, cta = null;
+    if (loading) { step = 1; msg = "Collecting fresh posts from your sources…"; }
+    else if (!items && !ideas) { step = 1; msg = "No posts yet. Check Settings for your sources, then Refresh."; cta = ["Refresh", "refresh"]; }
+    else if (!ideas || fromOld) { step = 2; msg = `${items} posts ready${fromOld ? " (your cards below are from " + fmtDate(state.analyzedAt) + ")" : ""}. Sift them for the ${$("briefCount").value} best weekend builds.`; cta = ["Find weekend builds", "analyze"]; }
+    else if (!planned.length) { step = 3; msg = "Read the cards. When one feels right, open it and hit Plan this build."; cta = state.topPick ? ["Open the top pick", "pick"] : null; }
+    else { step = 4; const p = card(planned[0]); msg = `Plan ready for ${p.app_name || p.from}. Copy the brief and build it this weekend.`; cta = ["Open the plan", "plan"]; }
+    const names = ["Collect", "Sift", "Decide", "Plan"];
+    $("stepper").innerHTML = `<ol>${names.map((n, i) => `<li class="${i + 1 < step ? "done" : i + 1 === step ? "now" : ""}"><span>${i + 1}</span>${n}</li>`).join("")}</ol>
+      <p>${escapeHtml(msg)}</p>${cta ? `<button class="btn btn--sm ${cta[1] === "analyze" ? "btn--primary" : ""}" type="button" id="stepCta" data-go="${cta[1]}">${escapeHtml(cta[0])}</button>` : ""}`;
+    const b = $("stepCta");
+    if (b) b.addEventListener("click", () => {
+      const go = b.dataset.go;
+      if (go === "refresh") refreshFeed();
+      else if (go === "analyze") analyze();
+      else {
+        const target = go === "plan" ? planned[0] : state.ideas.find(i => state.topPick && i.name === state.topPick.name);
+        if (!target) return;
+        setTab("best");
+        const el = document.querySelector(`[data-name="${CSS.escape(target.name)}"]`);
+        if (el) { el.open = true; (go === "plan" ? el.querySelector(".planbox") || el : el).scrollIntoView({ behavior: "smooth", block: "start" }); }
+      }
+    });
+  }
+
   /* ---------- Saved ---------- */
   const savedKey = x => launchKey(x) + "|" + (card(x).idea || "").toLowerCase().slice(0, 80);
   const savedList = () => store.get(KEYS.shortlist, []);
@@ -564,6 +632,7 @@
     return tab === "skip" ? sorted.filter(x => x.verdict === "SKIP") : sorted.filter(x => x.verdict !== "SKIP");
   }
   function renderIdeas() {
+    renderStepper();
     const best = state.ideas.filter(x => x.verdict !== "SKIP").length, skip = state.ideas.length - best, saved = savedList().length;
     $("nBest").textContent = best || ""; $("nSkip").textContent = skip || ""; $("nSaved").textContent = saved || "";
     $("resultMeta").textContent = state.analyzedAt && state.tab !== "saved" ? `${state.meta ? `${state.meta.considered} posts sifted → ${state.meta.picked} carded · ` : ""}${fmtDate(state.analyzedAt)}` : "";
@@ -595,12 +664,13 @@
     const rank = { high: 0, medium: 1, low: 2 };
     const top = x.keywords.slice().sort((a, c) => rank[lvl(a.demand)] - rank[lvl(c.demand)])[0];
     const isNew = state.newKeys.has(launchKey(x));
-    const title = (x.plan && x.plan.names && x.plan.names[0]) || x.name;
+    const title = x.app_name || x.from;
     return `<details class="row row--${v.toLowerCase()}" data-name="${escapeHtml(x.name)}" ${open ? "open" : ""}>
       <summary>
         <span class="pill v-${v.toLowerCase()}">${v}</span>
         <div class="cell-main">
-          <div class="names"><strong>${escapeHtml(title)}</strong>${kindChip(x._kind)}<span class="from">${escapeHtml(x._source || "")}${x._savedAt ? ` · saved ${escapeHtml(fmtDate(x._savedAt))}` : ""}</span>${isNew ? '<span class="pill new">NEW</span>' : ""}${x.plan ? '<span class="chip">PLANNED</span>' : ""}</div>
+          <div class="names"><strong>${escapeHtml(title)}</strong>${x.plan ? '<span class="chip chip--planned">PLANNED</span>' : ""}${isNew ? '<span class="pill new">NEW</span>' : ""}</div>
+          <div class="inspired">${kindChip(x._kind)} inspired by <b>${escapeHtml(x.from)}</b> · ${escapeHtml(x._source || "")}${x._savedAt ? ` · saved ${escapeHtml(fmtDate(x._savedAt))}` : ""}</div>
           <p class="alt">${escapeHtml(v === "SKIP" ? (x.reason || x.idea) : x.idea)}</p>
         </div>
         <div class="cell-for">${escapeHtml(x.buyer)}</div>
@@ -663,7 +733,7 @@
     try {
       const res = await postJson(API_URL, { action: "plan",
         item: { name: x.name, description: x._desc || x.idea || x.name, source_url: x.source_url, kind: x._kind || "launch", source: x._source || "" },
-        decision: { idea: x.idea, buyer: x.buyer, pain: x.pain, price: x.price, hard_part: x.hard_part, keywords: x.keywords } });
+        decision: { app_name: x.app_name, idea: x.idea, buyer: x.buyer, pain: x.pain, price: x.price, hard_part: x.hard_part, keywords: x.keywords } });
       // Keep the plan on the run's card and on its saved copy, so it survives reloads
       const key = savedKey(raw);
       const live = state.ideas.find(i => savedKey(i) === key);
@@ -729,8 +799,9 @@
     const srcs = enabled();
     if (!srcs.length) { setStatus("Pick at least one source.", "warn"); return; }
     const problem = await checkLambda();
-    if (problem) { setStatus(problem, "error"); $("refreshBtn").disabled = false; return; }
+    if (problem) { setStatus(problem, "error"); $("refreshBtn").disabled = false; loading = false; renderStepper(); return; }
     $("refreshBtn").disabled = true; $("analyzeBtn").disabled = true;
+    loading = true; renderStepper();
     setStatus(`Fetching ${srcs.length} source${srcs.length === 1 ? "" : "s"}…`, "", true);
     const failed = [];
     const lists = await pool(srcs.map(src => async () => {
@@ -750,7 +821,7 @@
       if ((u && seenUrl.has(u)) || (n && seenName.has(n))) continue;
       if (u) seenUrl.add(u); if (n) seenName.add(n); items.push(x);
     }
-    state.items = items; state.failed = failed; state.inboxAll = false;
+    state.items = items; state.failed = failed; state.inboxAll = false; loading = false;
     const seen = store.get(KEYS.seen, {}), now = new Date().toISOString();
     items.forEach(x => { const k = launchKey(x); if (k && !seen[k]) seen[k] = now; });
     const dayAgo = Date.now() - 864e5;
@@ -845,7 +916,7 @@
   for (const id of ["perSource", "briefCount"]) {
     const el = $(id);
     if (settings[id] && [...el.options].some(o => o.value === String(settings[id]))) el.value = String(settings[id]);
-    el.addEventListener("change", () => { const cur = store.get(KEYS.settings, {}); cur[id] = el.value; store.set(KEYS.settings, cur); if (id === "perSource") refreshFeed(); });
+    el.addEventListener("change", () => { const cur = store.get(KEYS.settings, {}); cur[id] = el.value; store.set(KEYS.settings, cur); if (id === "perSource") refreshFeed(); else renderStepper(); });
   }
   renderSources(); renderInsights(); renderIdeas(); renderLaunches();
   refreshFeed();
