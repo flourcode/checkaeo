@@ -247,6 +247,22 @@ a.chip::after { content: " ↗"; color: var(--muted); }
 .note { margin: 0.6rem 0 0; color: var(--muted); font-size: 0.93rem; }
 .note:empty { display: none; }
 
+/* The name the person picked */
+.yours { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem 0.9rem; }
+.yours .name-word { font-size: 1.8rem; }
+.pill {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 1.5px solid transparent;
+}
+.pill[data-status="likely_available"] { background: var(--ok-soft); color: var(--ok); border-color: var(--ok); }
+.pill[data-status="taken"] { background: var(--bad-soft); color: var(--bad); }
+.pill[data-status="unknown"] { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); border-style: dashed; }
+.yours a { font-weight: 600; }
+
 /* Names: a wrapping row of self-sized items, never squeezed into columns */
 .names { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.6rem; }
 .names li {

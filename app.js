@@ -134,7 +134,9 @@ function render(r) {
     facts.append(row);
   }
 
+  renderYours(r.yourName);
   renderNames(Array.isArray(r.names) ? r.names : [], r.verdict);
+  $("#names-title").textContent = r.yourName ? "Other names with an open .com" : "Names with an open .com";
 
   // Related searches: open Google so people can see the competition themselves
   const kws = r.verdict === "cant_help" || !Array.isArray(r.keywords) ? [] : r.keywords;
@@ -161,6 +163,40 @@ function render(r) {
   const heading = $("#verdict");
   card.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "start" });
   heading.focus({ preventScroll: true });
+}
+
+// The name the person typed or mentioned, checked live: always shown, open or not.
+function renderYours(y) {
+  const part = $("#yours-part");
+  const box = $("#yours");
+  box.replaceChildren();
+  part.hidden = !y;
+  if (!y) return;
+
+  const pillText = {
+    likely_available: "Looks open",
+    taken: y.registeredYear ? `Taken since ${y.registeredYear}` : "Taken",
+    unknown: "Couldn't check right now",
+  }[y.status] || "Couldn't check right now";
+
+  box.append(
+    el("span", { className: "name-word" }, y.name),
+    el("span", { className: "sr-only" }, ", "),
+    el("span", { className: "name-domain" }, y.domain),
+    el("span", { className: "sr-only" }, ", "),
+    el("span", { className: "pill", "data-status": y.status }, pillText),
+    el("span", { className: "sr-only" }, ", "),
+  );
+  if (y.status === "likely_available") {
+    box.append(el("a", { href: CONFIG.registrarUrl(y.domain), target: "_blank", rel: "noopener" }, "Register it"));
+  } else if (y.status === "taken") {
+    box.append(el("a", { href: `https://${y.domain}`, target: "_blank", rel: "noopener nofollow" }, "See who has it"));
+  } else {
+    box.append(el("a", { href: CONFIG.registrarUrl(y.domain), target: "_blank", rel: "noopener" }, "Look it up"));
+  }
+
+  const takenHint = y.status === "taken" ? " The open names below are close alternatives." : "";
+  $("#yours-note").textContent = `${y.comment || ""}${takenHint}`.trim();
 }
 
 // Only names the registry shows as open are listed. If none are open, say so

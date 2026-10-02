@@ -33,7 +33,7 @@
         <div class="plate-foot">
           <button type="submit" id="idea-btn" class="plate-btn">Check it</button>
           <button type="button" id="idea-clear" class="plate-clear" hidden>Clear</button>
-          <p class="plate-hint" id="idea-hint">Rough is fine. One line is plenty.</p>
+          <p class="plate-hint" id="idea-hint">Rough is fine. Got a name in mind? Mention it and we'll check it.</p>
         </div>
       </div>
       <p class="form-error" id="idea-error" role="alert" hidden></p>
@@ -57,8 +57,14 @@
 
       <dl class="facts" id="facts"></dl>
 
+      <div class="part" id="yours-part" hidden>
+        <h3>The name you picked</h3>
+        <div class="yours" id="yours"></div>
+        <p class="note" id="yours-note"></p>
+      </div>
+
       <div class="part" id="names-part">
-        <h3>Names with an open .com</h3>
+        <h3 id="names-title">Names with an open .com</h3>
         <ul class="names" id="names"></ul>
         <p class="note" id="names-note"></p>
       </div>
