@@ -71,6 +71,7 @@ async function ask(idea) {
 
 let runId = 0;
 let lastIdea = "";
+let justChecked = false; // after a result, the next click into the box selects it so typing replaces it
 
 async function check(raw) {
   const idea = String(raw || "").replace(/\s+/g, " ").trim();
@@ -94,6 +95,7 @@ async function check(raw) {
   $("#status").textContent = "";
   if (err) return showError(err);
   render(report);
+  justChecked = true;
 }
 
 function showError(msg) {
@@ -178,7 +180,12 @@ function renderNames(names, verdict) {
 
   for (const n of shown) {
     const li = el("li", { "data-status": n.status });
-    li.append(el("span", { className: "name-word" }, n.name), el("span", { className: "name-domain" }, n.domain));
+    li.append(
+      el("span", { className: "name-word" }, n.name),
+      el("span", { className: "sr-only" }, ", "),
+      el("span", { className: "name-domain" }, n.domain),
+      el("span", { className: "sr-only" }, ", "),
+    );
     li.append(el("a", { href: CONFIG.registrarUrl(n.domain), target: "_blank", rel: "noopener", "aria-label": `Register ${n.domain}` }, open.length ? "Register" : "Look it up"));
     list.append(li);
   }
@@ -194,10 +201,28 @@ function renderNames(names, verdict) {
   }
 }
 
+// Empty the box and put the cursor in it, ready for the next idea.
+function newIdea({ scroll = false } = {}) {
+  const input = $("#idea-input");
+  input.value = "";
+  autosize(input);
+  syncClear();
+  justChecked = false;
+  $("#idea-error").hidden = true;
+  input.removeAttribute("aria-invalid");
+  if (scroll) window.scrollTo({ top: 0, behavior: reducedMotion() ? "auto" : "smooth" });
+  input.focus({ preventScroll: scroll });
+}
+
+function syncClear() {
+  $("#idea-clear").hidden = $("#idea-input").value.trim() === "";
+}
+
 function tryIdea(text) {
   const input = $("#idea-input");
   input.value = text;
   autosize(input);
+  syncClear();
   window.scrollTo({ top: 0, behavior: reducedMotion() ? "auto" : "smooth" });
   check(text);
 }
@@ -221,9 +246,24 @@ function init() {
     if (e.key === "Enter" && !e.shiftKey) { // Enter checks; Shift+Enter adds a line
       e.preventDefault();
       check(input.value);
+    } else if (e.key === "Escape" && input.value) { // Escape clears the box
+      e.preventDefault();
+      newIdea();
     }
   });
+  // After a result, clicking or tabbing into the box selects the old idea,
+  // so just typing replaces it. No need to backspace.
+  const selectIfStale = () => {
+    if (justChecked && input.value.trim() === lastIdea) input.select();
+  };
+  input.addEventListener("focus", selectIfStale);
+  input.addEventListener("click", selectIfStale);
+  $("#idea-clear").addEventListener("click", () => newIdea());
+  $("#again").addEventListener("click", () => newIdea({ scroll: true }));
+
   input.addEventListener("input", () => {
+    justChecked = false;
+    syncClear();
     autosize(input);
     if (!$("#idea-error").hidden) $("#idea-error").hidden = true;
     input.removeAttribute("aria-invalid");

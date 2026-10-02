@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>NamerCheck — Is my side hustle idea any good?</title>
+  <title>SideGator — Is my side hustle idea any good?</title>
   <meta name="description" content="Type a side hustle idea, get a straight answer in seconds: a verdict, what people search for, and brandable names with an open .com. Free, no login.">
-  <meta property="og:title" content="NamerCheck — Is my side hustle idea any good?">
+  <meta property="og:title" content="SideGator — Is my side hustle idea any good?">
   <meta property="og:description" content="A 10-second gut check for side hustle ideas: a verdict, related searches, and names with an open .com.">
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#2A44C4">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232A44C4'/%3E%3Ctext x='32' y='45' font-family='Arial,sans-serif' font-weight='800' font-size='36' text-anchor='middle' fill='white'%3EN%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232A44C4'/%3E%3Ctext x='32' y='45' font-family='Arial,sans-serif' font-weight='800' font-size='36' text-anchor='middle' fill='white'%3ES%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
 </head>
 <body>
   <header class="site-header">
-    <a class="wordmark" href="./">NamerCheck</a>
+    <a class="wordmark" href="./">SideGator</a>
     <p class="header-note">Free. No sign-up. Nothing saved.</p>
   </header>
 
@@ -32,6 +32,7 @@
                   placeholder="meal prep for traveling sales reps" aria-describedby="idea-hint idea-error"></textarea>
         <div class="plate-foot">
           <button type="submit" id="idea-btn" class="plate-btn">Check it</button>
+          <button type="button" id="idea-clear" class="plate-clear" hidden>Clear</button>
           <p class="plate-hint" id="idea-hint">Rough is fine. One line is plenty.</p>
         </div>
       </div>
@@ -71,6 +72,8 @@
         <h3 id="alts-title">Try one of these instead</h3>
         <ul class="chips chips-stack" id="alts" aria-labelledby="alts-title"></ul>
       </div>
+
+      <button type="button" class="again-btn" id="again">Check another idea</button>
     </section>
   </main>
 

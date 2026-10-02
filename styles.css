@@ -147,6 +147,19 @@ h1 {
 .plate-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 .plate-btn:disabled { opacity: 0.75; cursor: progress; }
 .plate-hint { margin: 0; opacity: 0.85; font-size: 0.95rem; }
+.plate-clear {
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.55rem 0.9rem;
+  border: 1.5px solid rgb(255 255 255 / 0.5);
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.plate-clear:hover { border-color: #fff; background: rgb(255 255 255 / 0.1); }
+.plate-clear:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 
 .form-error { margin: 0.75rem 0 0; color: var(--bad); font-weight: 600; }
 
@@ -250,6 +263,24 @@ a.chip::after { content: " ↗"; color: var(--muted); }
 .name-domain { color: var(--muted); font-size: 0.9rem; }
 .names li[data-status="unknown"] .name-domain::after { content: " (couldn't check)"; }
 .names a { font-weight: 600; font-size: 0.95rem; }
+
+.again-btn {
+  margin-top: 1.5rem;
+  font: inherit;
+  font-weight: 700;
+  padding: 0.75rem 1.3rem;
+  border: 0;
+  border-radius: 10px;
+  background: var(--cobalt);
+  color: var(--on-cobalt);
+  cursor: pointer;
+}
+.again-btn:hover { background: var(--cobalt-deep); }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
 
 /* Footer */
 

@@ -1,4 +1,4 @@
-# NamerCheck
+# SideGator
 
 A casual, 10-second gut check for side hustle ideas. The kind of tool someone opens on a break, tries three or four ideas in, and comes back to next week.
 
@@ -6,11 +6,15 @@ Type an idea, get one answer card:
 
 - **A verdict:** Great idea, Worth a shot, Crowded market, Nah, brah, or (for illegal or harmful ideas only) Can't help with that one, with a one-line reason.
 - **The sharper version** of the idea, **who pays**, and **what to try first** this week.
-- **Names with an open .com.** Gemini suggests 12 brandable names, and the Lambda checks every .com live at the registry in the same request. Only open ones are shown, with a Register link.
+- **Names with an open .com.** Gemini suggests 12 brandable names, and the Lambda checks every .com live at the registry in the same request. Only open ones are shown, with a Register link. Near-duplicates (MeowLens and MewLens, Purrshot and Purrshots) are dropped before checking, and the prompt rules out dropped-vowel spellings like "KittnArt".
 - **See what's already out there:** 5 related search phrases, each a link to Google results, so people can size up the competition themselves.
 - **Try one of these instead:** 3 other ideas on the same interest. One click checks the next one.
 
 Weak or vague ideas are never a dead end. The AI reshapes them into the nearest workable version and says why.
+
+Starting a new idea is one move: after a result, clicking into the box selects the old idea so typing replaces it. **Clear** (or Escape) empties it, and **Check another idea** at the bottom of the card jumps back up with an empty box.
+
+**About the name:** the product is SideGator. Internal names still say "namercheck" (`lambda/namercheck.mjs`, the `NAMERCHECK_GEMINI_MODEL` variable, the project folder) so the existing Lambda setup and environment variables keep working. Renaming those is optional cleanup.
 
 No login, no database, no saved history, no build step. Nothing typed is stored.
 
@@ -23,8 +27,8 @@ No login, no database, no saved history, no build step. Nothing typed is stored.
   app.js            One request, render the card (no storage)
   README.md
   lambda/
-    index.mjs       Router: sends each request to NamerCheck or the Idea Sifter
-    namercheck.mjs  NamerCheck: Gemini + live .com checks
+    index.mjs       Router: sends each request to SideGator or the Idea Sifter
+    namercheck.mjs  SideGator: Gemini + live .com checks
     sifter.mjs      Idea Sifter: an unchanged copy of the sifter's index.mjs
     lambda.mjs      Alias so the old "lambda.handler" setting keeps working
   namercheck-lambda.zip   The four lambda/ files, ready to upload
@@ -37,19 +41,19 @@ No login, no database, no saved history, no build step. Nothing typed is stored.
 
 ## One Lambda, two tools
 
-NamerCheck shares the Idea Sifter's Lambda and Function URL (`https://6cu5wlvx2mylhy7xzdefy5bsya0ccmxb.lambda-url.us-east-1.on.aws/`). `index.mjs` only routes:
+SideGator shares the Idea Sifter's Lambda and Function URL (`https://6cu5wlvx2mylhy7xzdefy5bsya0ccmxb.lambda-url.us-east-1.on.aws/`). `index.mjs` only routes:
 
 | Request | Goes to |
 |---|---|
 | `POST` with an `action` field, `GET /health`, `OPTIONS` | Idea Sifter |
-| Everything else (`POST { "kind": "idea" }`, other `GET`s) | NamerCheck |
+| Everything else (`POST { "kind": "idea" }`, other `GET`s) | SideGator |
 
 `sifter.mjs` is a byte-for-byte copy of the sifter's `index.mjs`. When the sifter changes, drop its new `index.mjs` in as `sifter.mjs` and re-zip.
 
 ### Deploy
 
 1. Open the Lambda, choose **Code → Upload from → .zip file**, and pick `namercheck-lambda.zip`. Keep the handler (`index.handler`) and the sifter's timeout.
-2. **Function URL CORS:** allow your NamerCheck site's origin (as well as the sifter's), methods `GET` and `POST`, and header `content-type`. Leave `CORS_ORIGIN` and `SEND_CORS_HEADERS` unset; AWS handles CORS.
+2. **Function URL CORS:** allow your SideGator site's origin (as well as the sifter's), methods `GET` and `POST`, and header `content-type`. Leave `CORS_ORIGIN` and `SEND_CORS_HEADERS` unset; AWS handles CORS.
 3. Push `index.html`, `styles.css` and `app.js` to Amplify.
 
 Quick test:
@@ -67,7 +71,7 @@ curl -s -X POST "https://6cu5wlvx2mylhy7xzdefy5bsya0ccmxb.lambda-url.us-east-1.o
 | `NAMERCHECK_GEMINI_MODEL` | Default `gemini-3.5-flash-lite`. Separate from the sifter's `GEMINI_MODEL`. |
 | `GEMINI_TIMEOUT_MS` | Default 20000. |
 | `AI_RATE_LIMIT_PER_MINUTE`, `AI_RATE_LIMIT_PER_HOUR` | Per-IP limits, defaults 6 and 40, per warm instance. Enough for someone testing a handful of ideas. |
-| `ALLOWED_ORIGINS` | Optional origin allowlist for NamerCheck requests, such as `https://yourdomain.com`. |
+| `ALLOWED_ORIGINS` | Optional origin allowlist for SideGator requests, such as `https://yourdomain.com`. |
 | `BOT_USER_AGENT`, `SITE_URL` | User-Agent sent to the registry. |
 
 ## API
