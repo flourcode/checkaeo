@@ -14,12 +14,16 @@ const CONFIG = {
 };
 
 const VERDICT_LABEL = {
-  great: "Great idea",
-  worth_a_shot: "Worth a shot",
-  crowded: "Crowded market",
+  great: "Yeah, dude",
+  worth_a_shot: "Worth a hop",
+  crowded: "Crowded pond",
   nah: "Nah, brah",
   cant_help: "Can't help with that one",
 };
+
+// The coffee frog's face for each verdict (faces live in the inline SVG; the
+// body is frogs/coffee.svg). The verdict itself is the live caption text.
+const VERDICT_FACE = { great: "yeah", worth_a_shot: "smirk", crowded: "meh", nah: "nah", cant_help: "sad" };
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -85,22 +89,28 @@ async function check(raw) {
   const id = ++runId;
   lastIdea = idea;
   setBusy(true);
-  $("#status").textContent = "Thinking it over…";
-  const step = setTimeout(() => { if (id === runId) $("#status").textContent = "Checking which .com names are open…"; }, 4500);
+  setStatus("Mulling it over…");
+  const step = setTimeout(() => { if (id === runId) setStatus("Checking which .com names are open…"); }, 4500);
 
   const { report, error: err } = await ask(idea);
   clearTimeout(step);
   if (id !== runId) return;
   setBusy(false);
-  $("#status").textContent = "";
+  setStatus("");
   if (err) return showError(err);
   render(report);
   justChecked = true;
 }
 
+// Loading line with the phone frog; empty text hides it.
+function setStatus(text) {
+  $("#status-text").textContent = text;
+  $("#status").hidden = !text;
+}
+
 function showError(msg) {
   const e = $("#idea-error");
-  e.textContent = msg;
+  $("#idea-error-text").textContent = msg;
   e.hidden = false;
   $("#idea-input").setAttribute("aria-invalid", "true");
 }
@@ -122,6 +132,11 @@ function render(r) {
   const wrote = $("#you-wrote");
   wrote.replaceChildren(document.createTextNode("You asked about "), el("q", {}, lastIdea));
   $("#verdict").textContent = VERDICT_LABEL[r.verdict] || "Here's the read";
+  $("#mascot").dataset.mood = VERDICT_FACE[r.verdict] || "smirk";
+  const sticker = $("#sticker");
+  sticker.classList.remove("is-hopping");
+  void sticker.getBoundingClientRect(); // restart the hop for every new answer
+  if (!reducedMotion()) sticker.classList.add("is-hopping");
   $("#reason").textContent = r.verdictReason || "";
 
   // Quick facts: the sharper version, who pays, the first move

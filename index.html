@@ -3,21 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>SideGator — Is my side hustle idea any good?</title>
+  <title>SideFrog — Is my side hustle idea any good?</title>
   <meta name="description" content="Type a side hustle idea, get a straight answer in seconds: a verdict, what people search for, and brandable names with an open .com. Free, no login.">
-  <meta property="og:title" content="SideGator — Is my side hustle idea any good?">
+  <meta property="og:title" content="SideFrog — Is my side hustle idea any good?">
   <meta property="og:description" content="A 10-second gut check for side hustle ideas: a verdict, related searches, and names with an open .com.">
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#2A44C4">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232A44C4'/%3E%3Ctext x='32' y='45' font-family='Arial,sans-serif' font-weight='800' font-size='36' text-anchor='middle' fill='white'%3ES%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="frogs/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600;700&family=Fredoka:wght@600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="site-header">
-    <a class="wordmark" href="./">SideGator</a>
+    <a class="wordmark" href="./"><svg class="frog wordmark-frog look-right" data-mood="smirk" viewBox="0 0 640 550" aria-hidden="true" focusable="false"><image href="frogs/coffee.svg" width="640" height="550"/><g class="face face-smirk"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="162" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="165" rx="13" ry="19" fill="#111"/><path d="M180 258 Q275 302 372 256" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M168 250 Q174 258 182 258" fill="none" stroke="#111" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g></svg>SideFrog</a>
     <p class="header-note">Free. No sign-up. Nothing saved.</p>
   </header>
 
@@ -36,7 +36,10 @@
           <p class="plate-hint" id="idea-hint">Rough is fine. Got a name in mind? Mention it and we'll check it.</p>
         </div>
       </div>
-      <p class="form-error" id="idea-error" role="alert" hidden></p>
+      <div class="form-error" id="idea-error" role="alert" hidden>
+        <svg class="frog error-frog look-right" data-mood="oops" viewBox="0 0 640 550" aria-hidden="true" focusable="false"><image href="frogs/coffee.svg" width="640" height="550"/><g class="face face-oops"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="162" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="165" rx="13" ry="19" fill="#111"/><ellipse cx="276" cy="270" rx="18" ry="22" fill="#7A2420" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g></svg>
+        <p id="idea-error-text"></p>
+      </div>
     </form>
 
     <div class="examples" id="examples">
@@ -48,12 +51,22 @@
       </ul>
     </div>
 
-    <p class="status" id="status" role="status" aria-live="polite"></p>
+    <div class="status" id="status" role="status" aria-live="polite" hidden>
+      <svg class="frog status-frog look-right" data-mood="think" viewBox="0 0 640 550" aria-hidden="true" focusable="false"><image href="frogs/coffee.svg" width="640" height="550"/><g class="face face-think"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="148" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="151" rx="13" ry="19" fill="#111"/><path d="M224 270 Q246 258 268 270 Q290 282 312 270" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g></svg>
+      <p id="status-text"></p>
+    </div>
 
     <section class="result" id="result" hidden aria-labelledby="verdict">
-      <p class="you-wrote" id="you-wrote"></p>
-      <h2 class="verdict" id="verdict" tabindex="-1"></h2>
-      <p class="reason" id="reason"></p>
+      <div class="card-head">
+        <figure class="sticker" id="sticker">
+          <svg class="frog sticker-frog look-left" data-mood="smirk" viewBox="0 0 640 550" aria-hidden="true" focusable="false" id="mascot"><image href="frogs/coffee.svg" width="640" height="550"/><g class="face face-yeah"><path d="M162 168 Q202 118 242 168" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M354 171 Q394 121 434 171" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M168 242 Q275 258 384 238 Q372 330 276 330 Q186 328 168 242 Z" fill="#7A2420" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M210 306 Q276 282 342 304 Q306 326 276 326 Q236 324 210 306 Z" fill="#FF716A"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g><g class="face face-smirk"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="162" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="165" rx="13" ry="19" fill="#111"/><path d="M180 258 Q275 302 372 256" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M168 250 Q174 258 182 258" fill="none" stroke="#111" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g><g class="face face-meh"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="162" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="165" rx="13" ry="19" fill="#111"/><path d="M182 266 L372 262" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g><g class="face face-nah"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="166" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="169" rx="13" ry="19" fill="#111"/><path d="M168 100 L236 104" fill="none" stroke="#111" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M362 96 Q396 72 430 86" fill="none" stroke="#111" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M164 272 Q245 240 382 288" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g><g class="face face-sad"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="168" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="171" rx="13" ry="19" fill="#111"/><path d="M168 106 Q196 94 230 104" fill="none" stroke="#111" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><path d="M364 104 Q398 94 426 104" fill="none" stroke="#111" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><path d="M186 290 Q276 236 368 290" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M444 214 Q458 238 450 250 Q444 258 434 250 Q428 240 444 214 Z" fill="#98D4EC" stroke="#111" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g></svg>
+          <figcaption><h2 class="verdict" id="verdict" tabindex="-1"></h2></figcaption>
+        </figure>
+        <div class="card-head-text">
+          <p class="you-wrote" id="you-wrote"></p>
+          <p class="reason" id="reason"></p>
+        </div>
+      </div>
 
       <dl class="facts" id="facts"></dl>
 
