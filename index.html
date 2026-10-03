@@ -8,36 +8,36 @@
   <meta property="og:title" content="SideFrog — Is your side hustle idea worth the leap?">
   <meta property="og:description" content="A coffee-break gut check for side hustle ideas: a straight verdict, related searches, and names with an open .com.">
   <meta property="og:type" content="website">
-  <meta name="theme-color" content="#1E5A3A">
+  <meta name="theme-color" content="#FBF7EF">
   <link rel="icon" type="image/svg+xml" href="frogs/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="site-header">
-    <a class="wordmark" href="./"><svg class="frog wordmark-frog look-right" data-mood="smirk" viewBox="0 0 640 550" aria-hidden="true" focusable="false"><image href="frogs/coffee.svg" width="640" height="550"/><g class="face face-smirk"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="162" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="165" rx="13" ry="19" fill="#111"/><path d="M180 258 Q275 302 372 256" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M168 250 Q174 258 182 258" fill="none" stroke="#111" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g></svg>SideFrog</a>
-    <p class="header-note">Free. No sign-up. Nothing saved.</p>
+    <a class="wordmark" href="./"><svg class="frog wordmark-frog look-right" data-mood="smirk" viewBox="19 21 576 524" aria-hidden="true" focusable="false"><image href="frogs/coffee.svg" width="640" height="550"/><g class="face face-smirk"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="162" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="165" rx="13" ry="19" fill="#111"/><path d="M180 258 Q275 302 372 256" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M168 250 Q174 258 182 258" fill="none" stroke="#111" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g></svg>SideFrog</a>
+    <p class="price-box"><strong>Price: free.</strong> <span>No sign-up. Nothing saved.</span></p>
   </header>
 
   <main>
-    <h1>Thinking about making the leap from your 9-to-5?</h1>
-    <p class="lede">Grab a coffee and type in your side hustle idea. In about ten seconds you'll get a straight answer, what people search for, and names with an open .com.</p>
+    <h1>Thinking about making the leap from your <span class="nowrap">9-to-5?</span></h1>
+    <p class="lede">Type an idea. Get a straight verdict in about ten seconds.</p>
 
     <form id="idea-form" novalidate>
       <div class="plate">
-        <label class="plate-label" for="idea-input">Your idea</label>
+        <label class="plate-label" for="idea-input"><span class="label-caps">The idea</span> <span class="label-aside">and a name, if you have one</span></label>
         <textarea id="idea-input" class="plate-input" rows="1" maxlength="500"
-                  placeholder="meal prep for traveling sales reps" aria-describedby="idea-hint idea-error"></textarea>
+                  placeholder="meal prep for pet turtles" aria-describedby="idea-hint idea-error"></textarea>
         <div class="plate-foot">
           <button type="submit" id="idea-btn" class="plate-btn">Check it</button>
           <button type="button" id="idea-clear" class="plate-clear" hidden>Clear</button>
-          <p class="plate-hint" id="idea-hint">Rough is fine. Got a name in mind? Mention it and we'll check it.</p>
+          <p class="plate-hint" id="idea-hint">Half-baked is fine. This is a coffee break, not Shark Tank.</p>
         </div>
       </div>
       <div class="form-error" id="idea-error" role="alert" hidden>
-        <svg class="frog error-frog look-right" data-mood="oops" viewBox="0 0 640 550" aria-hidden="true" focusable="false"><image href="frogs/coffee.svg" width="640" height="550"/><g class="face face-oops"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="162" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="165" rx="13" ry="19" fill="#111"/><ellipse cx="276" cy="270" rx="18" ry="22" fill="#7A2420" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g></svg>
+        <svg class="frog error-frog look-right" data-mood="oops" viewBox="19 21 576 524" aria-hidden="true" focusable="false"><image href="frogs/coffee.svg" width="640" height="550"/><g class="face face-oops"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="162" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="165" rx="13" ry="19" fill="#111"/><ellipse cx="276" cy="270" rx="18" ry="22" fill="#7A2420" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g></svg>
         <p id="idea-error-text"></p>
       </div>
     </form>
@@ -45,26 +45,36 @@
     <div class="examples" id="examples">
       <span class="chips-label" id="examples-label">Or try:</span>
       <ul class="chips" aria-labelledby="examples-label">
-        <li><button type="button" class="chip">meal prep for traveling sales reps</button></li>
         <li><button type="button" class="chip">bookkeeping for tattoo studios</button></li>
-        <li><button type="button" class="chip">dog walking app for apartment buildings</button></li>
+        <li><button type="button" class="chip">candles that smell like the office</button></li>
+        <li><button type="button" class="chip">dog walking for apartment buildings</button></li>
       </ul>
     </div>
 
     <div class="status" id="status" role="status" aria-live="polite" hidden>
-      <svg class="frog status-frog look-right" data-mood="think" viewBox="0 0 640 550" aria-hidden="true" focusable="false"><image href="frogs/coffee.svg" width="640" height="550"/><g class="face face-think"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="148" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="151" rx="13" ry="19" fill="#111"/><path d="M224 270 Q246 258 268 270 Q290 282 312 270" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g></svg>
+      <svg class="frog status-frog look-right" data-mood="think" viewBox="19 21 576 524" aria-hidden="true" focusable="false"><image href="frogs/coffee.svg" width="640" height="550"/><g class="face face-think"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="148" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="151" rx="13" ry="19" fill="#111"/><path d="M224 270 Q246 258 268 270 Q290 282 312 270" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g></svg>
       <p id="status-text"></p>
     </div>
 
+    <section class="result is-example" id="example" data-verdict="nah" aria-label="Example answer">
+      <div class="card-head">
+        <p class="you-wrote"><span class="re">RE: </span>meal prep for pet turtles <span class="example-tag">Example</span></p>
+        <p class="verdict" role="heading" aria-level="2"><span class="verdict-text">Keep your day job</span></p>
+        <p class="reason">Niche is far too small, and perishable logistics will eat your margin before your first status meeting.</p>
+        <div class="sticker">
+          <svg class="frog sticker-frog look-left" data-mood="nah" viewBox="19 21 576 524" aria-hidden="true" focusable="false"><image href="frogs/coffee.svg" width="640" height="550"/><g class="face face-nah"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="166" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="169" rx="13" ry="19" fill="#111"/><path d="M168 100 L236 104" fill="none" stroke="#111" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M362 96 Q396 72 430 86" fill="none" stroke="#111" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M164 272 Q245 240 382 288" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g></svg>
+        </div>
+      </div>
+      <p class="example-foot">Every answer also gets who pays, a first test to run, names with an open .com, and the searches to check.</p>
+    </section>
+
     <section class="result" id="result" hidden aria-labelledby="verdict">
       <div class="card-head">
-        <figure class="sticker" id="sticker">
-          <svg class="frog sticker-frog look-left" data-mood="smirk" viewBox="0 0 640 550" aria-hidden="true" focusable="false" id="mascot"><image href="frogs/coffee.svg" width="640" height="550"/><g class="face face-yeah"><path d="M162 168 Q202 118 242 168" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M354 171 Q394 121 434 171" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M168 242 Q275 258 384 238 Q372 330 276 330 Q186 328 168 242 Z" fill="#7A2420" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M210 306 Q276 282 342 304 Q306 326 276 326 Q236 324 210 306 Z" fill="#FF716A"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g><g class="face face-smirk"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="162" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="165" rx="13" ry="19" fill="#111"/><path d="M180 258 Q275 302 372 256" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M168 250 Q174 258 182 258" fill="none" stroke="#111" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g><g class="face face-meh"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="162" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="165" rx="13" ry="19" fill="#111"/><path d="M182 266 L372 262" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g><g class="face face-nah"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="166" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="169" rx="13" ry="19" fill="#111"/><path d="M168 100 L236 104" fill="none" stroke="#111" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M362 96 Q396 72 430 86" fill="none" stroke="#111" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M164 272 Q245 240 382 288" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g><g class="face face-sad"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="168" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="171" rx="13" ry="19" fill="#111"/><path d="M168 106 Q196 94 230 104" fill="none" stroke="#111" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><path d="M364 104 Q398 94 426 104" fill="none" stroke="#111" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><path d="M186 290 Q276 236 368 290" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M444 214 Q458 238 450 250 Q444 258 434 250 Q428 240 444 214 Z" fill="#98D4EC" stroke="#111" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g></svg>
-          <figcaption><h2 class="verdict" id="verdict" tabindex="-1"></h2></figcaption>
-        </figure>
-        <div class="card-head-text">
-          <p class="you-wrote" id="you-wrote"></p>
-          <p class="reason" id="reason"></p>
+        <p class="you-wrote" id="you-wrote"></p>
+        <h2 class="verdict" id="verdict" tabindex="-1"></h2>
+        <p class="reason" id="reason"></p>
+        <div class="sticker" id="sticker">
+          <svg class="frog sticker-frog look-left" data-mood="smirk" viewBox="19 21 576 524" aria-hidden="true" focusable="false" id="mascot"><image href="frogs/coffee.svg" width="640" height="550"/><g class="face face-yeah"><path d="M162 168 Q202 118 242 168" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M354 171 Q394 121 434 171" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M168 242 Q275 258 384 238 Q372 330 276 330 Q186 328 168 242 Z" fill="#7A2420" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M210 306 Q276 282 342 304 Q306 326 276 326 Q236 324 210 306 Z" fill="#FF716A"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g><g class="face face-smirk"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="162" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="165" rx="13" ry="19" fill="#111"/><path d="M180 258 Q275 302 372 256" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M168 250 Q174 258 182 258" fill="none" stroke="#111" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g><g class="face face-meh"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="162" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="165" rx="13" ry="19" fill="#111"/><path d="M182 266 L372 262" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g><g class="face face-nah"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="166" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="169" rx="13" ry="19" fill="#111"/><path d="M168 100 L236 104" fill="none" stroke="#111" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M362 96 Q396 72 430 86" fill="none" stroke="#111" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M164 272 Q245 240 382 288" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g><g class="face face-sad"><circle cx="202" cy="158" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="202" cy="168" rx="13" ry="19" fill="#111"/><circle cx="394" cy="161" r="48" fill="#fff" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><ellipse class="pupil" cx="394" cy="171" rx="13" ry="19" fill="#111"/><path d="M168 106 Q196 94 230 104" fill="none" stroke="#111" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><path d="M364 104 Q398 94 426 104" fill="none" stroke="#111" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><path d="M186 290 Q276 236 368 290" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M444 214 Q458 238 450 250 Q444 258 434 250 Q428 240 444 214 Z" fill="#98D4EC" stroke="#111" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="249" cy="206" rx="5" ry="6.5" fill="#111"/><ellipse cx="282" cy="206" rx="5" ry="6.5" fill="#111"/></g></svg>
         </div>
       </div>
 
@@ -78,18 +88,18 @@
 
       <div class="part" id="names-part">
         <h3 id="names-title">Names with an open .com</h3>
-        <ul class="names" id="names"></ul>
+        <ul class="rows" id="names"></ul>
         <p class="note" id="names-note"></p>
       </div>
 
       <div class="part" id="keywords-part">
         <h3>See what's already out there</h3>
-        <ul class="chips" id="keywords"></ul>
+        <ul class="rows rows-grid" id="keywords"></ul>
       </div>
 
       <div class="part" id="alts-part">
         <h3 id="alts-title">Try one of these instead</h3>
-        <ul class="chips chips-stack" id="alts" aria-labelledby="alts-title"></ul>
+        <ul class="rows" id="alts" aria-labelledby="alts-title"></ul>
       </div>
 
       <button type="button" class="again-btn" id="again">Check another idea</button>
@@ -97,7 +107,7 @@
   </main>
 
   <footer class="site-footer">
-    <p class="footer-tag">Made for coffee breaks.</p>
+    <p class="footer-tag">Made for coffee breaks. Your manager remains uninformed.</p>
     <p>The verdict is an AI's quick read (Gemini 3.5 Flash-Lite), not market research. Names are checked live at the .com registry; "open" means the registry has no record, but premium or reserved names can look the same, so confirm when you register. Not legal or trademark advice. Nothing you type is saved.</p>
   </footer>
 

@@ -14,10 +14,10 @@ const CONFIG = {
 };
 
 const VERDICT_LABEL = {
-  great: "Yeah, dude",
-  worth_a_shot: "Worth a hop",
+  great: "Surprisingly, yes",
+  worth_a_shot: "This could work",
   crowded: "Crowded pond",
-  nah: "Nah, brah",
+  nah: "Keep your day job",
   cant_help: "Can't help with that one",
 };
 
@@ -37,6 +37,17 @@ function el(tag, attrs = {}, text) {
   if (text !== undefined) node.textContent = text;
   return node;
 }
+
+// A full-width action row: text on the left, a short cue on the right.
+// Used for names (Register ↗), searches (↗) and alternative ideas (Check).
+function row(tag, attrs, mainNodes, cue) {
+  const node = el(tag, { ...attrs, className: "row" });
+  const main = el("span", { className: "row-main" });
+  main.append(...mainNodes);
+  node.append(main, el("span", { className: "row-cue", "aria-hidden": "true" }, cue));
+  return node;
+}
+const NEW_TAB = " (opens in a new tab)";
 
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -83,14 +94,14 @@ async function check(raw) {
   const error = $("#idea-error");
   error.hidden = true;
   input.removeAttribute("aria-invalid");
-  if (idea.length < CONFIG.minLength) return showError("Type an idea first. A few words is enough.");
+  if (idea.length < CONFIG.minLength) return showError("Type an idea first. Half-baked is fine.");
   if (idea.length > CONFIG.maxLength) return showError(`Keep it under ${CONFIG.maxLength} characters. One line is plenty.`);
 
   const id = ++runId;
   lastIdea = idea;
   setBusy(true);
   setStatus("Sipping on it…");
-  const step = setTimeout(() => { if (id === runId) setStatus("Checking which .com names are open…"); }, 4500);
+  const step = setTimeout(() => { if (id === runId) setStatus("Circling back on the .com names…"); }, 4500);
 
   const { report, error: err } = await ask(idea);
   clearTimeout(step);
@@ -130,8 +141,8 @@ function render(r) {
   card.dataset.verdict = r.verdict;
 
   const wrote = $("#you-wrote");
-  wrote.replaceChildren(document.createTextNode("You asked about "), el("q", {}, lastIdea));
-  $("#verdict").textContent = VERDICT_LABEL[r.verdict] || "Here's the read";
+  wrote.replaceChildren(el("span", { className: "re" }, "RE: "), document.createTextNode(lastIdea)); // memo-style subject line
+  $("#verdict").replaceChildren(el("span", { className: "verdict-text" }, VERDICT_LABEL[r.verdict] || "Here's the read"));
   $("#mascot").dataset.mood = VERDICT_FACE[r.verdict] || "smirk";
   const sticker = $("#sticker");
   sticker.classList.remove("is-hopping");
@@ -157,7 +168,8 @@ function render(r) {
   const kws = r.verdict === "cant_help" || !Array.isArray(r.keywords) ? [] : r.keywords;
   $("#keywords").replaceChildren(...kws.map((k) => {
     const li = el("li");
-    li.append(el("a", { className: "chip", href: CONFIG.searchUrl(k), target: "_blank", rel: "noopener", "aria-label": `Search Google for ${k}` }, k));
+    li.append(row("a", { href: CONFIG.searchUrl(k), target: "_blank", rel: "noopener", "aria-label": `Search Google for ${k}${NEW_TAB}` },
+      [document.createTextNode(k)], "↗"));
     return li;
   }));
   $("#keywords-part").hidden = kws.length === 0;
@@ -166,7 +178,7 @@ function render(r) {
   const alts = Array.isArray(r.alternatives) ? r.alternatives : [];
   $("#alts").replaceChildren(...alts.map((text) => {
     const li = el("li");
-    const btn = el("button", { type: "button", className: "chip" }, text);
+    const btn = row("button", { type: "button", "aria-label": `Check this idea: ${text}` }, [document.createTextNode(text)], "Check");
     btn.addEventListener("click", () => tryIdea(text));
     li.append(btn);
     return li;
@@ -175,6 +187,9 @@ function render(r) {
   $("#alts-part").hidden = alts.length === 0;
 
   card.hidden = false;
+  const example = $("#example");
+  if (example) example.hidden = true;   // the real answer replaces the example
+  fitVerdict();
   const heading = $("#verdict");
   card.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "start" });
   heading.focus({ preventScroll: true });
@@ -203,16 +218,53 @@ function renderYours(y) {
     el("span", { className: "sr-only" }, ", "),
   );
   if (y.status === "likely_available") {
-    box.append(el("a", { href: CONFIG.registrarUrl(y.domain), target: "_blank", rel: "noopener" }, "Register it"));
+    box.append(el("a", { href: CONFIG.registrarUrl(y.domain), target: "_blank", rel: "noopener", "aria-label": `Register ${y.domain}${NEW_TAB}` }, "Register it ↗"));
   } else if (y.status === "taken") {
-    box.append(el("a", { href: `https://${y.domain}`, target: "_blank", rel: "noopener nofollow" }, "See who has it"));
+    box.append(el("a", { href: `https://${y.domain}`, target: "_blank", rel: "noopener nofollow", "aria-label": `See who has ${y.domain}${NEW_TAB}` }, "See who has it ↗"));
   } else {
-    box.append(el("a", { href: CONFIG.registrarUrl(y.domain), target: "_blank", rel: "noopener" }, "Look it up"));
+    box.append(el("a", { href: CONFIG.registrarUrl(y.domain), target: "_blank", rel: "noopener", "aria-label": `Look up ${y.domain}${NEW_TAB}` }, "Look it up ↗"));
   }
 
   const takenHint = y.status === "taken" ? " The open names below are close alternatives." : "";
   $("#yours-note").textContent = `${y.comment || ""}${takenHint}`.trim();
 }
+
+// The verdict always stays on one line, the frog's one-liner. CSS sets the
+// largest size; this shrinks it only when the line would overflow its space.
+function fitVerdict() {
+  for (const h of document.querySelectorAll(".result:not([hidden]) .verdict")) fitOne(h);
+}
+
+function fitOne(h) {
+  const text = h.firstElementChild;
+  if (!text) return;
+  h.style.fontSize = "";                       // start from the CSS maximum
+  const avail = h.clientWidth;
+  const need = text.offsetWidth;
+  if (!avail || !need) return;                 // not laid out yet
+  if (need > avail) {
+    const max = parseFloat(getComputedStyle(h).fontSize);
+    let size = Math.max(14, Math.floor(max * (avail / need)));
+    h.style.fontSize = `${size}px`;
+    // Letter widths don't scale perfectly; nudge down until it really fits.
+    for (let i = 0; i < 12 && size > 14 && text.offsetWidth > h.clientWidth; i++) {
+      size -= 1;
+      h.style.fontSize = `${size}px`;
+    }
+  }
+}
+
+// Re-fit when the card changes width (rotation, resizing) and once the web font arrives.
+if ("ResizeObserver" in window) {
+  let lastWidth = 0;
+  new ResizeObserver((entries) => {
+    const w = Math.round(entries[0].contentRect.width);
+    if (w !== lastWidth) { lastWidth = w; fitVerdict(); }
+  }).observe(document.querySelector("main") || document.body);
+} else {
+  window.addEventListener("resize", fitVerdict);
+}
+if (document.fonts?.ready) document.fonts.ready.then(fitVerdict);
 
 // Only names the registry shows as open are listed. If none are open, say so
 // plainly; if the registry couldn't be reached, show a few names marked as unchecked.
@@ -231,24 +283,25 @@ function renderNames(names, verdict) {
 
   for (const n of shown) {
     const li = el("li", { "data-status": n.status });
-    li.append(
-      el("span", { className: "name-word" }, n.name),
-      el("span", { className: "sr-only" }, ", "),
-      el("span", { className: "name-domain" }, n.domain),
-      el("span", { className: "sr-only" }, ", "),
-    );
-    li.append(el("a", { href: CONFIG.registrarUrl(n.domain), target: "_blank", rel: "noopener", "aria-label": `Register ${n.domain}` }, open.length ? "Register" : "Look it up"));
+    const action = open.length ? "Register" : "Look it up";
+    li.append(row("a",
+      { href: CONFIG.registrarUrl(n.domain), target: "_blank", rel: "noopener", "aria-label": `${action} ${n.domain}${NEW_TAB}` },
+      [el("span", { className: "name-word" }, n.name), el("span", { className: "name-domain" }, n.domain)],
+      `${action} ↗`));
     list.append(li);
   }
 
   if (!open.length && !unknown.length) {
-    note.textContent = `All ${names.length} names we came up with already have their .com taken. Check it again for a fresh batch.`;
+    note.textContent = names.length === 1
+      ? "The name we came up with already has its .com taken. Check it again for a fresh batch."
+      : `All ${names.length} names we came up with already have their .com taken. Check it again for a fresh batch.`;
   } else if (!open.length) {
     note.textContent = "Couldn't reach the .com registry just now, so these aren't checked yet.";
   } else {
     const taken = names.filter((n) => n.status === "taken").length;
     const takenText = taken ? `; ${taken} ${taken === 1 ? "was" : "were"} taken` : "";
-    note.textContent = `We came up with ${names.length} names and checked each .com live${takenText}. Grab one fast: open names don't stay open.`;
+    const nameCount = `${names.length} ${names.length === 1 ? "name" : "names"}`;
+    note.textContent = `We came up with ${nameCount} and checked each .com live${takenText}. Grab one fast: open names don't stay open.`;
   }
 }
 
@@ -311,6 +364,8 @@ function init() {
   input.addEventListener("click", selectIfStale);
   $("#idea-clear").addEventListener("click", () => newIdea());
   $("#again").addEventListener("click", () => newIdea({ scroll: true }));
+
+  fitVerdict();   // the example answer is on screen from the start
 
   input.addEventListener("input", () => {
     justChecked = false;

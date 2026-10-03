@@ -1,55 +1,91 @@
-:root {
-  /* Pond & coffee: colours pulled from the frog and his mug */
-  --paper: #F6F1E7;        /* oat cream, like coffee foam */
-  --surface: #FFFDF8;
-  --ink: #17261C;          /* green-black, matches his outlines */
-  --muted: #5C6A5C;
-  --line: #E2D9C8;
-  --pond: #1E5A3A;         /* deep lily-pad green: the big input plate */
-  --pond-deep: #164A2F;
-  --pond-soft: #E4EFDC;
-  --on-pond: #FFFFFF;
-  --lime: #7AC52E;         /* the frog himself: the main button */
-  --lime-light: #94D84E;
-  --on-lime: #12230F;
-  --link: #1E6B42;
-  --link-hover: #134A2D;
-  --ok: #1E6B42;
-  --ok-soft: #E4EFDC;
-  --warn: #8A5A00;
-  --warn-soft: #FBF0D2;
-  --bad: #A3221A;
-  --bad-soft: #FBE7E5;
+/* ==========================================================================
+   SideFrog: a coffee-break accomplice for side-hustle daydreams.
+   Look: responsible adult meets tiny act of rebellion. Warm, light, retro-smart.
+   Rules of thumb:
+   - The page is mostly light cream and off-white. The frog owns the bright green.
+   - Deep green is for structure and emphasis, never a blanket fill.
+   - Lime is the "go" colour: the main buttons and a highlighter mark.
+   - Controls get confident ink outlines and a small hard offset shadow,
+     the deliberate "10-15% less polished than fintech" touch.
+   ========================================================================== */
 
-  --display: "Fredoka", "Arial Rounded MT Bold", "Nunito", system-ui, sans-serif;
-  --body: "Public Sans", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
-  --measure: 64ch;
+:root {
+  /* "Avocado Kitchen": vintage mid-century mod. Mostly toasted white and coffee black;
+     colour lands where the meaning is (the frog, the button, the verdict).
+     Rough mix: 60% paper/cream, 25% ink and rules, 10% avocado/olive, 5% orange/rust/mustard. */
+  --paper: #FBF7EF;        /* Toasted White: page */
+  --surface: #FFFDF9;      /* Warm White: cards, the idea box (a shade lighter than the page) */
+  --ink: #1F241F;          /* Coffee Black: text, outlines */
+  --muted: #5A5A4A;        /* Taupe Ink: supporting text (5.8:1) */
+  --placeholder: #7A7562;
+  --line: #E2D8C6;         /* soft dividers, decorative */
+  --rule: #A89B84;         /* Olive Gray: printed rules, decorative */
+  --frog: #8DAA3F;         /* Avocado: the frog himself */
+  --deep: #4A5C34;         /* Forest Olive: labels (6.0:1) */
+  --lime: #8DAA3F;         /* Avocado: main button fill (ink text 6.0:1) */
+  --lime-hover: #9DBA4F;
+  --lime-tint: #F6EFD3;    /* mustard wash: chip hover */
+  --on-lime: #1F241F;
+  --blue: #2F6F73;         /* Atomic Teal: links, focus rings (5.4:1) */
+  --blue-hover: #1F5356;
+  --accent-text: #A4501F;  /* Deep Burnt: "RE:" and small warm accents (4.6:1) */
+  --shadow: #1F241F;
+
+  /* Verdict colours: the one place the warm accents speak loudly */
+  --v-great: #4A5C34;      /* Surprisingly, yes: forest olive */
+  --v-maybe: #8A6A12;      /* This could work: dark mustard */
+  --v-crowded: #A4501F;    /* Crowded pond: deep burnt orange */
+  --v-nah: #B74A2F;        /* Keep your day job: tomato rust */
+
+  /* Status */
+  --ok: #4A5C34;
+  --ok-soft: #E8EDD3;
+  --warn: #8A6A12;
+  --warn-soft: #F6EDCB;
+  --bad: #B74A2F;
+  --bad-soft: #F7E2D8;
+
+  /* Type: Bricolage Grotesque throughout */
+  --font: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+
+  /* Shape */
+  --radius: 16px;
+  --radius-sm: 10px;
+  --measure: 62ch;
   --gutter: clamp(1.1rem, 4vw, 2.5rem);
   color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Night pond */
-    --paper: #0F1C16;
-    --surface: #162820;
-    --ink: #EAF1E4;
-    --muted: #A3B3A1;
-    --line: #2B4235;
-    --pond: #2A7149;
-    --pond-deep: #215C3B;
-    --pond-soft: #1D3A2A;
-    --lime: #8BD13F;
-    --lime-light: #A3E35C;
-    --on-lime: #10200C;
-    --link: #9BD86A;
-    --link-hover: #B8E88F;
-    --ok: #8BD13F;
-    --ok-soft: #1D3A2A;
-    --warn: #E6B54E;
-    --warn-soft: #32260A;
-    --bad: #F08A80;
-    --bad-soft: #3A1714;
+    /* After hours: wood-panelled den */
+    --paper: #1E211B;
+    --surface: #272B22;
+    --ink: #F1E7D4;
+    --muted: #BEB49F;
+    --placeholder: #8F8873;
+    --line: #3A3F32;
+    --rule: #6C6655;
+    --deep: #B9CC7A;
+    --lime: #9DBA4F;
+    --lime-hover: #AECB5E;
+    --lime-tint: #353A2B;
+    --on-lime: #1F241F;
+    --blue: #7DB9BC;
+    --blue-hover: #A3D0D2;
+    --accent-text: #E39A62;
+    --shadow: #0E100C;
+    --v-great: #B9CC7A;
+    --v-maybe: #E2C460;
+    --v-crowded: #E39A62;
+    --v-nah: #E58063;
+    --ok: #B9CC7A;
+    --ok-soft: #2F3A22;
+    --warn: #E2C460;
+    --warn-soft: #3A321A;
+    --bad: #E58063;
+    --bad-soft: #3D2219;
   }
 }
 
@@ -60,47 +96,79 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--body);
+  font-family: var(--font);
+  font-weight: 400;
   font-size: 1.0625rem;
   line-height: 1.55;
+  font-optical-sizing: auto;
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-a { color: var(--link); text-underline-offset: 0.18em; }
-a:hover { color: var(--link-hover); }
-:focus-visible { outline: 3px solid var(--link); outline-offset: 2px; border-radius: 4px; }
+a { color: var(--blue); text-underline-offset: 0.18em; text-decoration-thickness: 1.5px; }
+a:hover { color: var(--blue-hover); }
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; border-radius: 6px; }
 
-/* Header and page frame */
+/* --------------------------------------------------------------------------
+   Page frame and header
+   -------------------------------------------------------------------------- */
 
 .site-header, main, .site-footer {
-  max-width: 52rem;
+  max-width: 50rem;
   margin: 0 auto;
   padding-left: var(--gutter);
   padding-right: var(--gutter);
 }
+
 .site-header {
-  padding-top: 1.25rem;
+  padding-top: 1.1rem;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.6rem 1rem;
   flex-wrap: wrap;
 }
+/* Printed masthead rule, full width */
+.site-header::after {
+  content: "";
+  flex-basis: 100%;
+  height: 0;
+  border-top: 1.5px solid var(--ink);
+  margin-top: 0.3rem;
+}
+/* The old cover price box */
+.price-box {
+  margin: 0;
+  padding: 0.35rem 0.6rem 0.4rem;
+  border: 1.5px solid var(--ink);
+  background: var(--surface);
+  font-size: 0.8rem;
+  line-height: 1.3;
+  color: var(--ink);
+  max-width: 12.5rem;
+}
+.price-box strong { display: block; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.78rem; }
+.price-box span { display: block; font-weight: 500; }
+
 .wordmark {
-  font-family: var(--display);
-  font-weight: 600;
-  font-size: 1.35rem;
-  letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 800;
+  font-size: 1.4rem;
+  letter-spacing: -0.03em;
   color: var(--ink);
   text-decoration: none;
 }
-.header-note { margin: 0; color: var(--muted); font-size: 0.95rem; }
-.wordmark { display: inline-flex; align-items: center; gap: 0.45rem; }
+.wordmark:hover { color: var(--ink); }
 .wordmark-frog { width: 2.75rem; height: auto; }
 
-/* The coffee frog: one body (frogs/coffee.svg), many faces. data-mood picks the
-   face; look-left / look-right aims his eyes at whatever he's reacting to. */
+
+/* --------------------------------------------------------------------------
+   The coffee frog: one body, many faces. data-mood picks the face;
+   look-left / look-right aims his eyes at whatever he's reacting to.
+   -------------------------------------------------------------------------- */
+
 .frog { display: block; overflow: visible; }
 .frog .face { display: none; }
 .frog[data-mood="yeah"] .face-yeah,
@@ -114,153 +182,256 @@ a:hover { color: var(--link-hover); }
 .frog.look-left .pupil { transform: translateX(-12px); }
 .frog.look-right .pupil { transform: translateX(12px); }
 
+/* --------------------------------------------------------------------------
+   Hero
+   -------------------------------------------------------------------------- */
 
 main { padding-top: clamp(2rem, 6vw, 3.5rem); padding-bottom: 2rem; }
 
 h1 {
-  font-family: var(--display);
-  font-weight: 600;
-  font-size: clamp(2.1rem, 5.4vw, 3.4rem);
-  line-height: 1.03;
-  letter-spacing: -0.01em;
-  margin: 0 0 0.75rem;
-  max-width: 20ch;
+  font-weight: 800;
+  font-size: clamp(2.3rem, 6vw, 3.75rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  margin: 0 0 0.9rem;
+  max-width: 17ch;
 }
-.lede { margin: 0 0 1.75rem; color: var(--muted); font-size: clamp(1.05rem, 2vw, 1.2rem); max-width: 46ch; }
+.lede {
+  margin: 0 0 1.75rem;
+  color: var(--muted);
+  font-size: clamp(1.12rem, 2vw, 1.25rem);
+  line-height: 1.5;
+  max-width: 46ch;
+}
 
-/* The plate: the one loud element */
+/* --------------------------------------------------------------------------
+   The idea box: the emotional centre. Light, outlined, alive.
+   -------------------------------------------------------------------------- */
 
 .plate {
-  background: var(--pond);
-  color: var(--on-pond);
-  border-radius: 22px;
-  padding: clamp(1.25rem, 3.5vw, 2rem) clamp(1.25rem, 4vw, 2.5rem);
+  background: var(--surface);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: 6px 6px 0 var(--shadow);
+  padding: clamp(1.1rem, 3vw, 1.6rem) clamp(1.15rem, 3.5vw, 1.9rem) clamp(1.1rem, 3vw, 1.5rem);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
-.plate-label { display: block; font-weight: 600; opacity: 0.85; margin-bottom: 0.35rem; }
+/* Typing: the box lifts and its outline turns deep green (keyboard users still see focus) */
+.plate:focus-within {
+  border-color: var(--deep);
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 var(--shadow);
+}
+.plate:has(.plate-input[aria-invalid="true"]) { border-color: var(--bad); }
+
+.plate-label { display: block; margin-bottom: 0.3rem; color: var(--deep); }
+.label-caps, .facts dt, .part h3 {
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--deep);
+}
+.label-aside { font-size: 0.98rem; color: var(--muted); margin-left: 0.25rem; }
+
 .plate-input {
   display: block;
   width: 100%;
   margin: 0;
-  padding: 0.1em 0 0.15em;
+  padding: 0.1em 0 0.2em;
   background: transparent;
-  color: inherit;
+  color: var(--ink);
   border: 0;
-  border-bottom: 2px solid rgb(255 255 255 / 0.35);
   border-radius: 0;
-  font-family: var(--display);
-  font-weight: 600;
-  font-size: clamp(1.7rem, 4.6vw, 2.8rem);
-  line-height: 1.12;
-  letter-spacing: -0.01em;
-  caret-color: currentColor;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: clamp(1.6rem, 4.4vw, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  caret-color: var(--deep);
   resize: none;
   overflow: hidden;
 }
-.plate-input::placeholder { color: rgb(255 255 255 / 0.42); }
-.plate-input:focus { outline: none; border-bottom-color: #fff; }
-.plate-input[aria-invalid="true"] { border-bottom-color: #FFB4AB; }
-.plate-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1.25rem; margin-top: 1.1rem; }
-.plate-btn {
+.plate-input::placeholder { color: var(--placeholder); font-weight: 600; }
+.plate-input:focus, .plate-input:focus-visible { outline: none; }
+
+.plate-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.1rem;
+  margin-top: 1.1rem;
+}
+
+/* Buttons: ink outline, hard shadow, a little press when clicked */
+.plate-btn, .again-btn {
   font: inherit;
   font-weight: 700;
   font-size: 1.05rem;
-  padding: 0.8rem 1.5rem;
-  border: 0;
-  border-radius: 10px;
+  padding: 0.7rem 1.4rem;
+  line-height: 1.2;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-sm);
   background: var(--lime);
   color: var(--on-lime);
+  box-shadow: 3px 3px 0 var(--shadow);
   cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.1s ease;
 }
-.plate-btn:hover { background: var(--lime-light); }
-.plate-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-.plate-btn:disabled { opacity: 0.75; cursor: progress; }
-.plate-hint { margin: 0; opacity: 0.85; font-size: 0.95rem; }
+@media (hover: hover) {
+  .plate-btn:hover, .again-btn:hover {
+    background: var(--lime-hover);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--shadow);
+  }
+}
+.plate-btn:active, .again-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--shadow);
+}
+.plate-btn { font-size: 1.16rem; padding: 0.8rem 1.9rem; }
+.plate-btn:disabled { cursor: progress; transform: none; box-shadow: 3px 3px 0 var(--shadow); opacity: 0.8; }
+@media (prefers-color-scheme: dark) {
+  .plate-btn, .again-btn { border-color: var(--lime); }
+}
+
 .plate-clear {
+  min-height: 2.75rem;
   font: inherit;
   font-weight: 600;
   font-size: 0.95rem;
-  padding: 0.55rem 0.9rem;
-  border: 1.5px solid rgb(255 255 255 / 0.5);
-  border-radius: 10px;
+  padding: 0.5rem 0.9rem;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
   background: transparent;
-  color: inherit;
+  color: var(--muted);
   cursor: pointer;
 }
-.plate-clear:hover { border-color: #fff; background: rgb(255 255 255 / 0.1); }
-.plate-clear:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.plate-clear:hover { border-color: var(--ink); color: var(--ink); }
 
-.form-error { margin: 0.9rem 0 0; display: flex; align-items: center; gap: 0.75rem; color: var(--bad); font-weight: 600; }
+.plate-hint { margin: 0; color: var(--muted); font-size: 1rem; }
+
+.form-error {
+  margin: 1rem 0 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--bad);
+  font-weight: 600;
+}
 .error-frog { width: 4rem; height: auto; flex: none; }
 .form-error p { margin: 0; }
 
-/* Chips: examples, keywords, alternatives */
+/* --------------------------------------------------------------------------
+   Chips: examples, keywords, alternatives. Light and tappable.
+   -------------------------------------------------------------------------- */
 
-.examples { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem 0.6rem; margin-top: 1rem; }
-.chips-label { color: var(--muted); font-size: 0.95rem; }
-.chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.45rem; }
-.chips-stack { flex-direction: column; align-items: flex-start; }
+.examples { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.6rem; margin-top: 1.25rem; }
+.chips-label { color: var(--muted); font-size: 1rem; white-space: nowrap; flex: none; }
+.chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .chip {
   font: inherit;
   font-size: 0.95rem;
+  font-weight: 500;
   line-height: 1.35;
   display: inline-block;
-  padding: 0.35rem 0.8rem;
-  border: 1.5px solid var(--line);
+  min-height: 2.75rem;
+  padding: 0.4rem 0.95rem;
+  border: 1.5px solid var(--ink);
   border-radius: 999px;
   background: var(--surface);
   color: var(--ink);
   text-decoration: none;
   cursor: pointer;
   text-align: left;
+  transition: transform 0.12s ease, border-color 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease;
 }
-.chip:hover { border-color: var(--pond); color: var(--ink); }
-.chips-stack .chip { border-radius: 12px; }
-a.chip::after { content: " ↗"; color: var(--muted); }
+@media (hover: hover) {
+  .chip:hover, .row:hover {
+    background: var(--lime-tint);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 0 var(--shadow);
+  }
+}
+.chip:active, .row:active { background: var(--lime-tint); transform: translateY(1px); box-shadow: none; }
 
-/* Loading */
+/* --------------------------------------------------------------------------
+   Loading
+   -------------------------------------------------------------------------- */
 
-.status { margin: 1.25rem 0 0; display: flex; align-items: center; gap: 0.75rem; color: var(--muted); font-weight: 600; }
+.status { margin: 1.4rem 0 0; display: flex; align-items: center; gap: 0.75rem; color: var(--muted); font-weight: 600; }
 .status-frog { width: 4.5rem; height: auto; flex: none; animation: bob 1.1s ease-in-out infinite alternate; }
 .status p { margin: 0; }
 @keyframes bob { from { transform: rotate(-3deg) translateY(0); } to { transform: rotate(3deg) translateY(-3px); } }
 
-/* The answer card */
+/* --------------------------------------------------------------------------
+   The answer card
+   -------------------------------------------------------------------------- */
 
 .result {
   margin-top: 1.75rem;
   background: var(--surface);
-  border: 1.5px solid var(--line);
-  border-radius: 18px;
-  padding: clamp(1.25rem, 3.5vw, 2rem);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: 6px 6px 0 var(--line);
+  padding: clamp(1rem, 3vw, 1.6rem) clamp(1.25rem, 3.5vw, 2rem) clamp(1.25rem, 3.5vw, 2rem);
 }
-.you-wrote { margin: 0 0 0.35rem; color: var(--muted); font-size: 0.95rem; overflow-wrap: anywhere; }
-.you-wrote q { font-style: italic; }
+@media (prefers-color-scheme: dark) {
+  .result { border-color: var(--line); box-shadow: 6px 6px 0 var(--shadow); }
+}
 
+/* Phones first (most visitors): the frog sits on top of the verdict at the
+   right, glancing down-left at it; the verdict gets the full width.
+   From 600px he moves beside the verdict, still looking at it. */
 .card-head {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas: "text sticker";
-  align-items: center;
-  gap: 1rem clamp(1rem, 3vw, 2rem);
+  grid-template-areas:
+    "re      frog"
+    "verdict verdict"
+    "reason  reason";
+  align-items: end;
+  column-gap: 0.75rem;
 }
-.card-head-text { grid-area: text; }
+.you-wrote { grid-area: re; align-self: start; }
+.verdict { grid-area: verdict; }
+.reason { grid-area: reason; }
+@media (min-width: 600px) {
+  .card-head {
+    grid-template-areas:
+      "re      frog"
+      "verdict frog"
+      "reason  frog";
+    align-items: start;
+    column-gap: clamp(1rem, 3vw, 1.75rem);
+  }
+}
+.you-wrote {
+  margin: 0 0 0.25rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+.you-wrote .re { font-family: var(--font); font-weight: 800; letter-spacing: 0.08em; color: var(--accent-text); }   /* memo subject line */
+.reason { margin: 0.6rem 0 0; font-size: 1.2rem; line-height: 1.45; max-width: var(--measure); }
+
+/* The frog: the character delivering the verdict, not the headline */
 .sticker {
-  grid-area: sticker;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  width: clamp(8.5rem, 34vw, 15rem);
-  filter: drop-shadow(0 4px 10px rgb(0 0 0 / 0.12));
+  grid-area: frog;
+  width: 5.75rem;
+  margin-bottom: 0.1rem;           /* sit right on the verdict line */
 }
+.sticker-frog.look-left .pupil { transform: translate(-12px, 8px); }   /* down-left, at the verdict */
+@media (min-width: 600px) {
+  .sticker { width: clamp(7.5rem, 20vw, 10.5rem); align-self: center; margin: 0; }
+  .sticker-frog.look-left .pupil { transform: translateX(-12px); }
+}
+.sticker { position: relative; isolation: isolate; }
 .sticker-frog { width: 100%; height: auto; }
-.sticker figcaption {
-  margin-top: -2px;                 /* join the white band at the bottom of the art */
-  background: #fff;
-  border-radius: 0 0 22px 22px;
-  padding: 0.05em 0.7em 0.3em;
-  text-align: center;
-}
 .sticker.is-hopping { animation: hop 0.55s cubic-bezier(.3, 1.6, .5, 1) 1; transform-origin: 50% 100%; }
 @keyframes hop {
   0% { transform: translateY(0) scale(1, 1); }
@@ -269,34 +440,63 @@ a.chip::after { content: " ↗"; color: var(--muted); }
   100% { transform: translateY(0) scale(1, 1); }
 }
 
+/* The verdict: the star of the card */
 .verdict {
-  font-family: var(--display);
-  font-weight: 600;
-  font-size: clamp(1.1rem, 4.2vw, 1.85rem);
-  line-height: 1.05;
-  letter-spacing: 0.01em;
+  font-weight: 800;
+  font-size: 2.5rem;                /* the largest it may be; app.js shrinks it to fit one line */
+  line-height: 1;
+  letter-spacing: -0.035em;
   text-transform: uppercase;
-  color: #111;
-  margin: 0;
+  color: var(--ink);
+  margin: 0.15rem 0 0;
+  white-space: nowrap;              /* never breaks across lines */
+  min-width: 0;
 }
+.verdict-text { display: inline-block; }
+@media (min-width: 600px) { .verdict { font-size: 3.9rem; } }
 .verdict:focus { outline: none; }
-.reason { margin: 0; font-size: 1.15rem; max-width: var(--measure); }
+
+/* The example answer shown on page load, replaced by a real one after a check */
+.example-tag {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.45rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  vertical-align: 0.1em;
+}
+.example-foot {
+  margin: 1rem 0 0;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.result[data-verdict="great"] .verdict { color: var(--v-great); }
+.result[data-verdict="worth_a_shot"] .verdict { color: var(--v-maybe); }
+.result[data-verdict="crowded"] .verdict { color: var(--v-crowded); }
+.result[data-verdict="nah"] .verdict { color: var(--v-nah); }
 
 .facts {
-  margin: 1.25rem 0 0;
+  margin: 1.4rem 0 0;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
   gap: 0.9rem 1.75rem;
-  padding-top: 1.1rem;
-  border-top: 1.5px solid var(--line);
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--rule);
 }
 .facts:empty { display: none; }
-.facts dt { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.15rem; }
-.facts dd { margin: 0; color: var(--muted); }
+.facts dt { margin-bottom: 0.2rem; }
+.facts dd { margin: 0; color: var(--ink); font-size: 1.08rem; }
 
-.part { margin-top: 1.4rem; padding-top: 1.1rem; border-top: 1.5px solid var(--line); }
-.part h3 { margin: 0 0 0.6rem; font-size: 1.05rem; }
-.note { margin: 0.6rem 0 0; color: var(--muted); font-size: 0.93rem; }
+.part { margin-top: 1.4rem; padding-top: 1.1rem; border-top: 1px solid var(--rule); }
+.part h3 { margin: 0 0 0.7rem; }
+.note { margin: 0.65rem 0 0; color: var(--muted); font-size: 0.98rem; }
 .note:empty { display: none; }
 
 /* The name the person picked */
@@ -313,54 +513,132 @@ a.chip::after { content: " ↗"; color: var(--muted); }
 .pill[data-status="likely_available"] { background: var(--ok-soft); color: var(--ok); border-color: var(--ok); }
 .pill[data-status="taken"] { background: var(--bad-soft); color: var(--bad); }
 .pill[data-status="unknown"] { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); border-style: dashed; }
-.yours a { font-weight: 600; }
+.yours a { font-weight: 600; display: inline-flex; align-items: center; min-height: 2.75rem; }   /* 44px tap target */
 
-/* Names: a wrapping row of self-sized items, never squeezed into columns */
-.names { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.6rem; }
-.names li {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.6rem;
-  padding: 0.55rem 0.85rem;
-  border: 1.5px solid var(--line);
+/* Rows: one component for every list of actions in the answer (names,
+   searches, alternative ideas). Full width, text left, cue right, so long
+   text wraps cleanly and every row is an easy 44px+ target. */
+.rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.rows > li { display: flex; }          /* rows side by side share a height */
+.rows > li > .row { flex: 1; }
+@media (min-width: 700px) {
+  .rows-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 2.9rem;
+  padding: 0.6rem 0.9rem;
+  border: 1.5px solid var(--ink);
   border-radius: 12px;
-  background: var(--paper);
-  white-space: nowrap;
-}
-.name-word { font-family: var(--display); font-weight: 600; font-size: 1.3rem; letter-spacing: -0.02em; }
-.name-domain { color: var(--muted); font-size: 0.9rem; }
-.names li[data-status="unknown"] .name-domain::after { content: " (couldn't check)"; }
-.names a { font-weight: 600; font-size: 0.95rem; }
-
-.again-btn {
-  margin-top: 1.5rem;
+  background: var(--surface);
+  color: var(--ink);
   font: inherit;
-  font-weight: 700;
-  padding: 0.75rem 1.3rem;
-  border: 0;
-  border-radius: 10px;
-  background: var(--lime);
-  color: var(--on-lime);
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.35;
+  text-align: left;
+  text-decoration: none;
   cursor: pointer;
+  transition: transform 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease;
 }
-.again-btn:hover { background: var(--lime-light); }
+.row:hover { color: var(--ink); }
+.row-main { min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.15rem 0.55rem; overflow-wrap: anywhere; }
+.row-cue { flex: none; font-weight: 700; font-size: 0.92rem; color: var(--blue); white-space: nowrap; }
+button.row .row-cue { color: var(--deep); }
+.name-word { font-weight: 700; font-size: 1.2rem; letter-spacing: -0.02em; }
+.name-domain { color: var(--muted); font-size: 0.9rem; }
+.rows li[data-status="unknown"] .name-domain::after { content: " (couldn't check)"; }
+
+.again-btn { margin-top: 1.6rem; }
+
+.nowrap { white-space: nowrap; }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-/* Footer */
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
 
-.site-footer { padding-top: 1rem; padding-bottom: 2.5rem; color: var(--muted); font-size: 0.9rem; }
+.site-footer { padding-top: 1.25rem; padding-bottom: 2.5rem; color: var(--muted); font-size: 0.9rem; font-weight: 450; }
 .site-footer p { margin: 0; max-width: var(--measure); }
-.site-footer .footer-tag { font-family: var(--display); font-weight: 600; color: var(--ink); font-size: 1.05rem; margin-bottom: 0.4rem; }
+.site-footer .footer-tag { font-family: var(--font); font-weight: 700; color: var(--ink); font-size: 1.05rem; margin-bottom: 0.4rem; }
 
 @media (max-width: 560px) {
-  .plate-btn { width: 100%; }
-  .names li { white-space: normal; flex-wrap: wrap; }
+  /* Tighter hero so the example answer shows up on the first screen */
+  .site-header { padding-top: 0.8rem; flex-wrap: nowrap; }
+  .site-header::after { display: none; }
+  .site-header { border-bottom: 1.5px solid var(--ink); padding-bottom: 0.7rem; }
+  .wordmark { font-size: 1.2rem; gap: 0.35rem; }
+  .wordmark-frog { width: 2.3rem; }
+  .price-box { font-size: 0.72rem; padding: 0.25rem 0.45rem 0.3rem; max-width: 10.5rem; }
+  .price-box strong { font-size: 0.7rem; }
+  main { padding-top: 1.25rem; }
+  h1 { margin-bottom: 0.55rem; }
+  .lede { margin-bottom: 1.1rem; }
+  .plate-foot { margin-top: 0.8rem; }
+  .examples { margin-top: 0.9rem; }
+  .result { margin-top: 1.25rem; }
+  .examples { flex-wrap: nowrap; }
+  .examples .chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-right: calc(-1 * var(--gutter));   /* let the row run to the screen edge */
+    padding: 0.2rem var(--gutter) 0.35rem 0.1rem;
+    scroll-snap-type: x proximity;
+  }
+  .examples .chips::-webkit-scrollbar { display: none; }
+  .examples .chip { white-space: nowrap; scroll-snap-align: start; }
+  /* Phones: "Check it" fills the row, "Clear" sits beside it, the hint goes underneath */
+  .plate-btn { flex: 1 1 auto; }
+  .plate-hint { flex-basis: 100%; }
+}
+
+/* Desktop: headline and input on the left, the example answer beside them */
+@media (min-width: 1000px) {
+  .site-header, main, .site-footer { max-width: 72rem; }
+  main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+    grid-template-areas:
+      "h1     example"
+      "lede   example"
+      "form   example"
+      "chips  example"
+      "status status"
+      "result result";
+    column-gap: 3.5rem;
+    align-items: start;
+  }
+  main > h1 { grid-area: h1; }
+  main > .lede { grid-area: lede; }
+  main > #idea-form { grid-area: form; }
+  main > .examples { grid-area: chips; }
+  main > .status { grid-area: status; }
+  main > #example { grid-area: example; align-self: center; margin-top: 0; }
+  main > #result { grid-area: result; max-width: 50rem; }
+  /* In the narrow column the example uses the stacked layout: frog over the verdict */
+  #example .card-head {
+    grid-template-areas:
+      "re      frog"
+      "verdict verdict"
+      "reason  reason";
+    align-items: end;
+    column-gap: 0.75rem;
+  }
+  #example .sticker { width: 6.5rem; align-self: end; margin: 0 0 0.1rem; }
+  #example .sticker-frog.look-left .pupil { transform: translate(-12px, 8px); }
+  #example .verdict { font-size: 2.6rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .plate:focus-within, .chip:hover, .row:hover, .plate-btn:hover, .again-btn:hover { transform: none; }
 }
