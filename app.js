@@ -89,7 +89,7 @@ async function check(raw) {
   const id = ++runId;
   lastIdea = idea;
   setBusy(true);
-  setStatus("Mulling it over…");
+  setStatus("Sipping on it…");
   const step = setTimeout(() => { if (id === runId) setStatus("Checking which .com names are open…"); }, 4500);
 
   const { report, error: err } = await ask(idea);

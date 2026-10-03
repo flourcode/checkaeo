@@ -1,21 +1,27 @@
 :root {
-  --paper: #F2F4F7;
-  --surface: #FFFFFF;
-  --ink: #152033;
-  --muted: #566275;
-  --line: #D6DCE4;
-  --cobalt: #2A44C4;
-  --cobalt-deep: #1E3299;
-  --cobalt-soft: #E3E8FB;
-  --on-cobalt: #FFFFFF;
-  --ok: #11683F;
-  --ok-soft: #E2F1E8;
+  /* Pond & coffee: colours pulled from the frog and his mug */
+  --paper: #F6F1E7;        /* oat cream, like coffee foam */
+  --surface: #FFFDF8;
+  --ink: #17261C;          /* green-black, matches his outlines */
+  --muted: #5C6A5C;
+  --line: #E2D9C8;
+  --pond: #1E5A3A;         /* deep lily-pad green: the big input plate */
+  --pond-deep: #164A2F;
+  --pond-soft: #E4EFDC;
+  --on-pond: #FFFFFF;
+  --lime: #7AC52E;         /* the frog himself: the main button */
+  --lime-light: #94D84E;
+  --on-lime: #12230F;
+  --link: #1E6B42;
+  --link-hover: #134A2D;
+  --ok: #1E6B42;
+  --ok-soft: #E4EFDC;
   --warn: #8A5A00;
-  --warn-soft: #FCF1D3;
+  --warn-soft: #FBF0D2;
   --bad: #A3221A;
   --bad-soft: #FBE7E5;
 
-  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --display: "Fredoka", "Arial Rounded MT Bold", "Nunito", system-ui, sans-serif;
   --body: "Public Sans", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
   --measure: 64ch;
   --gutter: clamp(1.1rem, 4vw, 2.5rem);
@@ -24,16 +30,22 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #0E1522;
-    --surface: #151F31;
-    --ink: #E7ECF4;
-    --muted: #9AA6B9;
-    --line: #2A364A;
-    --cobalt: #4F68E8;
-    --cobalt-deep: #3B54D4;
-    --cobalt-soft: #1C2750;
-    --ok: #5CC68D;
-    --ok-soft: #10301F;
+    /* Night pond */
+    --paper: #0F1C16;
+    --surface: #162820;
+    --ink: #EAF1E4;
+    --muted: #A3B3A1;
+    --line: #2B4235;
+    --pond: #2A7149;
+    --pond-deep: #215C3B;
+    --pond-soft: #1D3A2A;
+    --lime: #8BD13F;
+    --lime-light: #A3E35C;
+    --on-lime: #10200C;
+    --link: #9BD86A;
+    --link-hover: #B8E88F;
+    --ok: #8BD13F;
+    --ok-soft: #1D3A2A;
     --warn: #E6B54E;
     --warn-soft: #32260A;
     --bad: #F08A80;
@@ -55,9 +67,9 @@ body {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-a { color: var(--cobalt); text-underline-offset: 0.18em; }
-a:hover { color: var(--cobalt-deep); }
-:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 2px; border-radius: 4px; }
+a { color: var(--link); text-underline-offset: 0.18em; }
+a:hover { color: var(--link-hover); }
+:focus-visible { outline: 3px solid var(--link); outline-offset: 2px; border-radius: 4px; }
 
 /* Header and page frame */
 
@@ -77,7 +89,7 @@ a:hover { color: var(--cobalt-deep); }
 }
 .wordmark {
   font-family: var(--display);
-  font-weight: 800;
+  font-weight: 600;
   font-size: 1.35rem;
   letter-spacing: -0.02em;
   color: var(--ink);
@@ -107,21 +119,20 @@ main { padding-top: clamp(2rem, 6vw, 3.5rem); padding-bottom: 2rem; }
 
 h1 {
   font-family: var(--display);
-  font-weight: 800;
+  font-weight: 600;
   font-size: clamp(2.1rem, 5.4vw, 3.4rem);
   line-height: 1.03;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.01em;
   margin: 0 0 0.75rem;
-  max-width: 18ch;
-  font-variation-settings: "opsz" 96;
+  max-width: 20ch;
 }
 .lede { margin: 0 0 1.75rem; color: var(--muted); font-size: clamp(1.05rem, 2vw, 1.2rem); max-width: 46ch; }
 
 /* The plate: the one loud element */
 
 .plate {
-  background: var(--cobalt);
-  color: var(--on-cobalt);
+  background: var(--pond);
+  color: var(--on-pond);
   border-radius: 22px;
   padding: clamp(1.25rem, 3.5vw, 2rem) clamp(1.25rem, 4vw, 2.5rem);
 }
@@ -137,11 +148,10 @@ h1 {
   border-bottom: 2px solid rgb(255 255 255 / 0.35);
   border-radius: 0;
   font-family: var(--display);
-  font-weight: 800;
+  font-weight: 600;
   font-size: clamp(1.7rem, 4.6vw, 2.8rem);
   line-height: 1.12;
-  letter-spacing: -0.03em;
-  font-variation-settings: "opsz" 96;
+  letter-spacing: -0.01em;
   caret-color: currentColor;
   resize: none;
   overflow: hidden;
@@ -157,11 +167,11 @@ h1 {
   padding: 0.8rem 1.5rem;
   border: 0;
   border-radius: 10px;
-  background: #fff;
-  color: var(--cobalt-deep);
+  background: var(--lime);
+  color: var(--on-lime);
   cursor: pointer;
 }
-.plate-btn:hover { background: var(--cobalt-soft); }
+.plate-btn:hover { background: var(--lime-light); }
 .plate-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 .plate-btn:disabled { opacity: 0.75; cursor: progress; }
 .plate-hint { margin: 0; opacity: 0.85; font-size: 0.95rem; }
@@ -203,7 +213,7 @@ h1 {
   cursor: pointer;
   text-align: left;
 }
-.chip:hover { border-color: var(--cobalt); color: var(--ink); }
+.chip:hover { border-color: var(--pond); color: var(--ink); }
 .chips-stack .chip { border-radius: 12px; }
 a.chip::after { content: " ↗"; color: var(--muted); }
 
@@ -260,7 +270,7 @@ a.chip::after { content: " ↗"; color: var(--muted); }
 }
 
 .verdict {
-  font-family: "Fredoka", "Arial Rounded MT Bold", "Nunito", var(--body);
+  font-family: var(--display);
   font-weight: 600;
   font-size: clamp(1.1rem, 4.2vw, 1.85rem);
   line-height: 1.05;
@@ -317,7 +327,7 @@ a.chip::after { content: " ↗"; color: var(--muted); }
   background: var(--paper);
   white-space: nowrap;
 }
-.name-word { font-family: var(--display); font-weight: 800; font-size: 1.3rem; letter-spacing: -0.02em; }
+.name-word { font-family: var(--display); font-weight: 600; font-size: 1.3rem; letter-spacing: -0.02em; }
 .name-domain { color: var(--muted); font-size: 0.9rem; }
 .names li[data-status="unknown"] .name-domain::after { content: " (couldn't check)"; }
 .names a { font-weight: 600; font-size: 0.95rem; }
@@ -329,11 +339,11 @@ a.chip::after { content: " ↗"; color: var(--muted); }
   padding: 0.75rem 1.3rem;
   border: 0;
   border-radius: 10px;
-  background: var(--cobalt);
-  color: var(--on-cobalt);
+  background: var(--lime);
+  color: var(--on-lime);
   cursor: pointer;
 }
-.again-btn:hover { background: var(--cobalt-deep); }
+.again-btn:hover { background: var(--lime-light); }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -344,6 +354,7 @@ a.chip::after { content: " ↗"; color: var(--muted); }
 
 .site-footer { padding-top: 1rem; padding-bottom: 2.5rem; color: var(--muted); font-size: 0.9rem; }
 .site-footer p { margin: 0; max-width: var(--measure); }
+.site-footer .footer-tag { font-family: var(--display); font-weight: 600; color: var(--ink); font-size: 1.05rem; margin-bottom: 0.4rem; }
 
 @media (max-width: 560px) {
   .plate-btn { width: 100%; }
